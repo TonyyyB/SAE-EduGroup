@@ -2,6 +2,7 @@ import tkinter as tk
 from tkinter import ttk
 from tkinterdnd2 import TkinterDnD
 from pages.accueil import PageAccueil
+from pages.page import Page
 
 class App(TkinterDnD.Tk):  # Changement ici pour utiliser TkinterDnD.Tk
     def __init__(self, *args, **kwargs):
@@ -21,7 +22,7 @@ class App(TkinterDnD.Tk):  # Changement ici pour utiliser TkinterDnD.Tk
         self.frames = {}
         
         # Ajouter les différentes pages ici
-        for F in (PageAccueil,):
+        for F in (PageAccueil,Page):
             frame = F(container, self)
             self.frames[F] = frame
             frame.grid(row=0, column=0, sticky="nsew")
