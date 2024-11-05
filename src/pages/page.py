@@ -108,3 +108,7 @@ class Table(ttk.Frame):
     
     def get_entry(self, ligne, colonne):
         return self.grid_slaves(row=ligne, column=colonne)[0]
+
+class Boutton(tk.Button):
+    def __init__(self, parent, text, command=None):
+        super().__init__(parent, text=text, command=command, bg="#3498DB", fg="white", font=MOYENNE_POLICE)

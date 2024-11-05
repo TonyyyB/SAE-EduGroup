@@ -2,7 +2,7 @@ import tkinter as tk
 from tkinter import filedialog, messagebox
 from tkinterdnd2 import TkinterDnD, DND_FILES
 from constantes import *
-from pages.page import Page
+from pages.page import Page, Boutton
 
 class PageAccueil(Page):
     def __init__(self, parent, controller):
@@ -31,11 +31,11 @@ class PageAccueil(Page):
         self.clear_button.pack(side='right')
 
         # Boutons en bas de la fenêtre
-        self.import_button = tk.Button(self, text="Importer des paramètres", command=self.import_params, bg='#3498DB', fg='white', font=MOYENNE_POLICE)
+        self.import_button = Boutton(self, "Importer des paramètres", command=self.import_params)
         self.import_button.place(relx=0.25, rely=0.8, anchor='center', relwidth=0.25, relheight=0.08)
 
         # Boutons pour créer les groupes
-        self.create_button = tk.Button(self, text="Créer les groupes", command=self.go_to_next_page, bg='#3498DB', fg='white', font=MOYENNE_POLICE)
+        self.create_button = Boutton(self, "Créer les groupes", command=self.go_to_next_page)
         self.create_button.place(relx=0.75, rely=0.8, anchor='center', relwidth=0.25, relheight=0.08)
 
     def create_gradient(self):
