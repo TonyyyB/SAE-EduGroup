@@ -1,4 +1,5 @@
 import tkinter as tk
+from tkinter import ttk
 from tkinter import filedialog, messagebox
 from constantes import *
 
@@ -55,3 +56,55 @@ class Page(tk.Frame):
         if id in self.labels:
             raise Exception("Label already in list")
         self.labels[id] = {"x":x, "y":y, "text":text, "font":font, "fill":fill}
+
+class Table(ttk.Frame):
+    def __init__(self, parent, controller, nb_lignes, nb_colonnes, titre_colonnes):
+        super().__init__(parent)
+        if nb_colonnes != len(titre_colonnes):
+            raise Exception("Nombre de colonnes incompatible avec le nombre de titres de colonnes")
+
+        # Créer un canvas pour scroller la frame contenant la table
+        self.canvas = tk.Canvas(self)
+        self.scrollbar = ttk.Scrollbar(self, orient="vertical", command=self.canvas.yview)
+        self.canvas.configure(yscrollcommand=self.scrollbar.set)
+
+        # Frame qui contiendra la table
+        self.frame = ttk.Frame(self.canvas)
+        self.frame.bind(
+            "<Configure>",
+            lambda e: self.canvas.configure(scrollregion=self.canvas.bbox("all"))
+        )
+
+        # Ajouter la frame dans le canvas
+        self.canvas.create_window((0, 0), window=self.frame, anchor="nw")
+
+        # Disposition du canvas et de la scrollbar dans la grille
+        self.canvas.grid(row=0, column=0, sticky="nsew")
+        self.scrollbar.grid(row=0, column=1, sticky="ns")
+
+        self.controller = controller
+        self.nb_lignes = nb_lignes
+        self.nb_colonnes = nb_colonnes
+        self.titre_colonnes = titre_colonnes
+
+        # Création de la table
+        self.create_table()
+
+        # Configuration pour que le canvas s'ajuste automatiquement
+        self.grid_rowconfigure(0, weight=1)
+        self.grid_columnconfigure(0, weight=1)
+        
+    def create_table(self):
+        for j in range(len(self.titre_colonnes)):
+            b = tk.Entry(self.frame, disabledbackground=TITRE_COLONNE_BACKGROUND, disabledforeground=TITRE_COLONNE_COULEUR, font=TITRE_COLONNE_POLICE, width=20)
+            b.insert(0,self.titre_colonnes[j])
+            b.configure(state="disabled")
+            b.grid(row=0, column=j)
+        for i in range(self.nb_lignes):
+            for j in range(self.nb_colonnes):
+                b = tk.Entry(self.frame, font=VALEUR_LIGNE_POLICE,foreground=VALEUR_LIGNE_COULEUR)
+                b.insert(0,f"bite {i} {j}")
+                b.grid(row=i+1, column=j)
+    
+    def get_entry(self, ligne, colonne):
+        return self.grid_slaves(row=ligne, column=colonne)[0]
