@@ -3,6 +3,7 @@ from tkinter import filedialog, messagebox
 from tkinterdnd2 import TkinterDnD, DND_FILES
 from constantes import *
 from pages.page import Page
+from pages.creationGroupe import CreationGroupe
 
 class PageAccueil(Page):
     def __init__(self, parent, controller):
@@ -80,4 +81,5 @@ class PageAccueil(Page):
         if not self.file_path:
             messagebox.showwarning("Avertissement", "Veuillez ajouter un fichier avant de continuer.")
             return
-        messagebox.showinfo("Info", "Passage à la page suivante")
+        # Appel de la classe directement après avoir corrigé l'import
+        self.controller.show_frame(CreationGroupe)

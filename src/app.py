@@ -1,17 +1,16 @@
 import tkinter as tk
-from tkinter import ttk
 from tkinterdnd2 import TkinterDnD
 from pages.accueil import PageAccueil
 from pages.page import Page
+from pages.creationGroupe import CreationGroupe  # Assurez-vous que l'import est correct
 
-class App(TkinterDnD.Tk):  # Changement ici pour utiliser TkinterDnD.Tk
+class App(TkinterDnD.Tk):  # Utilisation de TkinterDnD.Tk
     def __init__(self, *args, **kwargs):
-        # Initialiser TkinterDnD.Tk plutôt que tk.Tk
         TkinterDnD.Tk.__init__(self, *args, **kwargs)
         
         self.title("EduGroup")
         
-        # Définir la taille initiale de la fenêtre à 1280x1080
+        # Définir la taille initiale de la fenêtre à 1400x1000
         self.geometry("1400x1000")
         
         container = tk.Frame(self)
@@ -22,12 +21,12 @@ class App(TkinterDnD.Tk):  # Changement ici pour utiliser TkinterDnD.Tk
         self.frames = {}
         
         # Ajouter les différentes pages ici
-        for F in (PageAccueil,Page):
+        for F in (PageAccueil, Page, CreationGroupe):  # Ajoutez CreationGroupe ici
             frame = F(container, self)
             self.frames[F] = frame
             frame.grid(row=0, column=0, sticky="nsew")
         
-        self.show_frame(PageAccueil)
+        self.show_frame(PageAccueil)  # Démarrer avec la page d'accueil
     
     def show_frame(self, cont):
         # Montrer la page demandée
