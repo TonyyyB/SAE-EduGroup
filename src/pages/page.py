@@ -82,8 +82,13 @@ class Table(tk.Frame):
 
         # Ajouter la frame dans le canvas
         self.canvas.create_window((0, 0), window=self.frame, anchor="nw")
+        
+        # Lier les événements de la molette sur le Canvas uniquement
+        self.canvas.bind("<Enter>", self._bind_mousewheel)
+        self.canvas.bind("<Leave>", self._unbind_mousewheel)
 
         # Disposition du canvas et des scrollbars dans la grille
+        
         self.canvas.grid(row=0, column=0, sticky="nsew")
         self.scrollbar_y.grid(row=0, column=1, sticky="ns")
         self.scrollbar_x.grid(row=1, column=0, sticky="ew")  # Placer la scrollbar horizontale en bas
@@ -109,8 +114,35 @@ class Table(tk.Frame):
         for i in range(self.nb_lignes):
             for j in range(self.nb_colonnes):
                 b = tk.Entry(self.frame, font=("Arial", 12), foreground="black")
-                b.insert(0, f"bite {i} {j}")
+                b.insert(1, f"Jean {i+1} {j+1}")
                 b.grid(row=i+1, column=j)
+    
+    def _bind_mousewheel(self, event):
+        # Liaison de la molette de la souris pour différents systèmes d'exploitation
+        if event.widget == self.canvas:
+            if self.winfo_toplevel().tk.call('tk', 'windowingsystem') == 'win32':
+                self.canvas.bind_all("<MouseWheel>", self._on_mousewheel_windows)
+            else:
+                # Pour macOS et Linux
+                self.canvas.bind_all("<Button-4>", self._on_mousewheel_linux)
+                self.canvas.bind_all("<Button-5>", self._on_mousewheel_linux)
+
+    def _unbind_mousewheel(self, event):
+        # Supprimer les liaisons de la molette de la souris
+        self.canvas.unbind_all("<MouseWheel>")
+        self.canvas.unbind_all("<Button-4>")
+        self.canvas.unbind_all("<Button-5>")
+
+    def _on_mousewheel_windows(self, event):
+        # Gestion du scroll pour Windows/macOS
+        self.canvas.yview_scroll(-1 * (event.delta // 120), "units")
+
+    def _on_mousewheel_linux(self, event):
+        # Gestion du scroll pour Linux
+        if event.num == 4:  # Scroll up
+            self.canvas.yview_scroll(-1, "units")
+        elif event.num == 5:  # Scroll down
+            self.canvas.yview_scroll(1, "units")
     
     def get_entry(self, ligne, colonne):
         return self.grid_slaves(row=ligne, column=colonne)[0]
