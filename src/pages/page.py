@@ -64,8 +64,14 @@ class Table(tk.Frame):
 
         # Créer un canvas pour scroller la frame contenant la table
         self.canvas = tk.Canvas(self)
-        self.scrollbar = tk.Scrollbar(self, orient="vertical", command=self.canvas.yview)
-        self.canvas.configure(yscrollcommand=self.scrollbar.set)
+        
+        # Ajouter une scrollbar verticale
+        self.scrollbar_y = tk.Scrollbar(self, orient="vertical", command=self.canvas.yview)
+        self.canvas.configure(yscrollcommand=self.scrollbar_y.set)
+        
+        # Ajouter une scrollbar horizontale
+        self.scrollbar_x = tk.Scrollbar(self, orient="horizontal", command=self.canvas.xview)
+        self.canvas.configure(xscrollcommand=self.scrollbar_x.set)
 
         # Frame qui contiendra la table
         self.frame = tk.Frame(self.canvas)
@@ -77,9 +83,10 @@ class Table(tk.Frame):
         # Ajouter la frame dans le canvas
         self.canvas.create_window((0, 0), window=self.frame, anchor="nw")
 
-        # Disposition du canvas et de la scrollbar dans la grille
+        # Disposition du canvas et des scrollbars dans la grille
         self.canvas.grid(row=0, column=0, sticky="nsew")
-        self.scrollbar.grid(row=0, column=1, sticky="ns")
+        self.scrollbar_y.grid(row=0, column=1, sticky="ns")
+        self.scrollbar_x.grid(row=1, column=0, sticky="ew")  # Placer la scrollbar horizontale en bas
 
         self.controller = controller
         self.nb_lignes = nb_lignes
@@ -95,14 +102,14 @@ class Table(tk.Frame):
         
     def create_table(self):
         for j in range(len(self.titre_colonnes)):
-            b = tk.Entry(self.frame, disabledbackground=TITRE_COLONNE_BACKGROUND, disabledforeground=TITRE_COLONNE_COULEUR, font=TITRE_COLONNE_POLICE, width=20)
-            b.insert(0,self.titre_colonnes[j])
+            b = tk.Entry(self.frame, disabledbackground="lightgray", disabledforeground="black", font=("Arial", 12), width=20)
+            b.insert(0, self.titre_colonnes[j])
             b.configure(state="disabled")
             b.grid(row=0, column=j)
         for i in range(self.nb_lignes):
             for j in range(self.nb_colonnes):
-                b = tk.Entry(self.frame, font=VALEUR_LIGNE_POLICE,foreground=VALEUR_LIGNE_COULEUR)
-                b.insert(0,f"bite {i} {j}")
+                b = tk.Entry(self.frame, font=("Arial", 12), foreground="black")
+                b.insert(0, f"bite {i} {j}")
                 b.grid(row=i+1, column=j)
     
     def get_entry(self, ligne, colonne):
