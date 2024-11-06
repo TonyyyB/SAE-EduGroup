@@ -5,6 +5,7 @@ from pages.accueil import PageAccueil
 from pages.page import Page
 import pandas as pd
 from Eleve import Eleve
+from pages.creationGroupe import CreationGroupe
 
 class App(TkinterDnD.Tk):  # Changement ici pour utiliser TkinterDnD.Tk
     def __init__(self, *args, **kwargs):
@@ -45,12 +46,12 @@ class App(TkinterDnD.Tk):  # Changement ici pour utiliser TkinterDnD.Tk
         self.frames = {}
         
         # Ajouter les différentes pages ici
-        for F in (PageAccueil,Page):
+        for F in (PageAccueil,Page,CreationGroupe):
             frame = F(container, self)
             self.frames[F] = frame
             frame.grid(row=0, column=0, sticky="nsew")
         
-        self.show_frame(Page)
+        self.show_frame(CreationGroupe)
     
     def show_frame(self, cont):
         # Montrer la page demandée
