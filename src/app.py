@@ -26,7 +26,7 @@ class App(TkinterDnD.Tk):  # Utilisation de TkinterDnD.Tk
             self.frames[F] = frame
             frame.grid(row=0, column=0, sticky="nsew")
         
-        self.show_frame(CreationGroupe)  # Démarrer avec la page d'accueil
+        self.show_frame(PageAccueil)  # Démarrer avec la page d'accueil
     
     def show_frame(self, cont):
         # Montrer la page demandée
