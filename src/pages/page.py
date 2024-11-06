@@ -57,92 +57,94 @@ class Page(tk.Frame):
         self.labels[id] = {"x":x, "y":y, "text":text, "font":font, "fill":fill}
 
 class Table(tk.Frame):
-    def __init__(self, parent, controller, nb_lignes, nb_colonnes, titre_colonnes):
+    def __init__(self, parent, controller, eleves=None, criteres=None):
         super().__init__(parent)
-        if nb_colonnes != len(titre_colonnes):
-            raise Exception("Nombre de colonnes incompatible avec le nombre de titres de colonnes")
 
-        # Créer un canvas pour scroller la frame contenant la table
         self.canvas = tk.Canvas(self)
-        
-        # Ajouter une scrollbar verticale
         self.scrollbar_y = tk.Scrollbar(self, orient="vertical", command=self.canvas.yview)
-        self.canvas.configure(yscrollcommand=self.scrollbar_y.set)
-        
-        # Ajouter une scrollbar horizontale
         self.scrollbar_x = tk.Scrollbar(self, orient="horizontal", command=self.canvas.xview)
-        self.canvas.configure(xscrollcommand=self.scrollbar_x.set)
+        self.canvas.configure(yscrollcommand=self.scrollbar_y.set, xscrollcommand=self.scrollbar_x.set)
 
-        # Frame qui contiendra la table
         self.frame = tk.Frame(self.canvas)
-        self.frame.bind(
-            "<Configure>",
-            lambda e: self.canvas.configure(scrollregion=self.canvas.bbox("all"))
-        )
-
-        # Ajouter la frame dans le canvas
+        self.frame.bind("<Configure>", lambda e: self.canvas.configure(scrollregion=self.canvas.bbox("all")))
         self.canvas.create_window((0, 0), window=self.frame, anchor="nw")
-        
-        # Lier les événements de la molette sur le Canvas uniquement
-        self.canvas.bind("<Enter>", self._bind_mousewheel)
-        self.canvas.bind("<Leave>", self._unbind_mousewheel)
 
-        # Disposition du canvas et des scrollbars dans la grille
-        
         self.canvas.grid(row=0, column=0, sticky="nsew")
         self.scrollbar_y.grid(row=0, column=1, sticky="ns")
-        self.scrollbar_x.grid(row=1, column=0, sticky="ew")  # Placer la scrollbar horizontale en bas
+        self.scrollbar_x.grid(row=1, column=0, sticky="ew")
 
         self.controller = controller
-        self.nb_lignes = nb_lignes
-        self.nb_colonnes = nb_colonnes
-        self.titre_colonnes = titre_colonnes
 
-        # Création de la table
-        self.create_table()
+        # Si une liste d'élèves est fournie, créer le tableau à partir de ces données
+        if eleves is not None and criteres is not None:
+            self.create_table_from_eleves(eleves, criteres)
 
         # Configuration pour que le canvas s'ajuste automatiquement
         self.grid_rowconfigure(0, weight=1)
         self.grid_columnconfigure(0, weight=1)
-        
-    def create_table(self):
-        for j in range(len(self.titre_colonnes)):
-            b = tk.Entry(self.frame, disabledbackground="lightgray", disabledforeground="black", font=("Arial", 12), width=20)
-            b.insert(0, self.titre_colonnes[j])
+
+        # Lier la molette de la souris pour faire défiler le tableau
+        self._bind_mousewheel(None)
+
+    def create_table_from_eleves(self, eleves, criteres):
+        """
+        Crée un tableau basé sur une liste d'élèves et des critères.
+        Affiche le nom, prénom, ID, et les notes pour chaque critère.
+        """
+        # Définir les titres de colonnes : Prénom, Nom, ID + critères
+        self.titre_colonnes = ['Prénom', 'Nom', 'ID'] + criteres
+
+        # Créer les titres des colonnes
+        for j, titre in enumerate(self.titre_colonnes):
+            b = tk.Entry(self.frame, disabledbackground="lightgray", disabledforeground="black", font=("Arial", 12), width=15)
+            b.insert(0, titre)
             b.configure(state="disabled")
             b.grid(row=0, column=j)
-        for i in range(self.nb_lignes):
-            for j in range(self.nb_colonnes):
-                b = tk.Entry(self.frame, font=("Arial", 12), foreground="black")
-                b.insert(1, f"Jean {i+1} {j+1}")
-                b.grid(row=i+1, column=j)
-    
+
+        # Remplir les lignes avec les données des élèves
+        for i, eleve in enumerate(eleves):
+            # Colonnes fixes : prénom, nom, ID
+            entry_prenom = tk.Entry(self.frame, font=("Arial", 12), foreground="black", width=15)
+            entry_prenom.insert(0, eleve.prenom)
+            entry_prenom.grid(row=i + 1, column=0)
+
+            entry_nom = tk.Entry(self.frame, font=("Arial", 12), foreground="black", width=15)
+            entry_nom.insert(0, eleve.nom)
+            entry_nom.grid(row=i + 1, column=1)
+
+            entry_id = tk.Entry(self.frame, font=("Arial", 12), foreground="black", width=15)
+            entry_id.insert(0, eleve.num_etudiant)
+            entry_id.grid(row=i + 1, column=2)
+
+            # Colonnes dynamiques pour les critères
+            for j, critere in enumerate(criteres):
+                note = eleve.criteres.get(critere, "")
+                entry_note = tk.Entry(self.frame, font=("Arial", 12), foreground="black", width=15)
+                entry_note.insert(0, note)
+                entry_note.grid(row=i + 1, column=j + 3)
+
     def _bind_mousewheel(self, event):
-        # Liaison de la molette de la souris pour différents systèmes d'exploitation
-        if event.widget == self.canvas:
+        """Lier les événements de la molette de la souris pour le défilement."""
+        if event is None or event.widget == self.canvas:
             if self.winfo_toplevel().tk.call('tk', 'windowingsystem') == 'win32':
                 self.canvas.bind_all("<MouseWheel>", self._on_mousewheel_windows)
             else:
-                # Pour macOS et Linux
                 self.canvas.bind_all("<Button-4>", self._on_mousewheel_linux)
                 self.canvas.bind_all("<Button-5>", self._on_mousewheel_linux)
 
     def _unbind_mousewheel(self, event):
-        # Supprimer les liaisons de la molette de la souris
+        """Délier les événements de la molette de la souris."""
         self.canvas.unbind_all("<MouseWheel>")
         self.canvas.unbind_all("<Button-4>")
         self.canvas.unbind_all("<Button-5>")
 
     def _on_mousewheel_windows(self, event):
-        # Gestion du scroll pour Windows/macOS
+        """Défilement sur Windows."""
         self.canvas.yview_scroll(-1 * (event.delta // 120), "units")
 
     def _on_mousewheel_linux(self, event):
-        # Gestion du scroll pour Linux
-        if event.num == 4:  # Scroll up
+        """Défilement sur Linux."""
+        if event.num == 4:
             self.canvas.yview_scroll(-1, "units")
-        elif event.num == 5:  # Scroll down
+        elif event.num == 5:
             self.canvas.yview_scroll(1, "units")
-    
-    def get_entry(self, ligne, colonne):
-        return self.grid_slaves(row=ligne, column=colonne)[0]
