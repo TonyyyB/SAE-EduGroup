@@ -8,7 +8,7 @@ from pages.creationGroupe import CreationGroupe
 
 class PageAccueil(Page):
     def __init__(self, parent, controller):
-        super().__init__(parent,controller)
+        super().__init__(parent, controller)
 
         # Zone de dépôt de fichier centrée avec tkinterdnd2 + fonctionnalité de bouton
         self.frame = tk.Frame(self, bg='white', padx=10, pady=12, relief=tk.RIDGE, bd=5)
@@ -49,28 +49,31 @@ class PageAccueil(Page):
 
         # Vérifier si le fichier est un CSV
         if self.file_path.endswith(".csv"):
-            self.drop_button.config(text=f"Fichier ajouté : {self.file_path.split('/')[-1]}")
+            self.drop_button.configure(text=f"Fichier ajouté : {self.file_path.split('/')[-1]}")
         else:
             # Alerte si ce n'est pas un fichier CSV
             self.file_path = None
             messagebox.showerror("Erreur", "Veuillez déposer uniquement des fichiers CSV.")
-            self.drop_button.config(text="Déposer le fichier ici ou cliquez pour choisir")
+            self.drop_button.configure(text="Déposer le fichier ici ou cliquez pour choisir")
 
     def open_file_explorer(self, event=None):
         # Ouvre l'explorateur de fichiers pour sélectionner un fichier CSV
         self.file_path = filedialog.askopenfilename(filetypes=[("Fichiers CSV", "*.csv"), ("Tous les fichiers", "*.*")])
         if self.file_path:
             if self.file_path.endswith(".csv"):
-                self.drop_button.config(text=f"Fichier ajouté : {self.file_path.split('/')[-1]}")
+                self.drop_button.configure(text=f"Fichier ajouté : {self.file_path.split('/')[-1]}")
             else:
                 # Alerte si ce n'est pas un fichier CSV
                 self.file_path = None
                 messagebox.showerror("Erreur", "Veuillez sélectionner uniquement des fichiers CSV.")
-                self.drop_button.config(text="Déposer le fichier ici ou cliquez pour choisir")
+                self.drop_button.configure(text="Déposer le fichier ici ou cliquez pour choisir")
 
     def clear_file(self):
+        # Effacer le chemin du fichier
         self.file_path = None
-        self.drop_button.config(text="Déposer le fichier ici ou cliquez pour choisir")
+        
+        # Remettre le texte par défaut du bouton drop_button
+        self.drop_button.configure(text="Déposer le fichier ici ou cliquez pour choisir")
 
     def import_params(self):
         pass
