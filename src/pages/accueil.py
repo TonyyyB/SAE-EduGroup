@@ -4,7 +4,8 @@ from tkinterdnd2 import TkinterDnD, DND_FILES
 import customtkinter as ctk
 from constantes import *
 from pages.page import Page
-from pages.creationGroupe import CreationGroupe
+import pandas as pd
+from Eleve import Eleve
 
 class PageAccueil(Page):
     def __init__(self, parent, controller):
@@ -82,5 +83,19 @@ class PageAccueil(Page):
         if not self.file_path:
             messagebox.showwarning("Avertissement", "Veuillez ajouter un fichier avant de continuer.")
             return
-        # Appel de la classe directement après avoir corrigé l'import
-        self.controller.show_frame(CreationGroupe)
+        
+        # Charger les élèves et les critères à partir du CSV
+        df = pd.read_csv(self.file_path)
+        self.criteres = df.columns.to_list()[5:]
+
+        # Créer la liste des élèves
+        self.eleves = []
+        for _, row in df.iterrows():
+            eleve = Eleve(prenom=row['Prénom'], nom=row['Nom'], num_etudiant=row['NumÉtudiant'], genre=row['Genre'])
+            for critere in self.criteres:
+                eleve.ajouter_critere(critere, row[critere])
+            self.eleves.append(eleve)
+        
+        # Charger dynamiquement la page CreationGroupe en passant les élèves et les critères
+        from pages.creationGroupe import CreationGroupe  # Import dynamique
+        self.controller.show_frame(CreationGroupe, self.eleves, self.criteres)
