@@ -1,7 +1,7 @@
 from eleve import Eleve
 from critere import Critere
 class Groupe:
-    def __init__(self, taille:int, contraintes:set[Critere]):
+    def __init__(self, taille:int):
         self.taille:int = taille
         self.contraintes:dict[Critere,set[int]] = {}  # Dictionnaire pour les contraintes
         self.eleves:set[Eleve] = set()

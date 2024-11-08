@@ -89,7 +89,7 @@ for data in donnees_eleves:
     eleves.append(eleve)
 
 # Coefficients de pondération pour chaque matière
-coef_matieres = {'Français': 30, 'Maths': 2, 'Pénébilite': 1}
+coef_matieres = {'Français': 0, 'Maths': 2, 'Pénébilite': 1}
 
 # Appel de l'algorithme avec 3 groupes et des contraintes par genre 
 partition = algo(
