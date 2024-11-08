@@ -1,4 +1,3 @@
-from groupe import Groupe
 class Critere:
     def __init__(self, nom:str, poids:int, repartition:bool):
         self.nom:str = nom
@@ -37,7 +36,7 @@ class Critere:
                 return cle
         return None
     
-    def calcul_score(self, groupe:Groupe) -> float:
+    def calcul_score(self, groupe:set) -> float:
         pass
 
     def __hash__(self) -> int:
