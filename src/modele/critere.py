@@ -1,4 +1,4 @@
-from modele.groupe import Groupe
+from groupe import Groupe
 class Critere:
     def __init__(self, nom:str, poids:int):
         self.nom = nom
