@@ -21,3 +21,6 @@ class Eleve:
 
     def __repr__(self):
         return f"{self.prenom} {self.nom} - Score: {self.score:.2f} - Genre: {self.genre}"
+    
+    def __hash__(self):
+        return hash((self.num_etudiant, self.nom, self.prenom, self.genre))

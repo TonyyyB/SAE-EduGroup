@@ -1,14 +1,20 @@
-
 class Critere:
+    
+    def __init__(self, nom, poids):
+        self.nom = nom
+        self.poids = poids
+        self.list_valeurs = []
 
-    def __init__(self, type_critere, valeur):
-        self.type_critere = type_critere
-        self.valeur = valeur
-        self.type_critere.ajouter_valeur(valeur)
+    def ajouter_valeur(self, valeur):
+        if valeur not in self.list_valeurs:
+            self.list_valeurs.append(valeur)
+
+    def set_poids(self, poids):
+        self.poids = poids
     
-    def get_type_critere(self):
-        return self.type_critere
+    def get_poids(self):
+        return self.poids
     
-    def get_valeur(self):
-        return self.valeur
+    def get_nom(self):
+        return self.nom
     
