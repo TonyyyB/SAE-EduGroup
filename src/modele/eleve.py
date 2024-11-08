@@ -1,11 +1,11 @@
 from critere import Critere
 class Eleve:
     def __init__(self, prenom:str, nom:str, num_etudiant:int, genre:bool):
-        self.prenom = prenom
-        self.nom = nom
-        self.num_etudiant = num_etudiant
-        self.genre = genre
-        self.criteres = {}  # Dictionnaire pour les matières et les critères
+        self.prenom:str = prenom
+        self.nom:str = nom
+        self.num_etudiant:int = num_etudiant
+        self.genre:bool = genre
+        self.criteres:dict[Critere,int] = {}  # Dictionnaire pour les matières et les critères
         print(self.criteres)
 
     def ajouter_critere(self, critere:Critere, valeur:int):
@@ -34,6 +34,9 @@ class Eleve:
     
     def get_criteres(self):
         return self.criteres
+    
+    def get_critere(self, critere):
+        return self.criteres[critere]
 
     def __eq__(self, other):
         return isinstance(other, Eleve) and self.num_etudiant == other.num_etudiant
