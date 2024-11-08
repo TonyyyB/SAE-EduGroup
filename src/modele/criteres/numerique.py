@@ -1,9 +1,8 @@
-import TypeCritere
-
-class Num(TypeCritere.TypeCritere):
+from modele.type_critere import TypeCritere
+class Numerique(TypeCritere):
         
         def __init__(self, nom, poids):
-            TypeCritere.TypeCritere.__init__(self, nom, poids)
+            super().__init__(self, nom, poids)
             self.min = None
             self.max = None
         
