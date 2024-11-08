@@ -31,6 +31,8 @@ class Partition:
                     # Pour les booléens et catégoriques, on peut également appliquer une logique de progression
                     # Ici, on prend une différence absolue entre les moyennes pour pénaliser les écarts
                     penalite_progression += critere.get_poids() * abs(moyenne_groupe_prec - moyenne_groupe_i)
+                valeurs_groupe_prec = valeurs_groupe_i
+                moyenne_groupe_prec = moyenne_groupe_i
 
         # Poids de la pénalité de progression
         lambda_coef = 10  # Ajuster ce coefficient selon l'importance de la progression
