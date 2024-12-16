@@ -38,6 +38,9 @@ class Critere:
     
     def calcul_score(self, groupe:set) -> float:
         pass
+    
+    def get_transpo(self) -> dict[int|bool|str,int]:
+        return self.transpo
 
     def __hash__(self) -> int:
-        return hash((self.nom))
+        return 3

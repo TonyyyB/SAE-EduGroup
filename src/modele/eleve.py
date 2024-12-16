@@ -1,4 +1,4 @@
-from critere import Critere
+from modele.critere import Critere
 class Eleve:
     def __init__(self, prenom:str, nom:str, num_etudiant:int, genre:bool):
         self.prenom:str = prenom
@@ -42,7 +42,7 @@ class Eleve:
         return isinstance(other, Eleve) and self.num_etudiant == other.num_etudiant
 
     def __repr__(self):
-        return f"{self.prenom} {self.nom} - Score: {self.score:.2f} - Genre: {self.genre}"
+        return f"{self.prenom} {self.nom} - Genre: {self.genre}"
     
     def __hash__(self):
         return hash((self.num_etudiant, self.nom, self.prenom, self.genre))
