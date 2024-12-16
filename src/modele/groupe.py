@@ -11,12 +11,54 @@ class Groupe:
         self.contraintes[critere] = set(vals)
     
     def ajouter_eleve(self, eleve:Eleve) -> None:
-        if self.taille + 1 >= self.taille:
+        if len(self.eleves) + 1 > self.taille:
             return False
         self.eleves.add(eleve)
         if len(self.criteres) == 0:
             self.criteres = eleve.get_criteres().keys()
         return True
+    
+    def supp_eleve(self, eleve:Eleve) -> None:
+        if eleve in self.eleves: self.eleves.remove(eleve)
+    
+    def simule_ajout(self, eleve:Eleve) -> float:
+        if eleve in self.eleves or len(self.eleves) + 1 > self.taille: return self.calcul_score()
+        self.eleves.add(eleve)
+        score = self.calcul_score()
+        self.eleves.remove(eleve)
+        return score
+
+
+    def simule_supp(self, eleve:Eleve) -> float:
+        if eleve not in self.eleves: return self.calcul_score()
+        self.eleves.remove(eleve)
+        score = self.calcul_score()
+        self.eleves.add(eleve)
+        return score
+
+    def simule_transf(self, groupe:Groupe, eleve1:Eleve, eleve2:Eleve) -> tuple[float,float]:
+        """Renvoie les deux score des deux groupes si un transfer est effectuer entre les deux élèves
+
+        Args:
+            groupe (Groupe): groupe concerné
+            eleve1 (Eleve): eleve du groupe
+            eleve2 (Eleve): eleve de l'autre groupe
+
+        Returns:
+            (float,float): score du groupe, score de l'autre groupe
+        """
+        if eleve1 not in self.eleves or eleve2 not in groupe.get_eleves(): return self.calcul_score(), groupe.calcul_score()
+        self.eleves.remove(eleve1)
+        groupe.get_eleves().remove(eleve2)
+        self.eleves.add(eleve2)
+        groupe.get_eleves().add(eleve1)
+        scores = self.calcul_score(), groupe.calcul_score()
+        self.eleves.remove(eleve2)
+        groupe.get_eleves().remove(eleve1)
+        self.eleves.add(eleve1)
+        groupe.get_eleves().add(eleve2)
+        return scores
+    
     
     def get_eleves(self) -> set[Eleve]:
         return self.eleves

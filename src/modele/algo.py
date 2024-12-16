@@ -3,21 +3,23 @@ from groupe import Groupe
 from partition import Partition
 from critere import Critere
 
-def algo(eleves, nb_groupes, tailles, contraintes, coef_matieres):
-    groupes = []
-    elevesAPlacer = []
-    for groupe in range(nb_groupes):
-        newGroupe = Groupe(tailles[groupe])
-        groupes.append(newGroupe)
-
+def algo(eleves:list|set[Eleve], partition:Partition):
+    elevesAPlacer = set()
+    groupes = partition.get_groupes()
     # Initialisation 
     for groupe in groupes:
         for eleve in eleves:
+            peutEtrePlacer = True
             for critere in eleve.get_criteres():
-                if :
-                    groupe.ajouter_eleve(eleve)
-                else :
-                    elevesAPlacer.append(eleve)
+                contrainte = groupe.get_contrainte(critere)
+                if contrainte is None: continue
+                if eleve.get_critere(critere) not in contrainte:
+                    peutEtrePlacer = False
+            if peutEtrePlacer:
+                groupe.ajouter_eleve(eleve)
+            else:
+                elevesAPlacer.add(eleve)
+    
 
     # Boucle
     for groupe in groupes:
