@@ -12,12 +12,12 @@ class Eleve:
         """Ajoute un critère avec une valeur associée au dictionnaire criteres."""
         self.criteres[critere] = valeur
 
-    def calculer_moyenne_ponderee(self, coef_matieres:dict[Critere,int]):
+    def calculer_moyenne_ponderee(self):
         """Calcule la moyenne pondérée des critères (matières) selon les coefficients fournis."""
-        total_coef = sum(coef_matieres[matiere] for matiere in self.criteres if matiere in coef_matieres)
+        total_coef = sum(critere.get_poids() for critere in self.criteres.keys())
         if total_coef == 0:
             return 0
-        score = sum(self.criteres[matiere] * coef_matieres[matiere] for matiere in self.criteres if matiere in coef_matieres) / total_coef
+        score = sum(self.criteres[critere] * critere for critere in self.criteres.keys()) / total_coef
         return score
     
     def get_id(self):
