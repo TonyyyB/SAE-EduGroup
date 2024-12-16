@@ -4,11 +4,12 @@ from tkinterdnd2 import TkinterDnD, DND_FILES
 import customtkinter as ctk
 from constantes import *
 from pages.page import Page
-from pages.creationGroupe import CreationGroupe
+import pandas as pd
+from Eleve import Eleve
 
 class PageAccueil(Page):
     def __init__(self, parent, controller):
-        super().__init__(parent,controller)
+        super().__init__(parent, controller)
 
         # Zone de dépôt de fichier centrée avec tkinterdnd2 + fonctionnalité de bouton
         self.frame = tk.Frame(self, bg='white', padx=10, pady=12, relief=tk.RIDGE, bd=5)
@@ -49,28 +50,31 @@ class PageAccueil(Page):
 
         # Vérifier si le fichier est un CSV
         if self.file_path.endswith(".csv"):
-            self.drop_button.config(text=f"Fichier ajouté : {self.file_path.split('/')[-1]}")
+            self.drop_button.configure(text=f"Fichier ajouté : {self.file_path.split('/')[-1]}")
         else:
             # Alerte si ce n'est pas un fichier CSV
             self.file_path = None
             messagebox.showerror("Erreur", "Veuillez déposer uniquement des fichiers CSV.")
-            self.drop_button.config(text="Déposer le fichier ici ou cliquez pour choisir")
+            self.drop_button.configure(text="Déposer le fichier ici ou cliquez pour choisir")
 
     def open_file_explorer(self, event=None):
         # Ouvre l'explorateur de fichiers pour sélectionner un fichier CSV
         self.file_path = filedialog.askopenfilename(filetypes=[("Fichiers CSV", "*.csv"), ("Tous les fichiers", "*.*")])
         if self.file_path:
             if self.file_path.endswith(".csv"):
-                self.drop_button.config(text=f"Fichier ajouté : {self.file_path.split('/')[-1]}")
+                self.drop_button.configure(text=f"Fichier ajouté : {self.file_path.split('/')[-1]}")
             else:
                 # Alerte si ce n'est pas un fichier CSV
                 self.file_path = None
                 messagebox.showerror("Erreur", "Veuillez sélectionner uniquement des fichiers CSV.")
-                self.drop_button.config(text="Déposer le fichier ici ou cliquez pour choisir")
+                self.drop_button.configure(text="Déposer le fichier ici ou cliquez pour choisir")
 
     def clear_file(self):
+        # Effacer le chemin du fichier
         self.file_path = None
-        self.drop_button.config(text="Déposer le fichier ici ou cliquez pour choisir")
+        
+        # Remettre le texte par défaut du bouton drop_button
+        self.drop_button.configure(text="Déposer le fichier ici ou cliquez pour choisir")
 
     def import_params(self):
         pass
@@ -79,5 +83,19 @@ class PageAccueil(Page):
         if not self.file_path:
             messagebox.showwarning("Avertissement", "Veuillez ajouter un fichier avant de continuer.")
             return
-        # Appel de la classe directement après avoir corrigé l'import
-        self.controller.show_frame(CreationGroupe)
+        
+        # Charger les élèves et les critères à partir du CSV
+        df = pd.read_csv(self.file_path)
+        self.criteres = df.columns.to_list()[5:]
+
+        # Créer la liste des élèves
+        self.eleves = []
+        for _, row in df.iterrows():
+            eleve = Eleve(prenom=row['Prénom'], nom=row['Nom'], num_etudiant=row['NumÉtudiant'], genre=row['Genre'])
+            for critere in self.criteres:
+                eleve.ajouter_critere(critere, row[critere])
+            self.eleves.append(eleve)
+        
+        # Charger dynamiquement la page CreationGroupe en passant les élèves et les critères
+        from pages.creationGroupe import CreationGroupe  # Import dynamique
+        self.controller.show_frame(CreationGroupe, self.eleves, self.criteres)
