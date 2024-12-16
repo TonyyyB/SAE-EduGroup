@@ -4,41 +4,26 @@ from partition import Partition
 from critere import Critere
 
 def algo(eleves, nb_groupes, tailles, contraintes, coef_matieres):
-    # Initialiser la partition de groupes
-    partition = Partition()
-    
-    # Création des groupes en respectant les tailles et en ajoutant les contraintes
     groupes = []
-    for i in range(nb_groupes):
-        groupe = Groupe(tailles[i])
-        if i in contraintes:
-            for critere, valeurs in contraintes[i].items():
-                groupe.ajouter_contrainte(critere, valeurs)
-        groupes.append(groupe)
-    
-    # Calcul de la moyenne pondérée des scores pour chaque élève
-    for eleve in eleves:
-        eleve.score = eleve.calculer_moyenne_ponderee(coef_matieres)
+    elevesAPlacer = []
+    for groupe in range(nb_groupes):
+        newGroupe = Groupe(tailles[groupe])
+        groupes.append(newGroupe)
 
-    # Trier les élèves par score pour équilibrer les groupes en termes de niveau
-    eleves.sort(key=lambda x: x.score, reverse=True)
-    
-    # Répartir les élèves en fonction des contraintes et tailles des groupes
-    for eleve in eleves:
-        placed = False
-        for groupe in groupes:
-            if len(groupe.eleves) < groupe.taille and respecter_contraintes(groupe, eleve):
-                groupe.ajouter_eleve(eleve)
-                placed = True
-                break
-        if not placed:
-            print(f"Impossible de placer {eleve.prenom} {eleve.nom} dans un groupe avec les contraintes actuelles.")
-    
-    # Ajouter chaque groupe à la partition finale
+    # Initialisation 
     for groupe in groupes:
-        partition.ajouter_groupe(groupe)
-    
-    return partition
+        for eleve in eleves:
+            for critere in eleve.get_criteres():
+                if :
+                    groupe.ajouter_eleve(eleve)
+                else :
+                    elevesAPlacer.append(eleve)
+
+    # Boucle
+    for groupe in groupes:
+        for eleve in eleves:
+
+
 
 def respecter_contraintes(groupe, eleve):
     """Vérifie si un élève respecte les contraintes d'un groupe."""
