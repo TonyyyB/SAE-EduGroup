@@ -17,28 +17,26 @@ class Critere:
 
     def set_poids(self, poids:int) -> None:
         self.poids:int = poids
-    
     def get_poids(self) -> int:
         return self.poids
-    
+
     def get_nom(self) -> str:
         return self.nom
-    
     def est_reparti(self) -> bool:
         return self.repartition
-    
+
     def to_int(self, val:int|bool|str) -> int:
         return self.transpo[val]
-    
+
     def to_val(self, val:int) -> int|bool|str:
         for cle, valeur in self.transpo.items():
             if valeur == val:
                 return cle
         return None
-    
+
     def calcul_score(self, groupe:set) -> float:
         pass
-    
+
     def get_transpo(self) -> dict[int|bool|str,int]:
         return self.transpo
 
