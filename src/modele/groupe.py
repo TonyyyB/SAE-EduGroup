@@ -9,7 +9,6 @@ class Groupe:
 
     def ajouter_contrainte(self, critere:Critere, vals:set|list[int]) -> None:
         self.contraintes[critere] = set(vals)
-    
     def ajouter_eleve(self, eleve:Eleve) -> None:
         if len(self.eleves) + 1 > self.taille:
             return False
@@ -17,17 +16,16 @@ class Groupe:
         if len(self.criteres) == 0:
             self.criteres = eleve.get_criteres().keys()
         return True
-    
+
     def supp_eleve(self, eleve:Eleve) -> None:
         if eleve in self.eleves: self.eleves.remove(eleve)
-    
+
     def simule_ajout(self, eleve:Eleve) -> float:
         if eleve in self.eleves or len(self.eleves) + 1 > self.taille: return self.calcul_score()
         self.eleves.add(eleve)
         score = self.calcul_score()
         self.eleves.remove(eleve)
         return score
-
 
     def simule_supp(self, eleve:Eleve) -> float:
         if eleve not in self.eleves: return self.calcul_score()
@@ -58,27 +56,25 @@ class Groupe:
         self.eleves.add(eleve1)
         groupe.get_eleves().add(eleve2)
         return scores
-    
+
     def transferer(self, groupe, eleve1:Eleve, eleve2:Eleve): # type: ignore
         if eleve1 not in self.eleves or eleve2 not in groupe.get_eleves(): return self.calcul_score(), groupe.calcul_score()
         self.eleves.remove(eleve1)
         groupe.get_eleves().remove(eleve2)
         self.eleves.add(eleve2)
         groupe.get_eleves().add(eleve1)
-    
-    
+
     def get_eleves(self) -> set[Eleve]:
         return self.eleves
-    
+
     def set_criteres(self, criteres:list|set[Critere]) -> None:
         self.criteres = set(criteres)
-    
+
     def get_contraintes(self) -> dict[Critere,set[int]]:
         return self.contraintes
-    
+
     def get_contrainte(self, critere:Critere) -> set[int]:
         return self.contraintes[critere] if critere in self.contraintes else None
-    
+
     def calcul_score(self) -> float:
         return sum(critere.calcul_score(self) for critere in self.criteres)
-    
