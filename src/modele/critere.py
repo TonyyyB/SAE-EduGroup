@@ -37,7 +37,7 @@ class Critere:
                 return cle
         return None
     
-    def calcul_score(self, groupe:Groupe) -> float:
+    def calcul_score(self, groupe:'Groupe') -> float:
         pass
 
     def get_transpo(self) -> dict[int|bool|str,int]:
