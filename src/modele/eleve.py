@@ -19,22 +19,21 @@ class Eleve:
             return 0
         score = sum(self.criteres[critere] * critere for critere in self.criteres.keys()) / total_coef
         return score
-    
+
     def get_id(self):
         return self.num_etudiant
-    
     def get_nom(self):
         return self.nom
-    
+
     def get_prenom(self):
         return self.prenom
-    
+
     def get_genre(self):
         return self.genre
-    
+
     def get_criteres(self):
         return self.criteres
-    
+
     def get_critere(self, critere):
         return self.criteres[critere]
 
@@ -43,6 +42,6 @@ class Eleve:
 
     def __repr__(self):
         return f"{self.prenom} {self.nom} - Genre: {self.genre}"
-    
+
     def __hash__(self):
         return hash((self.num_etudiant, self.nom, self.prenom, self.genre))
