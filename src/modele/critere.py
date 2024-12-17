@@ -42,6 +42,9 @@ class Critere:
 
     def get_transpo(self) -> dict[int|bool|str,int]:
         return self.transpo
+    
+    def __repr__(self):
+        return f"{self.nom}: {self.poids}"
 
     def __hash__(self) -> int:
-        return 3
+        return hash(self.nom)

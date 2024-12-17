@@ -10,6 +10,7 @@ class Eleve:
     def ajouter_critere(self, critere:Critere, valeur:int):
         """Ajoute un critère avec une valeur associée au dictionnaire criteres."""
         self.criteres[critere] = valeur
+        critere.ajouter_valeur(valeur)
 
     def calculer_moyenne_ponderee(self):
         """Calcule la moyenne pondérée des critères (matières) selon les coefficients fournis."""
@@ -40,7 +41,7 @@ class Eleve:
         return isinstance(other, Eleve) and self.num_etudiant == other.num_etudiant
 
     def __repr__(self):
-        return f"{self.prenom} {self.nom} - Genre: {self.genre}"
+        return f"{self.prenom} {self.nom} - Genre: {self.genre}, {[c.get_nom() + ":" + str(self.criteres[c]) for c in self.criteres]}"
 
     def __hash__(self):
         return hash((self.num_etudiant, self.nom, self.prenom, self.genre))

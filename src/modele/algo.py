@@ -8,62 +8,60 @@ from criteres.numerique import Numerique
 import math
 
 def algo(eleves:list|set[Eleve], partition:Partition):
-    elevesAPlacer:set[Groupe] = set()
+    elevesAPlacer:set[Groupe] = set(eleves)
     groupes = partition.get_groupes()
     # Initialisation 
-    for groupe in groupes:
-        for eleve in eleves:
-            peutEtrePlacer = True
-            for critere in eleve.get_criteres():
-                contrainte = groupe.get_contrainte(critere)
-                if contrainte is None: continue
-                if eleve.get_critere(critere) not in contrainte:
-                    peutEtrePlacer = False
-            if peutEtrePlacer:
-                groupe.ajouter_eleve(eleve)
-            else:
-                elevesAPlacer.add(eleve)
-    for eleve in elevesAPlacer:
-        maxi = 0
+    for eleve in eleves:
+        maxi = -math.inf
         gmax = None
         for groupe in groupes:
+            if not groupe.respecter_contraintes(eleve) or not groupe.place_dispo(): continue
             score = groupe.simule_ajout(eleve)
             if score > maxi:
                 maxi = score
                 gmax = groupe
-        if gmax is None:
-            print("Erreur")
-        else:
+        if gmax is not None:
             gmax.ajouter_eleve(eleve)
-    
-    # Boucle principale
-    lastScore = 0
-    newScore = 1
-    while(newScore > lastScore):
-        lastScore = newScore
-        a_transferer = dict()
+            elevesAPlacer.remove(eleve)
+    while len(elevesAPlacer) > 0:
+        eleve = elevesAPlacer.pop()
+        maxi = -math.inf
+        gmax = None
         for groupe in groupes:
-            a_transferer[groupe] = get_mieux_a_retirer(groupe)
-        to_test:set[Groupe] = set(a_transferer.keys())
-        transfert = (0, None)
-        while len(to_test) > 0:
-            groupe = to_test.pop()
-            if a_transferer[groupe] is None: continue
-            maxi = (0,0)
-            tmax = None
-            for g in to_test:
-                if a_transferer[g] is None: continue
-                score = groupe.simule_transf(g, a_transferer[groupe], a_transferer[g])
-                if sum(score) > sum(maxi):
-                    maxi = score
-                    tmax = {groupe:a_transferer[groupe], g:a_transferer[g]}
-            if tmax is None: continue
-            if sum(maxi) > transfert[0]:
-                transfert = sum(maxi), tmax
-        if transfert[1] is not None:
-            g1, g2 = transfert[1].keys()
-            g1.transferer(g2, transfert[1][g1], transfert[1][g2])
+            if not groupe.place_dispo(): continue
+            score = groupe.simule_ajout(eleve)
+            if score > maxi:
+                maxi = score
+                gmax = groupe
+        gmax.ajouter_eleve(eleve)
+    # Boucle principale
+    combinaisons:set[tuple[Groupe,Groupe]] = set()
+    for groupe1 in groupes:
+        for groupe2 in groupes:
+            if groupe1 == groupe2: continue
+            if (groupe2, groupe1) not in combinaisons:
+                combinaisons.add((groupe1, groupe2))
+                
+    lastScore = partition.calcul_score()
+    newScore = partition.calcul_score() + 1
+    i = 0
+    while(i < 100):
+        lastScore = newScore
+        for g1, g2 in combinaisons:
+            groupeScoreInf = g1 if g1.calcul_score() < g2.calcul_score() else g2
+            groupeScoreSup = g2 if groupeScoreInf == g1 else g1
+            maxiEvolInf = 0
+            evolMax = None
+            for e1, e2 in zip(g1.get_eleves(), g2.get_eleves()):
+                scoreGroupeInf, scoreGroupeSup = groupeScoreInf.simule_transf(groupeScoreSup, e1, e2)
+                if scoreGroupeInf > groupeScoreInf.calcul_score():
+                    if scoreGroupeInf > maxiEvolInf:
+                        maxiEvolInf = scoreGroupeInf
+                        evolMax = (e1, e2)
+            if evolMax is not None:
+                groupeScoreInf.transferer(groupeScoreSup, evolMax[0], evolMax[1])
         newScore = partition.calcul_score()
+        i += 1
     return partition
 
 
@@ -85,21 +83,37 @@ def get_mieux_a_retirer(groupe:Groupe):
             emax = eleve
     return emax
 
-def respecter_contraintes(groupe, eleve):
-    """Vérifie si un élève respecte les contraintes d'un groupe."""
-    for critere, valeurs in groupe.contraintes.items():
-        if critere in eleve.criteres and eleve.criteres[critere] not in valeurs:
-            return False
-    return True
-
-def afficher_partition(partition):
+def afficher_partition(partition:Partition):
     """Affiche la répartition des élèves dans chaque groupe."""
     for i, groupe in enumerate(partition.groupes):
-        print(f"Groupe {i+1} (Taille: {len(groupe.eleves)} / {groupe.taille}):")
-        for eleve in groupe.get_eleves():
-            print(f"  - {eleve}")
+        print(f"Groupe {i+1} (Taille: {len(groupe.eleves)} / {groupe.taille}) Score: {groupe.calcul_score()}:")
+        #for eleve in groupe.get_eleves():
+        #    print(f"  - {eleve}")
         print()
+def generer_eleves(criteres: list[Critere], nb: int) -> list[Eleve]:
+    """Genere nb élèves aléatoirement
 
+    Args:
+        criteres (list[Critere]): liste des criteres
+        nb (int): nombre d'élèves à génerer
+
+    Returns:
+        list[Eleve]: liste d'élèves
+    """
+    import random
+    eleves = []
+    for i in range(nb):
+        prenom = f"Prenom{random.randint(1, 1000)}"
+        nom = f"Nom{random.randint(1, 1000)}"
+        num_etudiant = i
+        genre = random.choice(['M', 'F'])
+        eleve = Eleve(prenom, nom, num_etudiant, genre)
+        for critere in criteres:
+            minimum = min(critere.get_transpo().values())
+            maximum = max(critere.get_transpo().values())
+            eleve.ajouter_critere(critere, random.randint(minimum, maximum))
+        eleves.append(eleve)
+    return eleves
 # Exemple d'utilisation
 donnees_eleves = [
     (3, "Leclerc", "Paul", "M", 2, 5, "A"),
@@ -124,24 +138,40 @@ donnees_eleves = [
 critereFrancais = Numerique("Français",10, True)
 critereMath = Numerique("Maths",5, True)
 criterePenibilite = Numerique("Pénibilité", 3, True)
+[x.ajouter_valeur(1) for x in [critereFrancais,critereMath,criterePenibilite]]
+[x.ajouter_valeur(6) for x in [critereFrancais,critereMath,criterePenibilite]]
 # Créer la liste des objets `Eleve`
 eleves = []
-for data in donnees_eleves:
-    num_etudiant, nom, prenom, genre, francais, maths, penebilite = data
-    eleve = Eleve(prenom, nom, num_etudiant, genre)
-    eleve.ajouter_critere(critereFrancais, francais)
-    eleve.ajouter_critere(critereMath, maths)
-    penebilite_score = {"A": 1, "B": 2, "C": 3}.get(penebilite, 0)
-    eleve.ajouter_critere(criterePenibilite, penebilite_score)
-    eleves.append(eleve)
+#for data in donnees_eleves:
+#    num_etudiant, nom, prenom, genre, francais, maths, penebilite = data
+#    eleve = Eleve(prenom, nom, num_etudiant, genre)
+#    eleve.ajouter_critere(critereFrancais, francais)
+#    eleve.ajouter_critere(critereMath, maths)
+#    penebilite_score = {"A": 1, "B": 2, "C": 3}.get(penebilite, 0)
+#    eleve.ajouter_critere(criterePenibilite, penebilite_score)
+#    eleves.append(eleve)
+
+eleves.extend(generer_eleves([critereFrancais, critereMath, criterePenibilite],500))
 
 # Coefficients de pondération pour chaque matière
-coef_matieres = {'Français': 0, 'Maths': 2, 'Pénébilite': 1}
 partition = Partition()
-partition.ajouter_groupe(Groupe(5))
-partition.ajouter_groupe(Groupe(5))
-partition.ajouter_groupe(Groupe(5))
-partition.ajouter_groupe(Groupe(5))
+g1 = Groupe(125)
+g1.ajouter_contrainte(critereFrancais, {1, 3})
+
+g2 = Groupe(125)
+g2.ajouter_contrainte(critereFrancais, {2, 4})
+
+g3 = Groupe(125)
+g3.ajouter_contrainte(critereFrancais, {3, 5})
+
+g4 = Groupe(125)
+g4.ajouter_contrainte(critereFrancais, {4, 6})
+
+partition.ajouter_groupe(g1)
+partition.ajouter_groupe(g2)
+partition.ajouter_groupe(g3)
+partition.ajouter_groupe(g4)
+
 # Appel de l'algorithme avec 3 groupes et des contraintes par genre 
 partition = algo(
     eleves,
