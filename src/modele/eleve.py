@@ -1,4 +1,4 @@
-from modele.critere import Critere
+from critere import Critere
 class Eleve:
     def __init__(self, prenom:str, nom:str, num_etudiant:int, genre:bool):
         self.prenom:str = prenom
@@ -6,7 +6,6 @@ class Eleve:
         self.num_etudiant:int = num_etudiant
         self.genre:bool = genre
         self.criteres:dict[Critere,int] = {}  # Dictionnaire pour les matières et les critères
-        print(self.criteres)
 
     def ajouter_critere(self, critere:Critere, valeur:int):
         """Ajoute un critère avec une valeur associée au dictionnaire criteres."""

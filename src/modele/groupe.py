@@ -1,5 +1,5 @@
-from modele.eleve import Eleve
-from modele.critere import Critere
+from eleve import Eleve
+from critere import Critere
 class Groupe:
     def __init__(self, taille:int, contraintes:set[Critere]=dict()):
         self.taille:int = taille
@@ -36,7 +36,7 @@ class Groupe:
         self.eleves.add(eleve)
         return score
 
-    def simule_transf(self, groupe:Groupe, eleve1:Eleve, eleve2:Eleve) -> tuple[float,float]:
+    def simule_transf(self, groupe, eleve1:Eleve, eleve2:Eleve) -> tuple[float,float]: # type: ignore
         """Renvoie les deux score des deux groupes si un transfer est effectuer entre les deux élèves
 
         Args:
@@ -58,6 +58,13 @@ class Groupe:
         self.eleves.add(eleve1)
         groupe.get_eleves().add(eleve2)
         return scores
+    
+    def transferer(self, groupe, eleve1:Eleve, eleve2:Eleve): # type: ignore
+        if eleve1 not in self.eleves or eleve2 not in groupe.get_eleves(): return self.calcul_score(), groupe.calcul_score()
+        self.eleves.remove(eleve1)
+        groupe.get_eleves().remove(eleve2)
+        self.eleves.add(eleve2)
+        groupe.get_eleves().add(eleve1)
     
     
     def get_eleves(self) -> set[Eleve]:

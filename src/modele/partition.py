@@ -4,10 +4,13 @@ from criteres.categorique import Categorique
 from criteres.numerique import Numerique
 class Partition:
     def __init__(self):
-        self.groupes:list[Groupe] = []
+        self.groupes:set[Groupe] = set()
 
     def ajouter_groupe(self, groupe:Groupe) -> None:
-        self.groupes.append(groupe)
+        self.groupes.add(groupe)
+    
+    def get_groupes(self) -> set[Groupe]:
+        return self.groupes
     
     def calcul_score(self) -> float:
         return sum(groupe.calcul_score() for groupe in self.groupes)

@@ -1,3 +1,6 @@
+from typing import TYPE_CHECKING
+if TYPE_CHECKING:
+    from groupe import Groupe
 class Critere:
     def __init__(self, nom:str, poids:int, repartition:bool):
         self.nom:str = nom
@@ -33,8 +36,8 @@ class Critere:
             if valeur == val:
                 return cle
         return None
-
-    def calcul_score(self, groupe:set) -> float:
+    
+    def calcul_score(self, groupe:Groupe) -> float:
         pass
 
     def get_transpo(self) -> dict[int|bool|str,int]:
