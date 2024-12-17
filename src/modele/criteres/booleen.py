@@ -1,8 +1,8 @@
 from critere import Critere
 from groupe import Groupe
 class Booleen(Critere):
-    def __init__(self, nom:str, poids:int):
-        super().__init__(self, nom, poids)
+    def __init__(self, nom:str, poids:int, repartition:bool):
+        super().__init__(nom, poids, repartition)
     
     def calcul_score(self, groupe:Groupe) -> float:
         valeurs = [eleve.get_critere(self) for eleve in groupe.get_eleves()]

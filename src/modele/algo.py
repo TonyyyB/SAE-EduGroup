@@ -49,17 +49,17 @@ def algo(eleves:list|set[Eleve], partition:Partition):
         while len(to_test) > 0:
             groupe = to_test.pop()
             if a_transferer[groupe] is None: continue
-            maxi = 0
+            maxi = (0,0)
             tmax = None
             for g in to_test:
                 if a_transferer[g] is None: continue
                 score = groupe.simule_transf(g, a_transferer[groupe], a_transferer[g])
-                if score > maxi:
+                if sum(score) > sum(maxi):
                     maxi = score
                     tmax = {groupe:a_transferer[groupe], g:a_transferer[g]}
             if tmax is None: continue
-            if maxi > transfert[0]:
-                transfert = maxi, tmax
+            if sum(maxi) > transfert[0]:
+                transfert = sum(maxi), tmax
         if transfert[1] is not None:
             g1, g2 = transfert[1].keys()
             g1.transferer(g2, transfert[1][g1], transfert[1][g2])
@@ -121,9 +121,9 @@ donnees_eleves = [
     (19, "Paillard", "Jacques", "M", 5, 2, "A"),
     (20, "Lemoine", "Philippe", "M", 6, 4, "A")
 ]
-critereFrancais = Numerique("Français",10)
-critereMath = Numerique("Maths",5)
-criterePenibilite = Numerique("Pénibilité", 3)
+critereFrancais = Numerique("Français",10, True)
+critereMath = Numerique("Maths",5, True)
+criterePenibilite = Numerique("Pénibilité", 3, True)
 # Créer la liste des objets `Eleve`
 eleves = []
 for data in donnees_eleves:
