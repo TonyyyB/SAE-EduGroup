@@ -94,3 +94,6 @@ class Groupe:
 
     def __repr__(self):
         return f"Groupe de {len(self.eleves)} score de {self.calcul_score()}"
+    
+    def __hash__(self):
+        return hash((self.taille, frozenset(self.eleves), frozenset(self.criteres)))
