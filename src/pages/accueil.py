@@ -1,6 +1,6 @@
 import tkinter as tk
 from tkinter import filedialog, messagebox
-from tkinterdnd2 import TkinterDnD, DND_FILES
+from tkinterdnd2 import DND_FILES
 import customtkinter as ctk
 from constantes import *
 from pages.page import Page
