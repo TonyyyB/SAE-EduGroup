@@ -10,7 +10,8 @@ import time
 import random
 
 def algo(eleves:list|set[Eleve], partition:Partition):
-    elevesAPlacer:set[Groupe] = set(eleves)
+    partition.clear()
+    elevesAPlacer:set[Eleve] = set(eleves)
     groupes = partition.get_groupes()
     # Initialisation
     for eleve in eleves:
@@ -137,11 +138,8 @@ partition.ajouter_groupe(g3)
 partition.ajouter_groupe(g4)
 start = time.time()
 # Appel de l'algorithme avec 3 groupes et des contraintes par genre
-partition = algo(
-    eleves,
-    partition
-)
+algo(eleves,partition)
 stop = time.time()
-# Afficher la répartition finale des groupes
 afficher_partition(partition)
+# Afficher la répartition finale des groupes
 print(stop-start)

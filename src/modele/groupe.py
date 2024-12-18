@@ -47,7 +47,7 @@ class Groupe:
         self.eleves.add(eleve)
         return score
 
-    def simule_transf(self, groupe, eleve1:Eleve, eleve2:Eleve) -> tuple[float,float]: # type: ignore
+    def simule_transf(self, groupe:'Groupe', eleve1:Eleve, eleve2:Eleve) -> tuple[float,float]: # type: ignore
         """Renvoie les deux score des deux groupes si un transfer est effectuer entre les deux élèves
 
         Args:
@@ -70,7 +70,7 @@ class Groupe:
         groupe.get_eleves().add(eleve2)
         return scores
 
-    def transferer(self, groupe, eleve1:Eleve, eleve2:Eleve): # type: ignore
+    def transferer(self, groupe:'Groupe', eleve1:Eleve, eleve2:Eleve):
         if eleve1 not in self.eleves or eleve2 not in groupe.get_eleves(): return self.calcul_score(), groupe.calcul_score()
         self.eleves.remove(eleve1)
         groupe.get_eleves().remove(eleve2)
@@ -90,7 +90,11 @@ class Groupe:
         return self.contraintes[critere] if critere in self.contraintes else None
 
     def calcul_score(self) -> float:
+        if len(self.eleves) == 0: return 0.0
         return sum(critere.calcul_score(self) for critere in self.criteres)
+    
+    def clear(self) -> None:
+        self.eleves.clear()
 
     def __repr__(self):
         return f"Groupe de {len(self.eleves)} score de {self.calcul_score()}"

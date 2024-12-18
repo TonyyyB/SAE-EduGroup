@@ -58,3 +58,7 @@ class Partition:
             ecart_type += (groupe.calcul_score() - moyenne) ** 2
         ecart_type = math.sqrt(ecart_type / len(self.groupes))
         return moyenne - ecart_type
+    
+    def clear(self) -> None:
+        for groupe in self.groupes:
+            groupe.clear()
