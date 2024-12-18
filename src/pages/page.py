@@ -115,17 +115,21 @@ class Table(tk.Frame):
         # Remplir les lignes avec les données des élèves
         for i, eleve in enumerate(eleves):
             # Colonnes fixes : prénom, nom, ID
-            entry_prenom = tk.Entry(self.frame, font=("Arial", 12), foreground="black", width=15)
+            entry_prenom = tk.Entry(self.frame, font=("Arial", 12), disabledbackground="white", disabledforeground="black", foreground="black", width=15)
             entry_prenom.insert(0, eleve.prenom)
             entry_prenom.grid(row=i + 1, column=0)
 
-            entry_nom = tk.Entry(self.frame, font=("Arial", 12), foreground="black", width=15)
+            entry_nom = tk.Entry(self.frame, font=("Arial", 12), disabledbackground="white", disabledforeground="black",foreground="black", width=15)
             entry_nom.insert(0, eleve.nom)
             entry_nom.grid(row=i + 1, column=1)
 
-            entry_id = tk.Entry(self.frame, font=("Arial", 12), foreground="black", width=15)
+            entry_id = tk.Entry(self.frame, font=("Arial", 12), disabledbackground="white", disabledforeground="black",foreground="black", width=15)
             entry_id.insert(0, eleve.num_etudiant)
             entry_id.grid(row=i + 1, column=2)
+
+            entry_nom.configure(state="disabled")
+            entry_prenom.configure(state="disabled")
+            entry_id.configure(state="disabled")
 
     def _bind_mousewheel(self, event):
         """Lier les événements de la molette de la souris pour le défilement."""
