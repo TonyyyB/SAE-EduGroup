@@ -3,6 +3,8 @@ from tkinter import ttk
 from tkinterdnd2 import TkinterDnD
 from pages.accueil import PageAccueil
 from pages.page import Page
+import pandas as pd
+from modele.eleve import Eleve
 from pages.creationGroupe import CreationGroupe
 
 class App(TkinterDnD.Tk):  # Changement ici pour utiliser TkinterDnD.Tk
