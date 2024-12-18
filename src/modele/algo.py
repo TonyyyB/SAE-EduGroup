@@ -7,11 +7,12 @@ from criteres.categorique import Categorique
 from criteres.numerique import Numerique
 import math
 import time
+import random
 
 def algo(eleves:list|set[Eleve], partition:Partition):
     elevesAPlacer:set[Groupe] = set(eleves)
     groupes = partition.get_groupes()
-    # Initialisation 
+    # Initialisation
     for eleve in eleves:
         maxi = -math.inf
         gmax = None
@@ -42,7 +43,7 @@ def algo(eleves:list|set[Eleve], partition:Partition):
             if groupe1 == groupe2: continue
             if (groupe2, groupe1) not in combinaisons:
                 combinaisons.add((groupe1, groupe2))
-                
+
     lastScore = partition.calcul_score()
     newScore = lastScore + 1
     timeLastScoreNotGreater = 0
@@ -85,13 +86,12 @@ def generer_eleves(criteres: list[Critere], nb: int) -> list[Eleve]:
     Returns:
         list[Eleve]: liste d'élèves
     """
-    import random
     eleves = []
     for i in range(nb):
         prenom = f"Prenom{random.randint(1, 1000)}"
         nom = f"Nom{random.randint(1, 1000)}"
         num_etudiant = i
-        genre = random.choice(['M', 'F'])
+        genre = random.choice(["M", "F"])
         eleve = Eleve(prenom, nom, num_etudiant, genre)
         for critere in criteres:
             minimum = min(critere.get_transpo().values())
@@ -126,7 +126,7 @@ partition.ajouter_groupe(g2)
 partition.ajouter_groupe(g3)
 partition.ajouter_groupe(g4)
 start = time.time()
-# Appel de l'algorithme avec 3 groupes et des contraintes par genre 
+# Appel de l'algorithme avec 3 groupes et des contraintes par genre
 partition = algo(
     eleves,
     partition
