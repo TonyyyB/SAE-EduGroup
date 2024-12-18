@@ -53,18 +53,26 @@ def algo(eleves:list|set[Eleve], partition:Partition):
             newScore = partition.calcul_score()
             maxiEvol = 0
             evolMax = None
+            maxiEvolSansContraintes = 0
+            evolMaxSansContraintes = None
             for e1, e2 in zip(g1.get_eleves(), g2.get_eleves()):
-                if not g1.respecter_contraintes(e2) or not g2.respecter_contraintes(e1): continue
                 score = partition.simule_transf(g1, g2, e1, e2)
-                if score > maxiEvol:
-                    maxiEvol = score
-                    evolMax = (g1, g2, e1, e2)
-            if evolMax is not None:
+                if not g1.respecter_contraintes(e2) or not g2.respecter_contraintes(e1):
+                    if score > maxiEvolSansContraintes:
+                        maxiEvolSansContraintes = score
+                        evolMaxSansContraintes = (g1, g2, e1, e2)
+                else:
+                    if score > maxiEvol:
+                        maxiEvol = score
+                        evolMax = (g1, g2, e1, e2)
+            if evolMax is None:
+                if evolMaxSansContraintes is not None:
+                    evolMaxSansContraintes[0].transferer(evolMaxSansContraintes[1], evolMaxSansContraintes[2], evolMaxSansContraintes[3])
+            else:
                 evolMax[0].transferer(evolMax[1], evolMax[2], evolMax[3])
         newScore = partition.calcul_score()
         if newScore > lastScore:
-            #timeLastScoreNotGreater = 0
-            pass
+            timeLastScoreNotGreater = 0
         else:
             timeLastScoreNotGreater += 1
     return partition
