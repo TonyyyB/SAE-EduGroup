@@ -28,8 +28,6 @@ class Page(tk.Frame):
         height = self.winfo_height()
         width = self.winfo_width()
 
-        print(f"Width: {width}, Height: {height}")  # Vérifie les dimensions
-
         for i in range(height):
             r = int(start_color[0] + (end_color[0] - start_color[0]) * (i / height))
             g = int(start_color[1] + (end_color[1] - start_color[1]) * (i / height))
