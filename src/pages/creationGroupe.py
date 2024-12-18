@@ -1,5 +1,5 @@
 import tkinter as tk
-from Eleve import Eleve
+from modele.eleve import Eleve
 import customtkinter as ctk
 from constantes import *
 from pages.page import Page
@@ -121,122 +121,13 @@ class CreationGroupe(Page):
         bouton_generer = ctk.CTkButton(self, text="Générer les groupes", font=GRANDE_POLICE, command=self.generer_groupes_vides)
         bouton_generer.place(relx=0.5, rely=0.12, anchor='center')
 
-        # Bouton de retour
-        bouton_exporter = ctk.CTkButton(self, text="Exporter les paramètres", font=GRANDE_POLICE, command=self.page_parametre_groupe)
-        bouton_exporter.place(relx=0.85, rely=0.10, anchor='center')
-
-        # Bouton de retour
-        bouton_resultats = ctk.CTkButton(self, text="Exporter les résultats", font=GRANDE_POLICE, command=self.retour_page_accueil)
-        bouton_resultats.place(relx=0.85, rely=0.15, anchor='center')
-
-        # Bouton de retour
-        bouton_retour = ctk.CTkButton(self, text="Changer de fichier", font=GRANDE_POLICE, command=self.retour_page_accueil)
-        bouton_retour.place(relx=0.85, rely=0.05, anchor='center')
-
-    def decrease_group_count(self):
-        """Réduit le nombre de groupes"""
-        if self.nb_groupes > 1:  # Limite à 1 groupe minimum
-            self.nb_groupes -= 1
-            self.group_count_label.config(text=str(self.nb_groupes))
-            self.generer_groupes_vides()  # Regénérer les groupes avec le nouveau nombre
-
-    def increase_group_count(self):
-        """Augmente le nombre de groupes"""
-        self.nb_groupes += 1
-        self.group_count_label.config(text=str(self.nb_groupes))
-        self.generer_groupes_vides()  # Regénérer les groupes avec le nouveau nombre
-
-    def generer_groupes_vides(self):
+    def generer_groupes(self):
         """
         Action lors de l'appui sur le bouton "Générer les groupes".
-        Répartit les élèves dans les groupes et les affiche dans un tableau.
+        Affiche les niveaux sélectionnés pour chaque critère.
         """
-        # Détruire les anciens groupes et labels
-        self.scrollbar_y.destroy()
-        for table in self.tables:
-            table.destroy()  # Détruire chaque objet Table existant
-        self.tables.clear()  # Réinitialiser la liste des tables
-
-        # Détruire les anciens labels des titres des groupes
-        for title_label in self.group_titles:
-            title_label.destroy()
-        self.group_titles.clear()  # Réinitialiser la liste des titres
-
-        # Supprimer les anciens boutons de paramètres
-        for bouton in self.boutons_param:
-            bouton.destroy()
-        self.boutons_param.clear()
-
-        groupes = {f'Groupe {i+1}': [] for i in range(self.nb_groupes)}
-
-        eleveVide = Eleve('/','/','/','/')
-
-        for i in range(self.nb_groupes):
-            groupe_num = i + 1
-            groupes[f'Groupe {groupe_num}'].append(eleveVide)
-
-        self.eleves_restants_label.config(text=f"Élèves restants: {len(self.eleves)}")
-
-        self.inner_frame.update_idletasks()
-
-        nb_colonnes = 3
-        espacement = 10
-        posx, posy = 0, 0
-
-        for i, (groupe_name, eleves_in_groupe) in enumerate(groupes.items()):
-            # Créer une sous-grille avec 2 colonnes : une pour le label et une pour le bouton
-            group_frame = tk.Frame(self.inner_frame)
-            group_frame.grid(row=posy, column=posx, padx=espacement, pady=espacement, sticky="w")
-
-            # Ajouter un titre avec fond bleu (3D83B1) et texte blanc
-            title_label = tk.Label(group_frame, text=groupe_name, font=("Arial", 12, "bold"), 
-                                    bg="#3D83B1", fg="white", width=15, height=2, anchor="center")
-            title_label.grid(row=0, column=0, padx=espacement, pady=espacement, sticky="w")
-
-            # Créer le bouton avec l'image redimensionnée
-            self.bouton_param = tk.Button(group_frame, image=self.img_param_tk, compound="right", anchor='e')
-            self.bouton_param.grid(row=0, column=1, padx=espacement, pady=espacement, sticky="e")
-
-            # Garder une référence à l'image pour éviter qu'elle ne soit collectée par le garbage collector
-            self.bouton_param.image = self.img_param_tk
-
-            # Ajouter le bouton à la liste
-            self.boutons_param.append(self.bouton_param)
-
-            self.group_titles.append(title_label)
-
-            # Créer la table pour chaque groupe
-            table = Table(parent=self.inner_frame, controller=self, eleves=eleves_in_groupe, criteres=self.criteres)
-            table.grid(row=posy + 1, column=posx, padx=espacement, pady=espacement)
-
-            # Personnalisation des cellules du tableau
-            for widget in table.winfo_children():
-                if isinstance(widget, tk.Label):
-                    widget.config(bg="white", fg="black", relief="solid", bd=1)
-
-            self.tables.append(table)
-
-            posx += 1
-            if posx >= nb_colonnes:
-                posx = 0
-                posy += 2  # Décaler de 2 lignes pour séparer le titre du tableau
-
-        self.inner_frame.update_idletasks()
-        self.canvas_frame.config(scrollregion=self.canvas_frame.bbox("all"))
-
-        self.scrollbar_y = tk.Scrollbar(self.canvas_frame, orient="vertical", command=self.canvas_frame.yview)
-        self.scrollbar_y.pack(side="right", fill="y")
-        self.canvas_frame.configure(yscrollcommand=self.scrollbar_y.set)
-
-
-    def retour_page_accueil(self):
-        """
-        Retourne à la page d'accueil.
-        """
-        self.controller.show_frame(PageAccueil)  # Retour à la page d'accueil
-    
-    def page_parametre_groupe(self):
-        """
-        Affichage de page de paramètre
-        """
-        self.controller.show_frame(ParametreGroupe) 
+        for critere, text_field in self.text_fields.items():
+            priority = text_field.get()  # Récupère la valeur du champ
+            print(f"{critere}: {priority}")
+        
+        # Ajoutez ici le code pour générer les groupes ou effectuer une autre action
