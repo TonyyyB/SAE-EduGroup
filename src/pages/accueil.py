@@ -5,7 +5,7 @@ import customtkinter as ctk
 from constantes import *
 from pages.page import Page
 import pandas as pd
-from Eleve import Eleve
+from modele.eleve import Eleve
 
 class PageAccueil(Page):
     def __init__(self, parent, controller):
@@ -92,8 +92,8 @@ class PageAccueil(Page):
         self.eleves = []
         for _, row in df.iterrows():
             eleve = Eleve(prenom=row['Prénom'], nom=row['Nom'], num_etudiant=row['NumÉtudiant'], genre=row['Genre'])
-            for critere in self.criteres:
-                eleve.ajouter_critere(critere, row[critere])
+            # for critere in self.criteres:
+            #     eleve.ajouter_critere(critere, row[critere])
             self.eleves.append(eleve)
         
         # Charger dynamiquement la page CreationGroupe en passant les élèves et les critères

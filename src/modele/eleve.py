@@ -1,4 +1,4 @@
-from critere import Critere
+from modele.critere import Critere
 class Eleve:
     def __init__(self, prenom:str, nom:str, num_etudiant:int, genre:bool):
         self.prenom:str = prenom

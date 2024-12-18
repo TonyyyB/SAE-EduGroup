@@ -5,7 +5,6 @@ from constantes import *
 from pages.page import Page
 from pages.page import Table
 from pages.accueil import PageAccueil
-from pages.parametreGroupe import ParametreGroupe
 from PIL import Image, ImageTk
 
 class CreationGroupe(Page):
@@ -13,15 +12,26 @@ class CreationGroupe(Page):
         super().__init__(parent, controller)
         self.eleves = []
         self.criteres = []
-        self.text_fields = {}  # Pour gérer les champs de texte
+        self.text_fields = {}
         self.labels = {}  # Pour stocker les labels créés sous forme de dictionnaire
-        self.nb_groupes = 5  # Initialisation du nombre de groupes à 5
+        self.group_titles = []  # Liste pour garder une référence des labels de titres des groupes
+        self.nb_groupes = 5
         self.tables = []  # Liste pour garder une référence des tables des groupes
-        self.eleves_restants_label = None  # Label pour afficher le nombre d'élèves restants
+        self.eleves_restants_label = None
+        self.boutons_param = []  # Initialiser la liste pour les boutons de paramètres
+        
+        # Redimensionner l'image à la taille désirée
+        self.img_param = Image.open("img/param.png")
+        self.img_resized = self.img_param.resize((30, 30))  # Ajustez les dimensions selon vos besoins
+        self.img_param_tk = ImageTk.PhotoImage(self.img_resized)
 
         # Ajouter un canvas pour le contenu
         self.canvas_frame = tk.Canvas(self.canvas)
         self.canvas_frame.place(relx=0.11, rely=0.22, relwidth=0.78, relheight=0.6)
+
+        # Créer l'étiquette des élèves restants
+        self.eleves_restants_label = tk.Label(self, text="Élèves restants: 0", font=("Arial", 16))
+        self.eleves_restants_label.place(relx=0.15, rely=0.02, anchor='center')
 
         # Ajouter une scrollbar verticale pour le Canvas
         self.scrollbar_y = tk.Scrollbar(self.canvas_frame, orient="vertical", command=self.canvas_frame.yview)
@@ -34,6 +44,7 @@ class CreationGroupe(Page):
 
         # Dessiner le fond dégradé sur la page (pas sur le canvas)
         self.create_gradient()
+        self.generer_groupes_vides()
 
     def set_data(self, eleves, criteres):
         """
@@ -43,6 +54,7 @@ class CreationGroupe(Page):
         self.criteres = criteres
         self.clear_ui()  # Effacer l'interface existante avant de la recréer
         self.setup_ui()  # Mettre à jour l'interface après le chargement des données
+        self.generer_groupes_vides()
 
     def clear_ui(self):
         """
@@ -105,7 +117,7 @@ class CreationGroupe(Page):
         self.eleves_restants_label.place(relx=0.15, rely=0.02, anchor='center')
 
         # Bouton de génération
-        bouton_generer = ctk.CTkButton(self, text="Générer les groupes", font=GRANDE_POLICE, command=self.generer_groupes)
+        bouton_generer = ctk.CTkButton(self, text="Générer les groupes", font=GRANDE_POLICE, command=self.generer_groupes_vides)
         bouton_generer.place(relx=0.5, rely=0.12, anchor='center')
 
         # Bouton de retour
