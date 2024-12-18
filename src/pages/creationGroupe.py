@@ -48,12 +48,6 @@ class CreationGroupe(Page):
         """
         self.eleves = eleves
         self.criteres = criteres
-        # Créer la partition
-        self.partition = Partition()
-        # Créer les groupes par défaut
-        for i in range(self.nb_groupes):
-            groupe = Groupe(20)
-            self.partition.ajouter_groupe(groupe)
         self.clear_ui()  # Effacer l'interface existante avant de la recréer
         self.setup_ui()  # Mettre à jour l'interface après le chargement des données
         self.afficher_groupes()
