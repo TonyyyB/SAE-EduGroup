@@ -7,6 +7,8 @@ from constantes import *
 from pages.page import Page
 from pages.page import Table
 from pages.accueil import PageAccueil
+from tkinter import messagebox
+import pandas as pd
 from PIL import Image, ImageTk
 
 class CreationGroupe(Page):
@@ -121,6 +123,10 @@ class CreationGroupe(Page):
         bouton_exporter.place(relx=0.85, rely=0.10, anchor='center')
 
         # Bouton de retour
+        bouton_param = ctk.CTkButton(self, text="Paramètres des critères", font=GRANDE_POLICE, command=self.pop_up_criteres)
+        bouton_param.place(relx=0.15, rely=0.17, anchor='center')
+
+        # Bouton de retour
         bouton_resultats = ctk.CTkButton(self, text="Exporter les résultats", font=GRANDE_POLICE, command=self.retour_page_accueil)
         bouton_resultats.place(relx=0.85, rely=0.15, anchor='center')
 
@@ -227,3 +233,11 @@ class CreationGroupe(Page):
         Retourne à la page d'accueil.
         """
         self.controller.show_frame(PageAccueil)  # Retour à la page d'accueil
+
+    def pop_up_criteres(self):
+        """
+        Méthode pour ouvrir un pop-up qui permet de paramétrer les critères.
+        """
+        from pages.parametresCriteres import ParametresCriteres
+        popup = ParametresCriteres(self, self.criteres)  # Passage des critères à la classe ParametresCriteres
+        popup.grab_set()  # Pour forcer le focus sur la fenêtre pop-up
