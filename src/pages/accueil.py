@@ -1,6 +1,6 @@
 import tkinter as tk
 from tkinter import filedialog, messagebox
-from tkinterdnd2 import TkinterDnD, DND_FILES
+from tkinterdnd2 import DND_FILES
 import customtkinter as ctk
 from constantes import *
 from pages.page import Page
@@ -10,7 +10,7 @@ from Eleve import Eleve
 class PageAccueil(Page):
     def __init__(self, parent, controller):
         super().__init__(parent, controller)
-
+        
         # Zone de dépôt de fichier centrée avec tkinterdnd2 + fonctionnalité de bouton
         self.frame = tk.Frame(self, bg='white', padx=10, pady=12, relief=tk.RIDGE, bd=5)
         self.frame.place(relx=0.5, rely=0.4, anchor='center', relwidth=0.6, relheight=0.2)

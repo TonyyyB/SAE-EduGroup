@@ -1,5 +1,4 @@
 import tkinter as tk
-from tkinter import filedialog, messagebox
 from constantes import *
 
 class Page(tk.Frame):
@@ -29,6 +28,8 @@ class Page(tk.Frame):
         height = self.winfo_height()
         width = self.winfo_width()
 
+        print(f"Width: {width}, Height: {height}")  # Vérifie les dimensions
+
         for i in range(height):
             r = int(start_color[0] + (end_color[0] - start_color[0]) * (i / height))
             g = int(start_color[1] + (end_color[1] - start_color[1]) * (i / height))
@@ -38,12 +39,13 @@ class Page(tk.Frame):
 
         for label in self.labels.values():
             self.canvas.create_text(
-                width*label["x"],
-                height*label["y"],
+                width * label["x"],
+                height * label["y"],
                 text=label["text"],
                 font=label["font"],
                 fill=label["fill"]
             )
+
 
     def on_resize(self, event):
         self.create_gradient()
@@ -51,10 +53,19 @@ class Page(tk.Frame):
     def go_to_next_page(self):
         pass
     
-    def create_label(self, id, x, y, text, font=MOYENNE_POLICE, fill="white"):
+    def create_label(self, id, x, y, text, font=MOYENNE_POLICE, fill=None, background=None):
         if id in self.labels:
             raise Exception("Label already in list")
-        self.labels[id] = {"x":x, "y":y, "text":text, "font":font, "fill":fill}
+        
+        label = tk.Label(self, text=text, font=font, fg=fill, bg=background)
+        
+        # Positionne le label
+        label.place(relx=x, rely=y, anchor='center')
+        
+        # Ajoute le label à un dictionnaire avec un id unique
+        self.labels[id] = {"x": x, "y": y, "text": text, "font": font, "fill": fill, "background": background}
+        
+        return label
 
 class Table(tk.Frame):
     def __init__(self, parent, controller, eleves=None, criteres=None):
@@ -92,7 +103,7 @@ class Table(tk.Frame):
         Affiche le nom, prénom, ID, et les notes pour chaque critère.
         """
         # Définir les titres de colonnes : Prénom, Nom, ID + critères
-        self.titre_colonnes = ['Prénom', 'Nom', 'ID'] + criteres
+        self.titre_colonnes = ['Prénom', 'Nom', 'ID']
 
         # Créer les titres des colonnes
         for j, titre in enumerate(self.titre_colonnes):
@@ -115,13 +126,6 @@ class Table(tk.Frame):
             entry_id = tk.Entry(self.frame, font=("Arial", 12), foreground="black", width=15)
             entry_id.insert(0, eleve.num_etudiant)
             entry_id.grid(row=i + 1, column=2)
-
-            # Colonnes dynamiques pour les critères
-            for j, critere in enumerate(criteres):
-                note = eleve.criteres.get(critere, "")
-                entry_note = tk.Entry(self.frame, font=("Arial", 12), foreground="black", width=15)
-                entry_note.insert(0, note)
-                entry_note.grid(row=i + 1, column=j + 3)
 
     def _bind_mousewheel(self, event):
         """Lier les événements de la molette de la souris pour le défilement."""
