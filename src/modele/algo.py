@@ -6,6 +6,7 @@ from criteres.booleen import Booleen
 from criteres.categorique import Categorique
 from criteres.numerique import Numerique
 import math
+import time
 
 def algo(eleves:list|set[Eleve], partition:Partition):
     elevesAPlacer:set[Groupe] = set(eleves)
@@ -48,21 +49,21 @@ def algo(eleves:list|set[Eleve], partition:Partition):
     while(timeLastScoreNotGreater < 3):
         lastScore = newScore
         for g1, g2 in combinaisons:
-            groupeScoreInf = g1 if g1.calcul_score() < g2.calcul_score() else g2
-            groupeScoreSup = g2 if groupeScoreInf == g1 else g1
-            maxiEvolInf = 0
+            newScore = partition.calcul_score()
+            maxiEvol = 0
             evolMax = None
             for e1, e2 in zip(g1.get_eleves(), g2.get_eleves()):
-                scoreGroupeInf, scoreGroupeSup = groupeScoreInf.simule_transf(groupeScoreSup, e1, e2)
-                if scoreGroupeInf > groupeScoreInf.calcul_score():
-                    if scoreGroupeInf > maxiEvolInf:
-                        maxiEvolInf = scoreGroupeInf
-                        evolMax = (e1, e2)
+                if not g1.respecter_contraintes(e2) or not g2.respecter_contraintes(e1): continue
+                score = partition.simule_transf(g1, g2, e1, e2)
+                if score > maxiEvol:
+                    maxiEvol = score
+                    evolMax = (g1, g2, e1, e2)
             if evolMax is not None:
-                groupeScoreInf.transferer(groupeScoreSup, evolMax[0], evolMax[1])
+                evolMax[0].transferer(evolMax[1], evolMax[2], evolMax[3])
         newScore = partition.calcul_score()
         if newScore > lastScore:
-            timeLastScoreNotGreater = 0
+            #timeLastScoreNotGreater = 0
+            pass
         else:
             timeLastScoreNotGreater += 1
     return partition
@@ -70,9 +71,9 @@ def algo(eleves:list|set[Eleve], partition:Partition):
 def afficher_partition(partition:Partition):
     """Affiche la répartition des élèves dans chaque groupe."""
     for i, groupe in enumerate(partition.groupes):
-        print(f"Groupe {i+1} (Taille: {len(groupe.eleves)} / {groupe.taille}) Score: {groupe.calcul_score()}:")
-        for eleve in groupe.get_eleves():
-            print(f"  - {eleve}")
+        print(f"Groupe {i+1} (Taille: {len(groupe.get_eleves())} / {groupe.taille}) Score: {groupe.calcul_score()}:")
+        #for eleve in groupe.get_eleves():
+        #    print(f"  - {eleve}")
         print()
 def generer_eleves(criteres: list[Critere], nb: int) -> list[Eleve]:
     """Genere nb élèves aléatoirement
@@ -104,32 +105,33 @@ criterePenibilite = Numerique("Pénibilité", 3, True)
 [x.ajouter_valeur(1) for x in [critereFrancais,critereMath,criterePenibilite]]
 [x.ajouter_valeur(6) for x in [critereFrancais,critereMath,criterePenibilite]]
 
-eleves = generer_eleves([critereFrancais, critereMath, criterePenibilite],80)
+eleves = generer_eleves([critereFrancais, critereMath, criterePenibilite],200)
 
 # Coefficients de pondération pour chaque matière
 partition = Partition()
-g1 = Groupe(20)
+g1 = Groupe(50)
 g1.ajouter_contrainte(critereFrancais, {1, 3})
 
-g2 = Groupe(20)
+g2 = Groupe(50)
 g2.ajouter_contrainte(critereFrancais, {2, 4})
 
-g3 = Groupe(20)
+g3 = Groupe(50)
 g3.ajouter_contrainte(critereFrancais, {3, 5})
 
-g4 = Groupe(20)
+g4 = Groupe(50)
 g4.ajouter_contrainte(critereFrancais, {4, 6})
 
 partition.ajouter_groupe(g1)
 partition.ajouter_groupe(g2)
 partition.ajouter_groupe(g3)
 partition.ajouter_groupe(g4)
-
+start = time.time()
 # Appel de l'algorithme avec 3 groupes et des contraintes par genre 
 partition = algo(
     eleves,
     partition
 )
-
+stop = time.time()
 # Afficher la répartition finale des groupes
 afficher_partition(partition)
+print(stop-start)
