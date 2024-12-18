@@ -67,7 +67,9 @@ def algo(eleves:list|set[Eleve], partition:Partition):
                         evolMax = (g1, g2, e1, e2)
             if evolMax is None:
                 if evolMaxSansContraintes is not None:
-                    evolMaxSansContraintes[0].transferer(evolMaxSansContraintes[1], evolMaxSansContraintes[2], evolMaxSansContraintes[3])
+                    evolMaxSansContraintes[0].transferer(evolMaxSansContraintes[1], 
+                                                         evolMaxSansContraintes[2], 
+                                                         evolMaxSansContraintes[3])
             else:
                 evolMax[0].transferer(evolMax[1], evolMax[2], evolMax[3])
         newScore = partition.calcul_score()
