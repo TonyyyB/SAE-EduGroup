@@ -1,5 +1,4 @@
 import tkinter as tk
-from tkinter import filedialog, messagebox
 from constantes import *
 
 class Page(tk.Frame):
