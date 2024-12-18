@@ -12,7 +12,7 @@ class Groupe:
 
     def ajouter_contrainte(self, critere:Critere, vals:set|list[int]) -> None:
         self.contraintes[critere] = set(vals)
-    
+
     def respecter_contraintes(self, eleve:Eleve):
         """Vérifie si un élève respecte les contraintes d'un groupe."""
         for critere, valeurs in self.contraintes.items():
@@ -94,6 +94,6 @@ class Groupe:
 
     def __repr__(self):
         return f"Groupe de {len(self.eleves)} score de {self.calcul_score()}"
-    
+
     def __hash__(self):
         return hash((self.taille, frozenset(self.eleves), frozenset(self.criteres)))

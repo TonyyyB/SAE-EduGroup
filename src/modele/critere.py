@@ -36,13 +36,13 @@ class Critere:
             if valeur == val:
                 return cle
         return None
-    
+
     def calcul_score(self, groupe:'Groupe') -> float:
         pass
 
     def get_transpo(self) -> dict[int|bool|str,int]:
         return self.transpo
-    
+
     def __repr__(self):
         return f"{self.nom}: {self.poids}"
 
