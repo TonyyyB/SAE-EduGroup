@@ -3,10 +3,9 @@ import customtkinter as ctk
 from constantes import *
 from pages.page import Page
 from pages.page import Table
-from pages.accueil import PageAccueil
-from pages.parametreGroupe import ParametreGroupe
+from pages.creationGroupe import CreationGroupe
 
-class CreationGroupe(Page):
+class ParametreGroupe(Page):
     def __init__(self, parent, controller):
         super().__init__(parent, controller)
         self.eleves = []
@@ -99,7 +98,7 @@ class CreationGroupe(Page):
         bouton_generer.place(relx=0.5, rely=0.12, anchor='center')
 
         # Bouton de retour
-        bouton_exporter = ctk.CTkButton(self, text="Exporter les paramètres", font=GRANDE_POLICE, command=self.page_parametre_groupe)
+        bouton_exporter = ctk.CTkButton(self, text="Exporter les paramètres", font=GRANDE_POLICE, command=self.retour_page_accueil)
         bouton_exporter.place(relx=0.85, rely=0.10, anchor='center')
 
         # Bouton de retour
@@ -181,10 +180,4 @@ class CreationGroupe(Page):
         """
         Retourne à la page d'accueil.
         """
-        self.controller.show_frame(PageAccueil)  # Retour à la page d'accueil
-    
-    def page_parametre_groupe(self):
-        """
-        Affichage de page de paramètre
-        """
-        self.controller.show_frame(ParametreGroupe) 
+        self.controller.show_frame(CreationGroupe)  # Retour à la page d'accueil
