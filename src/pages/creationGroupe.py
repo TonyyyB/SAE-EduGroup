@@ -5,6 +5,8 @@ from constantes import *
 from pages.page import Page
 from pages.page import Table
 from pages.accueil import PageAccueil
+from tkinter import messagebox
+import pandas as pd
 from PIL import Image, ImageTk
 
 class CreationGroupe(Page):
@@ -125,6 +127,13 @@ class CreationGroupe(Page):
         bouton_exporter.place(relx=0.85, rely=0.10, anchor='center')
 
         # Bouton de retour
+        bouton_param = ctk.CTkButton(self, text="Paramètres des critères", font=GRANDE_POLICE, command=self.pop_up_criteres)
+        bouton_param.place(relx=0.15, rely=0.17, anchor='center')
+
+        # Bouton paramètres groupes
+        self.bouton_parm_grp = None
+
+        # Bouton de retour
         bouton_resultats = ctk.CTkButton(self, text="Exporter les résultats", font=GRANDE_POLICE, command=self.retour_page_accueil)
         bouton_resultats.place(relx=0.85, rely=0.15, anchor='center')
 
@@ -193,14 +202,14 @@ class CreationGroupe(Page):
             title_label.grid(row=0, column=0, padx=espacement, pady=espacement, sticky="w")
 
             # Créer le bouton avec l'image redimensionnée
-            self.bouton_param = tk.Button(group_frame, image=self.img_param_tk, compound="right", anchor='e')
-            self.bouton_param.grid(row=0, column=1, padx=espacement, pady=espacement, sticky="e")
+            self.bouton_param_grp = tk.Button(group_frame, image=self.img_param_tk, compound="right", anchor='e', command=self.pop_up_param_grp)
+            self.bouton_param_grp.grid(row=0, column=1, padx=espacement, pady=espacement, sticky="e")
 
             # Garder une référence à l'image pour éviter qu'elle ne soit collectée par le garbage collector
-            self.bouton_param.image = self.img_param_tk
+            self.bouton_param_grp.image = self.img_param_tk
 
             # Ajouter le bouton à la liste
-            self.boutons_param.append(self.bouton_param)
+            self.boutons_param.append(self.bouton_param_grp)
 
             self.group_titles.append(title_label)
 
@@ -233,3 +242,17 @@ class CreationGroupe(Page):
         Retourne à la page d'accueil.
         """
         self.controller.show_frame(PageAccueil)  # Retour à la page d'accueil
+
+    def pop_up_criteres(self):
+        """
+        Méthode pour ouvrir un pop-up qui permet de paramétrer les critères.
+        """
+        from pages.parametresCriteres import ParametresCriteres
+        popup = ParametresCriteres(self, self.criteres)  # Passage des critères à la classe ParametresCriteres
+        popup.grab_set()  # Pour forcer le focus sur la fenêtre pop-up
+
+    def pop_up_param_grp(self):
+        from pages.parametresGroupe import ParametresGroupe
+        eleves_restants = self.eleves_restants_label.cget("text")
+        popup = ParametresGroupe(self, eleves_restants, self.criteres)
+        popup.grab_set()  # Pour forcer le focus sur la fenêtre pop-up
