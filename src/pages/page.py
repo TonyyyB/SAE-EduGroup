@@ -47,9 +47,6 @@ class Page(tk.Frame):
 
     def on_resize(self, event):
         self.create_gradient()
-
-    def go_to_next_page(self):
-        pass
     
     def create_label(self, id, x, y, text, font=MOYENNE_POLICE, fill=None, background=None):
         if id in self.labels:
@@ -101,33 +98,29 @@ class Table(tk.Frame):
         Affiche le nom, prénom, ID, et les notes pour chaque critère.
         """
         # Définir les titres de colonnes : Prénom, Nom, ID + critères
-        self.titre_colonnes = ['Prénom', 'Nom', 'ID']
+        self.titre_colonnes = ['Prénom', 'Nom', 'ID'] + criteres
 
         # Créer les titres des colonnes
         for j, titre in enumerate(self.titre_colonnes):
-            b = tk.Entry(self.frame, disabledbackground="lightgray", disabledforeground="black", font=("Arial", 12), width=15)
-            b.insert(0, titre)
-            b.configure(state="disabled")
+            b = tk.Label(self.frame, text=titre, bg="lightgray", font=("Arial", 12), width=15)
             b.grid(row=0, column=j)
 
         # Remplir les lignes avec les données des élèves
         for i, eleve in enumerate(eleves):
             # Colonnes fixes : prénom, nom, ID
-            entry_prenom = tk.Entry(self.frame, font=("Arial", 12), disabledbackground="white", disabledforeground="black", foreground="black", width=15)
-            entry_prenom.insert(0, eleve.prenom)
-            entry_prenom.grid(row=i + 1, column=0)
+            self._create_table_entry(i + 1, 0, eleve.prenom)
+            self._create_table_entry(i + 1, 1, eleve.nom)
+            self._create_table_entry(i + 1, 2, eleve.num_etudiant)
 
-            entry_nom = tk.Entry(self.frame, font=("Arial", 12), disabledbackground="white", disabledforeground="black",foreground="black", width=15)
-            entry_nom.insert(0, eleve.nom)
-            entry_nom.grid(row=i + 1, column=1)
+            # Colonnes dynamiques : notes pour chaque critère
+            for j, critere in enumerate(criteres):
+                note = getattr(eleve, critere, 'N/A')  # Suppose que les notes sont des attributs de l'élève
+                self._create_table_entry(i + 1, j + 3, note)
 
-            entry_id = tk.Entry(self.frame, font=("Arial", 12), disabledbackground="white", disabledforeground="black",foreground="black", width=15)
-            entry_id.insert(0, eleve.num_etudiant)
-            entry_id.grid(row=i + 1, column=2)
-
-            entry_nom.configure(state="disabled")
-            entry_prenom.configure(state="disabled")
-            entry_id.configure(state="disabled")
+    def _create_table_entry(self, row, col, text):
+        """Crée une cellule dans le tableau."""
+        entry = tk.Label(self.frame, text=text, bg="white", font=("Arial", 12), width=15)
+        entry.grid(row=row, column=col)
 
     def _bind_mousewheel(self, event):
         """Lier les événements de la molette de la souris pour le défilement."""

@@ -38,7 +38,6 @@ class CreationGroupe(Page):
         # Ajouter une scrollbar verticale pour le Canvas
         self.scrollbar_y = tk.Scrollbar(self.canvas_frame, orient="vertical", command=self.canvas_frame.yview)
         self.scrollbar_y.pack(side="right", fill="y")
-        self.canvas_frame.configure(yscrollcommand=self.scrollbar_y.set)
 
         # Créer un frame à l'intérieur du canvas
         self.inner_frame = tk.Frame(self.canvas_frame)
@@ -154,13 +153,8 @@ class CreationGroupe(Page):
         self.group_count_label.config(text=str(self.nb_groupes))
         self.generer_groupes_vides()  # Regénérer les groupes avec le nouveau nombre
 
-    def generer_groupes_vides(self):
-        """
-        Action lors de l'appui sur le bouton "Générer les groupes".
-        Répartit les élèves dans les groupes et les affiche dans un tableau.
-        """
+    def clear_grp(self):
         # Détruire les anciens groupes et labels
-        self.scrollbar_y.destroy()
         for table in self.tables:
             table.destroy()  # Détruire chaque objet Table existant
         self.tables.clear()  # Réinitialiser la liste des tables
@@ -174,6 +168,13 @@ class CreationGroupe(Page):
         for bouton in self.boutons_param:
             bouton.destroy()
         self.boutons_param.clear()
+
+    def generer_groupes_vides(self):
+        """
+        Action lors de l'appui sur le bouton "Générer les groupes".
+        Répartit les élèves dans les groupes et les affiche dans un tableau.
+        """
+        self.clear_grp()
 
         groupes = {f'Groupe {i+1}': [] for i in range(self.nb_groupes)}
 
@@ -232,8 +233,6 @@ class CreationGroupe(Page):
         self.inner_frame.update_idletasks()
         self.canvas_frame.config(scrollregion=self.canvas_frame.bbox("all"))
 
-        self.scrollbar_y = tk.Scrollbar(self.canvas_frame, orient="vertical", command=self.canvas_frame.yview)
-        self.scrollbar_y.pack(side="right", fill="y")
         self.canvas_frame.configure(yscrollcommand=self.scrollbar_y.set)
 
 
