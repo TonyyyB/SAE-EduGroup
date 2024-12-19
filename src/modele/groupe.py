@@ -1,5 +1,5 @@
-from eleve import Eleve
-from critere import Critere
+from modele.eleve import Eleve
+from modele.critere import Critere
 class Groupe:
     def __init__(self, taille:int, contraintes:set[Critere]=None):
         self.taille:int = taille

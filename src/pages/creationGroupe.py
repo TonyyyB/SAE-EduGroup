@@ -1,5 +1,7 @@
 import tkinter as tk
 from modele.eleve import Eleve
+from modele.partition import Partition
+from modele.groupe import Groupe
 import customtkinter as ctk
 from constantes import *
 from pages.page import Page
@@ -42,9 +44,6 @@ class CreationGroupe(Page):
         self.inner_frame = tk.Frame(self.canvas_frame)
         self.canvas_frame.create_window((0, 0), window=self.inner_frame, anchor="nw")
 
-        # Dessiner le fond dégradé sur la page (pas sur le canvas)
-        self.create_gradient()
-        self.generer_groupes_vides()
 
     def set_data(self, eleves, criteres):
         """
@@ -52,9 +51,15 @@ class CreationGroupe(Page):
         """
         self.eleves = eleves
         self.criteres = criteres
+        # Créer la partition
+        self.partition = Partition()
+        # Créer les groupes par défaut
+        for i in range(self.nb_groupes):
+            groupe = Groupe(20)
+            self.partition.ajouter_groupe(groupe)
         self.clear_ui()  # Effacer l'interface existante avant de la recréer
         self.setup_ui()  # Mettre à jour l'interface après le chargement des données
-        self.generer_groupes_vides()
+        self.afficher_groupes()
 
     def clear_ui(self):
         """
@@ -117,7 +122,7 @@ class CreationGroupe(Page):
         self.eleves_restants_label.place(relx=0.15, rely=0.02, anchor='center')
 
         # Bouton de génération
-        bouton_generer = ctk.CTkButton(self, text="Générer les groupes", font=GRANDE_POLICE, command=self.generer_groupes_vides)
+        bouton_generer = ctk.CTkButton(self, text="Générer les groupes", font=GRANDE_POLICE, command=self.afficher_groupes)
         bouton_generer.place(relx=0.5, rely=0.12, anchor='center')
 
         # Bouton de retour
@@ -136,16 +141,18 @@ class CreationGroupe(Page):
         """Réduit le nombre de groupes"""
         if self.nb_groupes > 1:  # Limite à 1 groupe minimum
             self.nb_groupes -= 1
+            self.partition.supprimer_groupe(self.partition.get_groupes()[-1])
             self.group_count_label.config(text=str(self.nb_groupes))
-            self.generer_groupes_vides()  # Regénérer les groupes avec le nouveau nombre
+            self.afficher_groupes()  # Regénérer les groupes avec le nouveau nombre
 
     def increase_group_count(self):
         """Augmente le nombre de groupes"""
         self.nb_groupes += 1
+        self.partition.ajouter_groupe(Groupe(20))
         self.group_count_label.config(text=str(self.nb_groupes))
-        self.generer_groupes_vides()  # Regénérer les groupes avec le nouveau nombre
+        self.afficher_groupes()  # Regénérer les groupes avec le nouveau nombre
 
-    def generer_groupes_vides(self):
+    def afficher_groupes(self):
         """
         Action lors de l'appui sur le bouton "Générer les groupes".
         Répartit les élèves dans les groupes et les affiche dans un tableau.
@@ -166,14 +173,6 @@ class CreationGroupe(Page):
             bouton.destroy()
         self.boutons_param.clear()
 
-        groupes = {f'Groupe {i+1}': [] for i in range(self.nb_groupes)}
-
-        eleveVide = Eleve('/','/','/','/')
-
-        for i in range(self.nb_groupes):
-            groupe_num = i + 1
-            groupes[f'Groupe {groupe_num}'].append(eleveVide)
-
         self.eleves_restants_label.config(text=f"Élèves restants: {len(self.eleves)}")
 
         self.inner_frame.update_idletasks()
@@ -182,13 +181,13 @@ class CreationGroupe(Page):
         espacement = 10
         posx, posy = 0, 0
 
-        for i, (groupe_name, eleves_in_groupe) in enumerate(groupes.items()):
+        for i, groupe in enumerate(self.partition.get_groupes()):
             # Créer une sous-grille avec 2 colonnes : une pour le label et une pour le bouton
             group_frame = tk.Frame(self.inner_frame)
             group_frame.grid(row=posy, column=posx, padx=espacement, pady=espacement, sticky="w")
 
             # Ajouter un titre avec fond bleu (3D83B1) et texte blanc
-            title_label = tk.Label(group_frame, text=groupe_name, font=("Arial", 12, "bold"), 
+            title_label = tk.Label(group_frame, text=f"Groupe {i+1}", font=("Arial", 12, "bold"), 
                                     bg="#3D83B1", fg="white", width=15, height=2, anchor="center")
             title_label.grid(row=0, column=0, padx=espacement, pady=espacement, sticky="w")
 
@@ -205,7 +204,7 @@ class CreationGroupe(Page):
             self.group_titles.append(title_label)
 
             # Créer la table pour chaque groupe
-            table = Table(parent=self.inner_frame, controller=self, eleves=eleves_in_groupe, criteres=self.criteres)
+            table = Table(parent=self.inner_frame, controller=self, eleves=groupe.get_eleves(), criteres=self.criteres)
             table.grid(row=posy + 1, column=posx, padx=espacement, pady=espacement)
 
             # Personnalisation des cellules du tableau
