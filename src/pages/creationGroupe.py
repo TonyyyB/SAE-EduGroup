@@ -122,7 +122,7 @@ class CreationGroupe(Page):
         self.eleves_restants_label.place(relx=0.15, rely=0.02, anchor='center')
 
         # Bouton de génération
-        bouton_generer = ctk.CTkButton(self, text="Générer les groupes", font=GRANDE_POLICE, command=self.afficher_groupes)
+        bouton_generer = ctk.CTkButton(self, text="Générer les groupes", font=GRANDE_POLICE, command=self.generer_groupes)
         bouton_generer.place(relx=0.5, rely=0.12, anchor='center')
 
         # Bouton de retour
@@ -136,6 +136,10 @@ class CreationGroupe(Page):
         # Bouton de retour
         bouton_retour = ctk.CTkButton(self, text="Changer de fichier", font=GRANDE_POLICE, command=self.retour_page_accueil)
         bouton_retour.place(relx=0.85, rely=0.05, anchor='center')
+    
+    def generer_groupes(self):
+        self.partition.generer(self.eleves)
+        self.afficher_groupes()
 
     def decrease_group_count(self):
         """Réduit le nombre de groupes"""

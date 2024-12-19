@@ -4,7 +4,10 @@ import math
 class Partition:
     def __init__(self):
         self.groupes:list[Groupe] = []
-        self.is_generer = False
+        self.is_genere = False
+    
+    def is_generer(self):
+        return self.is_genere
     
     def generer(self, eleves:list|set[Eleve]) -> 'Partition':
         self.clear()
@@ -75,7 +78,7 @@ class Partition:
                 timeLastScoreNotGreater = 0
             else:
                 timeLastScoreNotGreater += 1
-        self.is_generer = True
+        self.is_genere = True
         return self
 
     def ajouter_groupe(self, groupe:Groupe) -> None:
@@ -138,4 +141,4 @@ class Partition:
     def clear(self) -> None:
         for groupe in self.groupes:
             groupe.clear()
-        self.is_generer = False
+        self.is_genere = False
