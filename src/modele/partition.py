@@ -80,7 +80,26 @@ class Partition:
                 timeLastScoreNotGreater += 1
         self.is_genere = True
         return self
+    
+    def adapter_taille(self, eleves:list|set[Eleve]) -> None:
+        groupesTailleModif, groupesSansTailleModif = self.groupes_avec_et_sans_taille_modif()
+        if len(groupesSansTailleModif) == 0: return
+        nbElevesRestants = len(eleves) - sum([groupe.get_taille() for groupe in groupesTailleModif])
+        nbParGroupe = nbElevesRestants // len(groupesSansTailleModif)
+        for groupe in self.groupes:
+            groupe.changer_taille(nbParGroupe, False)
+            nbElevesRestants -= nbParGroupe
+        for i in range(nbElevesRestants):
+            self.groupes[i].changer_taille(self.groupes[i].get_taille()+1, False)
 
+    def groupes_avec_et_sans_taille_modif(self) -> tuple[list[Groupe], list[Groupe]]:
+        tailleModif = []
+        tailleNonModif = []
+        for groupe in self.groupes:
+            if groupe.a_ete_modifier(): tailleModif.append(groupe)
+            else: tailleNonModif.append(groupe)
+        return tailleModif, tailleNonModif
+    
     def ajouter_groupe(self, groupe:Groupe) -> None:
         self.groupes.append(groupe)
     
