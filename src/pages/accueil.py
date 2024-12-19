@@ -117,17 +117,16 @@ class PageAccueil(Page):
         for _, row in df.iterrows():
             eleve = Eleve(prenom=row['prenom'], nom=row['nom'], num_etudiant=row['numetudiant'], genre=row['genre'])
             for critere in self.criteres:
-                print(row[critere.get_nom()])
                 eleve.ajouter_critere(critere, row[critere.get_nom()])
             self.eleves.append(eleve)
 
-        for critere in self.criteres:
-            if isinstance(critere, Numerique):
-                print("numérique " + str(critere.get_transpo()))
-            elif isinstance(critere, Booleen):
-                print("booléen " + str(critere.get_transpo()))
-            elif isinstance(critere, Categorique):
-                print("catégorique " + str(critere.get_transpo()))
+        #for critere in self.criteres:
+        #    if isinstance(critere, Numerique):
+        #        print("numérique " + str(critere.get_transpo()))
+        #    elif isinstance(critere, Booleen):
+        #        print("booléen " + str(critere.get_transpo()))
+        #    elif isinstance(critere, Categorique):
+        #        print("catégorique " + str(critere.get_transpo()))
         
         # Charger dynamiquement la page CreationGroupe en passant les élèves et les critères
         from pages.creationGroupe import CreationGroupe  # Import dynamique
