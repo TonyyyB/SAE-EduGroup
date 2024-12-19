@@ -10,7 +10,7 @@ class Page(tk.Frame):
         self.canvas = tk.Canvas(self)
         self.canvas.pack(fill="both", expand=True)
 
-        self.labels = {
+        self.labels:dict[str,dict[str:float|str|tuple[str,int,str]]] = {
             "title" : {"x":0.1, "y":0.1, "text":"EduGroup", "font":GRANDE_POLICE, "fill":"white"}
         }
 
@@ -27,8 +27,6 @@ class Page(tk.Frame):
 
         height = self.winfo_height()
         width = self.winfo_width()
-
-        print(f"Width: {width}, Height: {height}")  # Vérifie les dimensions
 
         for i in range(height):
             r = int(start_color[0] + (end_color[0] - start_color[0]) * (i / height))
@@ -57,16 +55,14 @@ class Page(tk.Frame):
         if id in self.labels:
             raise Exception("Label already in list")
         
-        label = tk.Label(self, text=text, font=font, fg=fill, bg=background)
-        
-        # Positionne le label
-        label.place(relx=x, rely=y, anchor='center')
-        
         # Ajoute le label à un dictionnaire avec un id unique
         self.labels[id] = {"x": x, "y": y, "text": text, "font": font, "fill": fill, "background": background}
-        
-        return label
-
+    
+    def change_text(self, id, text):
+        if id in self.labels:
+            self.labels[id]["text"] = text
+        else:
+            raise Exception("Label not found in list")
 class Table(tk.Frame):
     def __init__(self, parent, controller, eleves=None, criteres=None):
         super().__init__(parent)

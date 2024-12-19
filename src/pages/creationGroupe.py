@@ -31,14 +31,9 @@ class CreationGroupe(Page):
         self.canvas_frame = tk.Canvas(self.canvas)
         self.canvas_frame.place(relx=0.11, rely=0.22, relwidth=0.78, relheight=0.6)
 
-        # Créer l'étiquette des élèves restants
-        self.eleves_restants_label = tk.Label(self, text="Élèves restants: 0", font=("Arial", 16))
-        self.eleves_restants_label.place(relx=0.15, rely=0.02, anchor='center')
-
         # Ajouter une scrollbar verticale pour le Canvas
         self.scrollbar_y = tk.Scrollbar(self.canvas_frame, orient="vertical", command=self.canvas_frame.yview)
         self.scrollbar_y.pack(side="right", fill="y")
-        self.canvas_frame.configure(yscrollcommand=self.scrollbar_y.set)
 
         # Créer un frame à l'intérieur du canvas
         self.inner_frame = tk.Frame(self.canvas_frame)
@@ -97,12 +92,10 @@ class CreationGroupe(Page):
         self.controller.minsize(1600, 1000)
 
         # Titre principal
-        label = self.create_label("instruction_text", 0.5, 0.05, "Création du groupe", font=GRANDE_POLICE)
-        self.labels["instruction_text"] = label  # Ajoute le label avec une clé unique
+        self.create_label("instruction_text", 0.5, 0.05, "Création du groupe", font=GRANDE_POLICE)
 
         # Contrôle du nombre de groupes
-        label_nb_groupes = self.create_label("label_nb_groupes", 0.15, 0.05, "Nombre de groupes", font=MOYENNE_POLICE)
-        self.labels["label_nb_groupes"] = label_nb_groupes
+        self.create_label("label_nb_groupes", 0.15, 0.05, "Nombre de groupes", font=MOYENNE_POLICE)
 
         # Affichage du nombre de groupes avec boutons +
         group_control_frame = tk.Frame(self)
@@ -117,9 +110,7 @@ class CreationGroupe(Page):
         increase_button = ctk.CTkButton(group_control_frame, text="+", font=("Arial", 16), command=self.increase_group_count)
         increase_button.grid(row=0, column=2)
 
-        # Ajouter le compteur d'élèves restants
-        self.eleves_restants_label = tk.Label(self, text=f"Élèves restants: {len(self.eleves)}", font=("Arial", 16))
-        self.eleves_restants_label.place(relx=0.15, rely=0.02, anchor='center')
+        self.create_label("eleves_restants", 0.15, 0.02, text=f"Élèves restants: {len(self.eleves)}", font=MOYENNE_POLICE)
 
         # Bouton de génération
         bouton_generer = ctk.CTkButton(self, text="Générer les groupes", font=GRANDE_POLICE, command=self.generer_groupes)
@@ -177,7 +168,7 @@ class CreationGroupe(Page):
             bouton.destroy()
         self.boutons_param.clear()
 
-        self.eleves_restants_label.config(text=f"Élèves restants: {len(self.eleves)}")
+        self.change_text("eleves_restants", f"Élèves restants: {len(self.eleves)}")
 
         self.inner_frame.update_idletasks()
 
