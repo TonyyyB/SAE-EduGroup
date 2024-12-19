@@ -1,5 +1,5 @@
-from groupe import Groupe
-from eleve import Eleve
+from modele.groupe import Groupe
+from modele.eleve import Eleve
 import math
 class Partition:
     def __init__(self):

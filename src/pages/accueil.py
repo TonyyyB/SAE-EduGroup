@@ -1,11 +1,15 @@
 import tkinter as tk
 from tkinter import filedialog, messagebox
+from modele.detection_critere import detecter_type_critere
 from tkinterdnd2 import DND_FILES
 import customtkinter as ctk
 from constantes import *
 from pages.page import Page
 import pandas as pd
 from modele.eleve import Eleve
+from modele.criteres.numerique import Numerique
+from modele.criteres.categorique import Categorique
+from modele.criteres.booleen import Booleen
 
 class PageAccueil(Page):
     def __init__(self, parent, controller):
@@ -86,15 +90,25 @@ class PageAccueil(Page):
         
         # Charger les élèves et les critères à partir du CSV
         df = pd.read_csv(self.file_path)
-        self.criteres = df.columns.to_list()[5:]
+        self.criteres = []
+        for critere in df.columns[5:]:
+            self.criteres.append(detecter_type_critere(critere, df[critere]))
 
         # Créer la liste des élèves
         self.eleves = []
         for _, row in df.iterrows():
             eleve = Eleve(prenom=row['Prénom'], nom=row['Nom'], num_etudiant=row['NumÉtudiant'], genre=row['Genre'])
-            # for critere in self.criteres:
-            #     eleve.ajouter_critere(critere, row[critere])
+            for critere in self.criteres:
+                eleve.ajouter_critere(critere, row[critere.get_nom()])
             self.eleves.append(eleve)
+
+        for critere in self.criteres:
+            if isinstance(critere, Numerique):
+                print("numérique")
+            elif isinstance(critere, Booleen):
+                print("booléen")
+            elif isinstance(critere, Categorique):
+                print("catégorique")
         
         # Charger dynamiquement la page CreationGroupe en passant les élèves et les critères
         from pages.creationGroupe import CreationGroupe  # Import dynamique
