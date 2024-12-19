@@ -1,5 +1,6 @@
 import tkinter as tk
 from tkinter import filedialog, messagebox
+import unicodedata
 from modele.detection_critere import detecter_type_critere
 from tkinterdnd2 import DND_FILES
 import customtkinter as ctk
@@ -90,25 +91,43 @@ class PageAccueil(Page):
         
         # Charger les élèves et les critères à partir du CSV
         df = pd.read_csv(self.file_path)
+
+        def normaliser_colonnes(colonnes):
+            """
+            Normalise les noms des colonnes pour qu'ils soient en minuscules,
+            sans accents, ni caractères spéciaux, et remplace les espaces par des underscores.
+
+            :param colonnes: Liste des noms de colonnes.
+            :return: Liste des noms de colonnes normalisés.
+            """
+            return [
+                ''.join(
+                    c for c in unicodedata.normalize('NFD', col.lower())
+                    if c.isalnum() or c == ' '
+                ).replace(' ', '_')
+                for col in colonnes
+            ]
+        df.columns = normaliser_colonnes(df.columns)
         self.criteres = []
-        for critere in df.columns[5:]:
+        for critere in df.columns[4:]:
             self.criteres.append(detecter_type_critere(critere, df[critere]))
 
         # Créer la liste des élèves
         self.eleves = []
         for _, row in df.iterrows():
-            eleve = Eleve(prenom=row['Prénom'], nom=row['Nom'], num_etudiant=row['NumÉtudiant'], genre=row['Genre'])
+            eleve = Eleve(prenom=row['prenom'], nom=row['nom'], num_etudiant=row['numetudiant'], genre=row['genre'])
             for critere in self.criteres:
+                print(row[critere.get_nom()])
                 eleve.ajouter_critere(critere, row[critere.get_nom()])
             self.eleves.append(eleve)
 
         for critere in self.criteres:
             if isinstance(critere, Numerique):
-                print("numérique")
+                print("numérique " + str(critere.get_transpo()))
             elif isinstance(critere, Booleen):
-                print("booléen")
+                print("booléen " + str(critere.get_transpo()))
             elif isinstance(critere, Categorique):
-                print("catégorique")
+                print("catégorique " + str(critere.get_transpo()))
         
         # Charger dynamiquement la page CreationGroupe en passant les élèves et les critères
         from pages.creationGroupe import CreationGroupe  # Import dynamique

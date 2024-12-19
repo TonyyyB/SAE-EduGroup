@@ -4,7 +4,10 @@ from modele.criteres.numerique import Numerique
 
 def detecter_type_critere(nom, valeurs):
     # Vérifier si toutes les valeurs sont des booléens (0 ou 1)
-    if set(valeurs.dropna().unique()) <= {0, 1}:
+    valeurs_booleennes = {"0", "1", 0, 1, "Oui", "Non", "True", "False", "oui", "non", "true", "false"}
+
+    valeurs_uniques = set(valeurs.dropna().astype(str).unique())
+    if valeurs_uniques <= valeurs_booleennes and len(valeurs_uniques) == 2:
         return Booleen(nom, 1, False)
     
     # Vérifier si chaque valeur a exactement 1 caractère
