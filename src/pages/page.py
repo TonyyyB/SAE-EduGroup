@@ -35,14 +35,20 @@ class Page(tk.Frame):
             color = f'#{r:02x}{g:02x}{b:02x}'
             self.canvas.create_line(0, i, width, i, fill=color)
 
-        for label in self.dict_labels.values():
-            self.canvas.create_text(
-                width * label['x'],
-                height * label['y'],
-                text=label["text"],
-                font=label["font"],
-                fill=label["fill"]
-            )
+        for label_key, label in self.dict_labels.items():
+            try:
+                # Assurez-vous que chaque clé nécessaire est présente
+                x = width * label.get('x', 0.5)  # Valeur par défaut si clé manquante
+                y = height * label.get('y', 0.1)  # Valeur par défaut si clé manquante
+                text = label.get('text', "")
+                font = label.get('font', ("Arial", 12))
+                fill = label.get('fill', 'black')
+
+                # Créer le texte sur le Canvas
+                self.canvas.create_text(x, y, text=text, font=font, fill=fill)
+            except Exception as e:
+                print(f"Erreur lors de la création du texte '{label_key}': {e}")
+
 
 
     def on_resize(self, event):
