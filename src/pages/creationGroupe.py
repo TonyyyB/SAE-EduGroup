@@ -15,8 +15,8 @@ class CreationGroupe(Page):
         self.eleves = []
         self.criteres = []
         self.text_fields = {}
-        self.labels = {}  # Pour stocker les labels créés sous forme de dictionnaire
-        self.group_titles = []  # Liste pour garder une référence des labels de titres des groupes
+        self.dict_labels = {}  # Pour stocker les dict_labels créés sous forme de dictionnaire
+        self.group_titles = []  # Liste pour garder une référence des dict_labels de titres des groupes
         self.nb_groupes = 5
         self.tables = []  # Liste pour garder une référence des tables des groupes
         self.eleves_restants_label = None
@@ -44,7 +44,6 @@ class CreationGroupe(Page):
         self.canvas_frame.create_window((0, 0), window=self.inner_frame, anchor="nw")
 
         # Dessiner le fond dégradé sur la page (pas sur le canvas)
-        self.create_gradient()
         self.generer_groupes_vides()
 
     def set_data(self, eleves, criteres):
@@ -59,17 +58,17 @@ class CreationGroupe(Page):
 
     def clear_ui(self):
         """
-        Méthode pour nettoyer l'interface en supprimant les éléments existants (labels, champs de texte, etc.).
+        Méthode pour nettoyer l'interface en supprimant les éléments existants (dict_labels, champs de texte, etc.).
         """
-        # Supprimer les labels des titres des groupes
+        # Supprimer les dict_labels des titres des groupes
         for title_label in self.group_titles:
-            title_label.destroy()  # Détruire les labels de titres des groupes
+            title_label.destroy()  # Détruire les dict_labels de titres des groupes
         self.group_titles.clear()  # Réinitialiser la liste des titres
 
         # Supprimer les autres éléments comme les champs de texte et les tableaux
-        for label in self.labels.values():
+        for label in self.dict_labels.values():
             label.destroy()
-        self.labels.clear()
+        self.dict_labels.clear()
 
         for critere, text_field in self.text_fields.items():
             text_field.destroy()
@@ -94,11 +93,11 @@ class CreationGroupe(Page):
 
         # Titre principal
         label = self.create_label("instruction_text", 0.5, 0.05, "Création du groupe", font=GRANDE_POLICE)
-        self.labels["instruction_text"] = label  # Ajoute le label avec une clé unique
+        self.dict_labels["instruction_text"] = label  # Ajoute le label avec une clé unique
 
         # Contrôle du nombre de groupes
         label_nb_groupes = self.create_label("label_nb_groupes", 0.15, 0.05, "Nombre de groupes", font=MOYENNE_POLICE)
-        self.labels["label_nb_groupes"] = label_nb_groupes
+        self.dict_labels["label_nb_groupes"] = label_nb_groupes
 
         # Affichage du nombre de groupes avec boutons +
         group_control_frame = tk.Frame(self)
@@ -154,12 +153,12 @@ class CreationGroupe(Page):
         self.generer_groupes_vides()  # Regénérer les groupes avec le nouveau nombre
 
     def clear_grp(self):
-        # Détruire les anciens groupes et labels
+        # Détruire les anciens groupes et dict_labels
         for table in self.tables:
             table.destroy()  # Détruire chaque objet Table existant
         self.tables.clear()  # Réinitialiser la liste des tables
 
-        # Détruire les anciens labels des titres des groupes
+        # Détruire les anciens dict_labels des titres des groupes
         for title_label in self.group_titles:
             title_label.destroy()
         self.group_titles.clear()  # Réinitialiser la liste des titres

@@ -10,7 +10,7 @@ class Page(tk.Frame):
         self.canvas = tk.Canvas(self)
         self.canvas.pack(fill="both", expand=True)
 
-        self.labels = {
+        self.dict_labels = {
             "title" : {"x":0.1, "y":0.1, "text":"EduGroup", "font":GRANDE_POLICE, "fill":"white"}
         }
 
@@ -35,10 +35,10 @@ class Page(tk.Frame):
             color = f'#{r:02x}{g:02x}{b:02x}'
             self.canvas.create_line(0, i, width, i, fill=color)
 
-        for label in self.labels.values():
+        for label in self.dict_labels.values():
             self.canvas.create_text(
-                width * label["x"],
-                height * label["y"],
+                width * label['x'],
+                height * label['y'],
                 text=label["text"],
                 font=label["font"],
                 fill=label["fill"]
@@ -49,7 +49,7 @@ class Page(tk.Frame):
         self.create_gradient()
     
     def create_label(self, id, x, y, text, font=MOYENNE_POLICE, fill=None, background=None):
-        if id in self.labels:
+        if id in self.dict_labels:
             raise Exception("Label already in list")
         
         label = tk.Label(self, text=text, font=font, fg=fill, bg=background)
@@ -58,7 +58,7 @@ class Page(tk.Frame):
         label.place(relx=x, rely=y, anchor='center')
         
         # Ajoute le label à un dictionnaire avec un id unique
-        self.labels[id] = {"x": x, "y": y, "text": text, "font": font, "fill": fill, "background": background}
+        self.dict_labels[id] = {"x": x, "y": y, "text": text, "font": font, "fill": fill, "background": background}
         
         return label
 
