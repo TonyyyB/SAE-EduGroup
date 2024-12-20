@@ -7,10 +7,10 @@ class Eleve:
         self.genre:bool = genre
         self.criteres:dict[Critere,int] = {}  # Dictionnaire pour les matières et les critères
 
-    def ajouter_critere(self, critere:Critere, valeur:int):
+    def ajouter_critere(self, critere:Critere, valeur:int|str|bool):
         """Ajoute un critère avec une valeur associée au dictionnaire criteres."""
-        self.criteres[critere] = valeur
         critere.ajouter_valeur(valeur)
+        self.criteres[critere] = critere.to_int(valeur)
 
     def calculer_moyenne_ponderee(self):
         """Calcule la moyenne pondérée des critères (matières) selon les coefficients fournis."""

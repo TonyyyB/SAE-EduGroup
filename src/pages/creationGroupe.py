@@ -1,5 +1,7 @@
 import tkinter as tk
 from modele.eleve import Eleve
+from modele.partition import Partition
+from modele.groupe import Groupe
 import customtkinter as ctk
 from constantes import *
 from pages.page import Page
@@ -12,15 +14,13 @@ from PIL import Image, ImageTk
 class CreationGroupe(Page):
     def __init__(self, parent, controller):
         super().__init__(parent, controller)
+        self.controller = controller
         self.eleves = []
         self.criteres = []
         self.text_fields = {}
-        self.dict_labels = {}  # Pour stocker les dict_labels créés sous forme de dictionnaire
-        self.group_titles = []  # Liste pour garder une référence des dict_labels de titres des groupes
         self.nb_groupes = 5
         self.tables = []  # Liste pour garder une référence des tables des groupes
         self.eleves_restants_label = None
-        self.boutons_param = []  # Initialiser la liste pour les boutons de paramètres
         
         # Redimensionner l'image à la taille désirée
         self.img_param = Image.open("img/param.png")
@@ -31,10 +31,6 @@ class CreationGroupe(Page):
         self.canvas_frame = tk.Canvas(self.canvas)
         self.canvas_frame.place(relx=0.11, rely=0.22, relwidth=0.78, relheight=0.6)
 
-        # Créer l'étiquette des élèves restants
-        self.eleves_restants_label = tk.Label(self, text="Élèves restants: 0", font=("Arial", 16))
-        self.eleves_restants_label.place(relx=0.15, rely=0.02, anchor='center')
-
         # Ajouter une scrollbar verticale pour le Canvas
         self.scrollbar_y = tk.Scrollbar(self.canvas_frame, orient="vertical", command=self.canvas_frame.yview)
         self.scrollbar_y.pack(side="right", fill="y")
@@ -43,32 +39,27 @@ class CreationGroupe(Page):
         self.inner_frame = tk.Frame(self.canvas_frame)
         self.canvas_frame.create_window((0, 0), window=self.inner_frame, anchor="nw")
 
-        # Dessiner le fond dégradé sur la page (pas sur le canvas)
-        self.generer_groupes_vides()
-
     def set_data(self, eleves, criteres):
         """
         Méthode pour définir les élèves et les critères depuis la page précédente.
         """
         self.eleves = eleves
         self.criteres = criteres
+        # Créer la partition
+        self.partition = Partition(self.eleves)
+        # Créer les groupes par défaut
+        for i in range(self.nb_groupes):
+            groupe = Groupe(20)
+            self.partition.ajouter_groupe(groupe)
+        self.partition.adapter_taille()
         self.clear_ui()  # Effacer l'interface existante avant de la recréer
         self.setup_ui()  # Mettre à jour l'interface après le chargement des données
-        self.generer_groupes_vides()
+        self.afficher_groupes()
 
     def clear_ui(self):
         """
         Méthode pour nettoyer l'interface en supprimant les éléments existants (dict_labels, champs de texte, etc.).
         """
-        # Supprimer les dict_labels des titres des groupes
-        for title_label in self.group_titles:
-            title_label.destroy()  # Détruire les dict_labels de titres des groupes
-        self.group_titles.clear()  # Réinitialiser la liste des titres
-
-        # Supprimer les autres éléments comme les champs de texte et les tableaux
-        for label in self.dict_labels.values():
-            label.destroy()
-        self.dict_labels.clear()
 
         for critere, text_field in self.text_fields.items():
             text_field.destroy()
@@ -78,10 +69,7 @@ class CreationGroupe(Page):
             table.destroy()
         self.tables.clear()
 
-        # Supprimer les boutons de paramètres
-        for bouton in self.boutons_param:
-            bouton.destroy()
-        self.boutons_param.clear()
+        self.clear_labels()
 
         if self.eleves_restants_label:
             self.eleves_restants_label.destroy()
@@ -92,12 +80,10 @@ class CreationGroupe(Page):
         self.controller.minsize(1600, 1000)
 
         # Titre principal
-        label = self.create_label("instruction_text", 0.5, 0.05, "Création du groupe", font=GRANDE_POLICE)
-        self.dict_labels["instruction_text"] = label  # Ajoute le label avec une clé unique
+        self.create_label("instruction_text", 0.5, 0.05, "Création du groupe", font=GRANDE_POLICE)
 
         # Contrôle du nombre de groupes
-        label_nb_groupes = self.create_label("label_nb_groupes", 0.15, 0.05, "Nombre de groupes", font=MOYENNE_POLICE)
-        self.dict_labels["label_nb_groupes"] = label_nb_groupes
+        self.create_label("label_nb_groupes", 0.15, 0.05, "Nombre de groupes", font=MOYENNE_POLICE)
 
         # Affichage du nombre de groupes avec boutons +
         group_control_frame = tk.Frame(self)
@@ -112,12 +98,10 @@ class CreationGroupe(Page):
         increase_button = ctk.CTkButton(group_control_frame, text="+", font=("Arial", 16), command=self.increase_group_count)
         increase_button.grid(row=0, column=2)
 
-        # Ajouter le compteur d'élèves restants
-        self.eleves_restants_label = tk.Label(self, text=f"Élèves restants: {len(self.eleves)}", font=("Arial", 16))
-        self.eleves_restants_label.place(relx=0.15, rely=0.02, anchor='center')
+        self.create_label("eleves_restants", 0.15, 0.02, text=f"Élèves restants: {len(self.eleves)}", font=MOYENNE_POLICE)
 
         # Bouton de génération
-        bouton_generer = ctk.CTkButton(self, text="Générer les groupes", font=GRANDE_POLICE, command=self.generer_groupes_vides)
+        bouton_generer = ctk.CTkButton(self, text="Générer les groupes", font=GRANDE_POLICE, command=self.generer_groupes)
         bouton_generer.place(relx=0.5, rely=0.12, anchor='center')
 
         # Bouton de retour
@@ -138,91 +122,53 @@ class CreationGroupe(Page):
         # Bouton de retour
         bouton_retour = ctk.CTkButton(self, text="Changer de fichier", font=GRANDE_POLICE, command=self.retour_page_accueil)
         bouton_retour.place(relx=0.85, rely=0.05, anchor='center')
+    
+    def generer_groupes(self):
+        self.partition.generer()
+        self.afficher_groupes()
 
     def decrease_group_count(self):
         """Réduit le nombre de groupes"""
         if self.nb_groupes > 1:  # Limite à 1 groupe minimum
             self.nb_groupes -= 1
+            self.partition.supprimer_groupe(self.partition.get_groupes()[-1])
+            self.partition.adapter_taille()
             self.group_count_label.config(text=str(self.nb_groupes))
-            self.generer_groupes_vides()  # Regénérer les groupes avec le nouveau nombre
+            self.afficher_groupes()  # Regénérer les groupes avec le nouveau nombre
 
     def increase_group_count(self):
         """Augmente le nombre de groupes"""
         self.nb_groupes += 1
+        self.partition.ajouter_groupe(Groupe(20))
+        self.partition.adapter_taille()
         self.group_count_label.config(text=str(self.nb_groupes))
-        self.generer_groupes_vides()  # Regénérer les groupes avec le nouveau nombre
+        self.afficher_groupes()  # Regénérer les groupes avec le nouveau nombre
 
-    def clear_grp(self):
-        # Détruire les anciens groupes et dict_labels
+    def afficher_groupes(self):
+        """
+        Action lors de l'appui sur le bouton "Générer les groupes".
+        Répartit les élèves dans les groupes et les affiche dans un tableau.
+        """
+        # Détruire les anciens groupes et labels
+        self.scrollbar_y.destroy()
         for table in self.tables:
             table.destroy()  # Détruire chaque objet Table existant
         self.tables.clear()  # Réinitialiser la liste des tables
-
-        # Détruire les anciens dict_labels des titres des groupes
-        for title_label in self.group_titles:
-            title_label.destroy()
-        self.group_titles.clear()  # Réinitialiser la liste des titres
-
         # Supprimer les anciens boutons de paramètres
         for bouton in self.boutons_param:
             bouton.destroy()
         self.boutons_param.clear()
 
-    def generer_groupes_vides(self):
-        """
-        Action lors de l'appui sur le bouton "Générer les groupes".
-        Répartit les élèves dans les groupes et les affiche dans un tableau.
-        """
-        self.clear_grp()
-
-        groupes = {f'Groupe {i+1}': [] for i in range(self.nb_groupes)}
-
-        eleveVide = Eleve('/','/','/','/')
-
-        for i in range(self.nb_groupes):
-            groupe_num = i + 1
-            groupes[f'Groupe {groupe_num}'].append(eleveVide)
-
-        self.eleves_restants_label.config(text=f"Élèves restants: {len(self.eleves)}")
+        self.change_text("eleves_restants", f"Élèves restants: {len(self.eleves)}")
 
         self.inner_frame.update_idletasks()
 
         nb_colonnes = 3
-        espacement = 10
         posx, posy = 0, 0
 
-        for i, (groupe_name, eleves_in_groupe) in enumerate(groupes.items()):
-            # Créer une sous-grille avec 2 colonnes : une pour le label et une pour le bouton
-            group_frame = tk.Frame(self.inner_frame)
-            group_frame.grid(row=posy, column=posx, padx=espacement, pady=espacement, sticky="w")
-
-            # Ajouter un titre avec fond bleu (3D83B1) et texte blanc
-            title_label = tk.Label(group_frame, text=groupe_name, font=("Arial", 12, "bold"), 
-                                    bg="#3D83B1", fg="white", width=15, height=2, anchor="center")
-            title_label.grid(row=0, column=0, padx=espacement, pady=espacement, sticky="w")
-
-            # Créer le bouton avec l'image redimensionnée
-            self.bouton_param_grp = tk.Button(group_frame, image=self.img_param_tk, compound="right", anchor='e', command=self.pop_up_param_grp)
-            self.bouton_param_grp.grid(row=0, column=1, padx=espacement, pady=espacement, sticky="e")
-
-            # Garder une référence à l'image pour éviter qu'elle ne soit collectée par le garbage collector
-            self.bouton_param_grp.image = self.img_param_tk
-
-            # Ajouter le bouton à la liste
-            self.boutons_param.append(self.bouton_param_grp)
-
-            self.group_titles.append(title_label)
-
-            # Créer la table pour chaque groupe
-            table = Table(parent=self.inner_frame, controller=self, eleves=eleves_in_groupe, criteres=self.criteres)
-            table.grid(row=posy + 1, column=posx, padx=espacement, pady=espacement)
-
-            # Personnalisation des cellules du tableau
-            for widget in table.winfo_children():
-                if isinstance(widget, tk.Label):
-                    widget.config(bg="white", fg="black", relief="solid", bd=1)
-
-            self.tables.append(table)
+        for i, groupe in enumerate(self.partition.get_groupes()):
+            tg = TableauGroupe(self.inner_frame, self.partition, i, self.img_param_tk)
+            tg.grid(row=posy, column=posx)
 
             posx += 1
             if posx >= nb_colonnes:
@@ -232,6 +178,11 @@ class CreationGroupe(Page):
         self.inner_frame.update_idletasks()
         self.canvas_frame.config(scrollregion=self.canvas_frame.bbox("all"))
 
+        if self.scrollbar_y is not None:
+            self.scrollbar_y.pack_forget()  # Désinstaller la scrollbar si elle est déjà présente
+            self.scrollbar_y.destroy()
+        self.scrollbar_y = tk.Scrollbar(self.canvas_frame, orient="vertical", command=self.canvas_frame.yview)
+        self.scrollbar_y.pack(side="right", fill="y")
         self.canvas_frame.configure(yscrollcommand=self.scrollbar_y.set)
 
 
@@ -249,8 +200,30 @@ class CreationGroupe(Page):
         popup = ParametresCriteres(self, self.criteres)  # Passage des critères à la classe ParametresCriteres
         popup.grab_set()  # Pour forcer le focus sur la fenêtre pop-up
 
+    def pop_up_param_grp(self, groupe):
+        from pages.parametresGroupe import ParametresGroupe
+        popup = ParametresGroupe(self, self.partition, groupe)
+        popup.grab_set()  # Pour forcer le focus sur la fenêtre pop-up
+
+class TableauGroupe(tk.Frame):
+    def __init__(self, parent, partition:Partition, index, img_param_tk):
+        super().__init__(parent)
+        self.groupe = partition.get_groupes()[index]
+        self.partition = partition
+        title_label = tk.Label(self, text=f"Groupe {index+1}", font=("Arial", 12, "bold"), 
+                                    bg="#3D83B1", fg="white", width=15, height=2, anchor="center")
+        title_label.grid(row=0, column=0, padx=10, pady=10, sticky="w")
+        # Créer le bouton avec l'image redimensionnée
+        bouton_param_grp = tk.Button(self, image=img_param_tk, compound="right", anchor='e', command=lambda: self.pop_up_param_grp())
+        bouton_param_grp.grid(row=0, column=1, padx=10, pady=10, sticky="e")
+        # Créer la table pour chaque groupe
+        table = Table(parent=self, controller=self, eleves=self.groupe.get_eleves(), criteres=self.partition.get_criteres())
+        table.grid(row=1, column=0, padx=10, pady=10, columnspan=2)
+        # Personnalisation des cellules du tableau
+        for widget in table.winfo_children():
+            if isinstance(widget, tk.Label):
+                widget.config(bg="white", fg="black", relief="solid", bd=1)
     def pop_up_param_grp(self):
         from pages.parametresGroupe import ParametresGroupe
-        eleves_restants = self.eleves_restants_label.cget("text")
-        popup = ParametresGroupe(self, eleves_restants, self.criteres)
+        popup = ParametresGroupe(self, self.partition, self.groupe)
         popup.grab_set()  # Pour forcer le focus sur la fenêtre pop-up

@@ -48,6 +48,9 @@ class Critere:
 
     def get_transpo(self) -> dict[int|bool|str,int]:
         return self.transpo
+    
+    def get_valeurs_possibles(self, toVal=False) -> set[int]|set[int|bool|str]:
+        return set(self.transpo.keys()) if toVal else set(self.transpo.values())
 
     def __repr__(self):
         return f"{self.nom}: {self.poids}"

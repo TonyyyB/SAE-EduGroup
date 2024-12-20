@@ -113,7 +113,11 @@ class PageAccueil(Page):
             self.criteres.append(detecter_type_critere(critere, df[critere]))
 
         # Créer la liste des élèves
+        import random
         self.eleves = []
+        testCritere = Numerique("niveau de francais",10,True)
+        testCritere1 = Categorique("Ecole d'origine", 5, True)
+        [testCritere1.ajouter_valeur(val, i) for i, val in enumerate(["College Dunois", "Jean Zay", "Ta maison"])]
         for _, row in df.iterrows():
             eleve = Eleve(prenom=row['prenom'], nom=row['nom'], num_etudiant=row['numetudiant'], genre=row['genre'])
             for critere in self.criteres:

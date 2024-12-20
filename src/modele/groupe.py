@@ -9,8 +9,17 @@ class Groupe:
             self.contraintes:dict[Critere,set[int]] = contraintes  # Dictionnaire pour les contraintes
         self.eleves:set[Eleve] = set()
         self.criteres:set[Critere] = set()
-
-    def ajouter_contrainte(self, critere:Critere, vals:set|list[int]) -> None:
+        self.aEteModifier = False
+    
+    def changer_taille(self, taille:int, enregistrer=True) -> None:
+        if enregistrer:
+            self.aEteModifier = True
+        self.taille = taille
+    
+    def a_ete_modifier(self) -> bool:
+        return self.aEteModifier
+    
+    def set_contrainte(self, critere:Critere, vals:set|list[int]) -> None:
         self.contraintes[critere] = set(vals)
 
     def respecter_contraintes(self, eleve:Eleve):
@@ -89,6 +98,9 @@ class Groupe:
     def get_contrainte(self, critere:Critere) -> set[int]:
         return self.contraintes[critere] if critere in self.contraintes else None
 
+    def get_taille(self) -> int:
+        return self.taille
+    
     def calcul_score(self) -> float:
         if len(self.eleves) == 0: return 0.0
         return sum(critere.calcul_score(self) for critere in self.criteres)

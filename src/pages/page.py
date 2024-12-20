@@ -10,7 +10,7 @@ class Page(tk.Frame):
         self.canvas = tk.Canvas(self)
         self.canvas.pack(fill="both", expand=True)
 
-        self.dict_labels = {
+        self.labels:dict[str,dict[str:float|str|tuple[str,int,str]]] = {
             "title" : {"x":0.1, "y":0.1, "text":"EduGroup", "font":GRANDE_POLICE, "fill":"white"}
         }
 
@@ -53,21 +53,25 @@ class Page(tk.Frame):
 
     def on_resize(self, event):
         self.create_gradient()
+        
+    def go_to_next_page(self):
+        pass
+
+    def clear_labels(self):
+        self.labels.clear()
     
     def create_label(self, id, x, y, text, font=MOYENNE_POLICE, fill=None, background=None):
         if id in self.dict_labels:
             raise Exception("Label already in list")
         
-        label = tk.Label(self, text=text, font=font, fg=fill, bg=background)
-        
-        # Positionne le label
-        label.place(relx=x, rely=y, anchor='center')
-        
         # Ajoute le label à un dictionnaire avec un id unique
-        self.dict_labels[id] = {"x": x, "y": y, "text": text, "font": font, "fill": fill, "background": background}
-        
-        return label
-
+        self.labels[id] = {"x": x, "y": y, "text": text, "font": font, "fill": fill, "background": background}
+    
+    def change_text(self, id, text):
+        if id in self.labels:
+            self.labels[id]["text"] = text
+        else:
+            raise Exception("Label not found in list")
 class Table(tk.Frame):
     def __init__(self, parent, controller, eleves=None, criteres=None):
         super().__init__(parent)
@@ -94,9 +98,6 @@ class Table(tk.Frame):
         # Configuration pour que le canvas s'ajuste automatiquement
         self.grid_rowconfigure(0, weight=1)
         self.grid_columnconfigure(0, weight=1)
-
-        # Lier la molette de la souris pour faire défiler le tableau
-        self._bind_mousewheel(None)
 
     def create_table_from_eleves(self, eleves, criteres):
         """
@@ -127,21 +128,6 @@ class Table(tk.Frame):
         """Crée une cellule dans le tableau."""
         entry = tk.Label(self.frame, text=text, bg="white", font=("Arial", 12), width=15)
         entry.grid(row=row, column=col)
-
-    def _bind_mousewheel(self, event):
-        """Lier les événements de la molette de la souris pour le défilement."""
-        if event is None or event.widget == self.canvas:
-            if self.winfo_toplevel().tk.call('tk', 'windowingsystem') == 'win32':
-                self.canvas.bind_all("<MouseWheel>", self._on_mousewheel_windows)
-            else:
-                self.canvas.bind_all("<Button-4>", self._on_mousewheel_linux)
-                self.canvas.bind_all("<Button-5>", self._on_mousewheel_linux)
-
-    def _unbind_mousewheel(self, event):
-        """Délier les événements de la molette de la souris."""
-        self.canvas.unbind_all("<MouseWheel>")
-        self.canvas.unbind_all("<Button-4>")
-        self.canvas.unbind_all("<Button-5>")
 
     def _on_mousewheel_windows(self, event):
         """Défilement sur Windows."""
