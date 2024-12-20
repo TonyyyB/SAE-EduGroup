@@ -94,8 +94,6 @@ class Partition:
             nbElevesRestants -= nbParGroupe
         for i in range(nbElevesRestants):
             self.groupes[i].changer_taille(self.groupes[i].get_taille()+1, False)
-        for groupe in self.groupes:
-            print(groupe.taille)
         print()
 
     def groupes_avec_et_sans_taille_modif(self) -> tuple[list[Groupe], list[Groupe]]:

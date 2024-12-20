@@ -176,7 +176,7 @@ class CreationGroupe(Page):
         posx, posy = 0, 0
 
         for i, groupe in enumerate(self.partition.get_groupes()):
-            tg = TableauGroupe(self.inner_frame, self.partition, i, self.img_param_tk)
+            tg = TableauGroupe(self.inner_frame, self, self.partition, i, self.img_param_tk)
             tg.grid(row=posy, column=posx)
 
             self.tables.append(tg)
@@ -217,23 +217,29 @@ class CreationGroupe(Page):
         popup.grab_set()  # Pour forcer le focus sur la fenêtre pop-up
 
 class TableauGroupe(tk.Frame):
-    def __init__(self, parent, partition:Partition, index, img_param_tk):
+    def __init__(self, parent, page, partition:Partition, index, img_param_tk):
         super().__init__(parent)
         self.groupe = partition.get_groupes()[index]
+        self.page=page
         self.partition = partition
         title_label = tk.Label(self, text=f"Groupe {index+1}", font=("Arial", 12, "bold"), 
                                     bg="#3D83B1", fg="white", width=15, height=2, anchor="center")
         title_label.grid(row=0, column=0, padx=10, pady=10, sticky="w")
+        nb_eleves_label = tk.Label(self, text=f"{len(self.groupe.get_eleves())}/{self.groupe.get_taille()}", font=("Arial", 12, "bold"), 
+                                    bg="#3D83B1", fg="white", width=15, height=2, anchor="center")
+        nb_eleves_label.grid(row=0, column=1, padx=10, pady=10, sticky="w")
         # Créer le bouton avec l'image redimensionnée
         bouton_param_grp = tk.Button(self, image=img_param_tk, compound="right", anchor='e', command=lambda: self.pop_up_param_grp())
-        bouton_param_grp.grid(row=0, column=1, padx=10, pady=10, sticky="e")
+        bouton_param_grp.grid(row=0, column=2, padx=10, pady=10, sticky="e")
         # Créer la table pour chaque groupe
         table = Table(parent=self, controller=self, eleves=self.groupe.get_eleves(), criteres=self.partition.get_criteres())
-        table.grid(row=1, column=0, padx=10, pady=10, columnspan=2)
+        table.grid(row=1, column=0, padx=10, pady=10, columnspan=3)
         # Personnalisation des cellules du tableau
         for widget in table.winfo_children():
             if isinstance(widget, tk.Label):
                 widget.config(bg="white", fg="black", relief="solid", bd=1)
+    def afficher_groupes(self):
+        self.page.afficher_groupes()
     def pop_up_param_grp(self):
         from pages.parametresGroupe import ParametresGroupe
         popup = ParametresGroupe(self, self.partition, self.groupe)

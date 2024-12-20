@@ -4,6 +4,7 @@ from tkinter import messagebox
 class ParametresGroupe(tk.Toplevel):
     def __init__(self, parent, partition, groupe):
         super().__init__(parent)
+        self.parent = parent
         self.partition = partition
         self.groupe = groupe
         self.title("Paramétrage des groupes")
@@ -70,9 +71,7 @@ class ParametresGroupe(tk.Toplevel):
         # Valide que le nombre d'élèves dans le groupe est inférieur ou égal aux élèves restants
         try:
             nb_eleve = int(self.eleves_dans_grp_var.get())
-            if nb_eleve > self.eleves_restants:
-                messagebox.showerror("Erreur", f"Le nombre d'élèves ne peut pas dépasser {self.eleves_restants}")
-                self.eleves_dans_grp_var.set(str(self.eleves_restants))
+            
         except ValueError:
             messagebox.showerror("Erreur", "Veuillez entrer un nombre valide")
             self.eleves_dans_grp_var.set("1")
@@ -87,9 +86,10 @@ class ParametresGroupe(tk.Toplevel):
                     criteres_selectionnes[critere].add(critere.to_int(val))
             if len(criteres_selectionnes) > 0:
                 self.groupe.set_contrainte(critere, criteres_selectionnes[critere])
-        print(self.groupe.get_contraintes())
+        self.groupe.changer_taille(int(self.entry_nb_eleve.get()))
         self.destroy()
         self.update()
+        self.parent.afficher_groupes()
         messagebox.showinfo("Sauvegarde", "Les critères ont été sauvegardés avec succès !")
 
 # Fenêtre principale
