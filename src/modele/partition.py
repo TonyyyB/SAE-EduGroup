@@ -31,9 +31,9 @@ class Partition:
                 elevesAPlacer.remove(eleve)
         while len(elevesAPlacer) > 0:
             eleve = elevesAPlacer.pop()
-            maxi = -math.inf
-            gmax = None
-            for groupe in groupes:
+            maxi = self.simule_ajout(groupes[0], eleve)
+            gmax = groupes[0]
+            for groupe in groupes[1:]:
                 if not groupe.place_dispo(): continue
                 score = self.simule_ajout(groupe,eleve)
                 if score > maxi:
