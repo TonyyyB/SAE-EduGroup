@@ -1,5 +1,7 @@
 import tkinter as tk
 from tkinter import filedialog, messagebox
+import unicodedata
+from modele.detection_critere import detecter_type_critere
 from tkinterdnd2 import DND_FILES
 import customtkinter as ctk
 from constantes import *
@@ -8,6 +10,7 @@ import pandas as pd
 from modele.eleve import Eleve
 from modele.criteres.numerique import Numerique
 from modele.criteres.categorique import Categorique
+from modele.criteres.booleen import Booleen
 
 class PageAccueil(Page):
     def __init__(self, parent, controller):
@@ -88,7 +91,26 @@ class PageAccueil(Page):
         
         # Charger les élèves et les critères à partir du CSV
         df = pd.read_csv(self.file_path)
-        self.criteres = df.columns.to_list()[5:]
+
+        def normaliser_colonnes(colonnes):
+            """
+            Normalise les noms des colonnes pour qu'ils soient en minuscules,
+            sans accents, ni caractères spéciaux, et remplace les espaces par des underscores.
+
+            :param colonnes: Liste des noms de colonnes.
+            :return: Liste des noms de colonnes normalisés.
+            """
+            return [
+                ''.join(
+                    c for c in unicodedata.normalize('NFD', col.lower())
+                    if c.isalnum() or c == ' '
+                ).replace(' ', '_')
+                for col in colonnes
+            ]
+        df.columns = normaliser_colonnes(df.columns)
+        self.criteres = []
+        for critere in df.columns[4:]:
+            self.criteres.append(detecter_type_critere(critere, df[critere]))
 
         # Créer la liste des élèves
         import random
@@ -97,12 +119,18 @@ class PageAccueil(Page):
         testCritere1 = Categorique("Ecole d'origine", 5, True)
         [testCritere1.ajouter_valeur(val, i) for i, val in enumerate(["College Dunois", "Jean Zay", "Ta maison"])]
         for _, row in df.iterrows():
-            eleve = Eleve(prenom=row['Prénom'], nom=row['Nom'], num_etudiant=row['NumÉtudiant'], genre=row['Genre'])
-            eleve.ajouter_critere(testCritere, random.randint(1, 6))
-            eleve.ajouter_critere(testCritere1, random.choice(["College Dunois", "Jean Zay", "Ta maison"]))
-            #for critere in self.criteres:
-            #    eleve.ajouter_critere(critere, row[critere])
+            eleve = Eleve(prenom=row['prenom'], nom=row['nom'], num_etudiant=row['numetudiant'], genre=row['genre'])
+            for critere in self.criteres:
+                eleve.ajouter_critere(critere, row[critere.get_nom()])
             self.eleves.append(eleve)
+
+        #for critere in self.criteres:
+        #    if isinstance(critere, Numerique):
+        #        print("numérique " + str(critere.get_transpo()))
+        #    elif isinstance(critere, Booleen):
+        #        print("booléen " + str(critere.get_transpo()))
+        #    elif isinstance(critere, Categorique):
+        #        print("catégorique " + str(critere.get_transpo()))
         
         # Charger dynamiquement la page CreationGroupe en passant les élèves et les critères
         from pages.creationGroupe import CreationGroupe  # Import dynamique

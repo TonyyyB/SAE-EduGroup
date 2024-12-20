@@ -35,19 +35,25 @@ class Page(tk.Frame):
             color = f'#{r:02x}{g:02x}{b:02x}'
             self.canvas.create_line(0, i, width, i, fill=color)
 
-        for label in self.labels.values():
-            self.canvas.create_text(
-                width * label["x"],
-                height * label["y"],
-                text=label["text"],
-                font=label["font"],
-                fill=label["fill"]
-            )
+        for label_key, label in self.dict_labels.items():
+            try:
+                # Assurez-vous que chaque clé nécessaire est présente
+                x = width * label.get('x', 0.5)  # Valeur par défaut si clé manquante
+                y = height * label.get('y', 0.1)  # Valeur par défaut si clé manquante
+                text = label.get('text', "")
+                font = label.get('font', ("Arial", 12))
+                fill = label.get('fill', 'black')
+
+                # Créer le texte sur le Canvas
+                self.canvas.create_text(x, y, text=text, font=font, fill=fill)
+            except Exception as e:
+                print(f"Erreur lors de la création du texte '{label_key}': {e}")
+
 
 
     def on_resize(self, event):
         self.create_gradient()
-
+        
     def go_to_next_page(self):
         pass
 
@@ -55,7 +61,7 @@ class Page(tk.Frame):
         self.labels.clear()
     
     def create_label(self, id, x, y, text, font=MOYENNE_POLICE, fill=None, background=None):
-        if id in self.labels:
+        if id in self.dict_labels:
             raise Exception("Label already in list")
         
         # Ajoute le label à un dictionnaire avec un id unique
@@ -99,33 +105,29 @@ class Table(tk.Frame):
         Affiche le nom, prénom, ID, et les notes pour chaque critère.
         """
         # Définir les titres de colonnes : Prénom, Nom, ID + critères
-        self.titre_colonnes = ['Prénom', 'Nom', 'ID']
+        self.titre_colonnes = ['Prénom', 'Nom', 'ID'] + criteres
 
         # Créer les titres des colonnes
         for j, titre in enumerate(self.titre_colonnes):
-            b = tk.Entry(self.frame, disabledbackground="lightgray", disabledforeground="black", font=("Arial", 12), width=15)
-            b.insert(0, titre)
-            b.configure(state="disabled")
+            b = tk.Label(self.frame, text=titre, bg="lightgray", font=("Arial", 12), width=15)
             b.grid(row=0, column=j)
 
         # Remplir les lignes avec les données des élèves
         for i, eleve in enumerate(eleves):
             # Colonnes fixes : prénom, nom, ID
-            entry_prenom = tk.Entry(self.frame, font=("Arial", 12), disabledbackground="white", disabledforeground="black", foreground="black", width=15)
-            entry_prenom.insert(0, eleve.prenom)
-            entry_prenom.grid(row=i + 1, column=0)
+            self._create_table_entry(i + 1, 0, eleve.prenom)
+            self._create_table_entry(i + 1, 1, eleve.nom)
+            self._create_table_entry(i + 1, 2, eleve.num_etudiant)
 
-            entry_nom = tk.Entry(self.frame, font=("Arial", 12), disabledbackground="white", disabledforeground="black",foreground="black", width=15)
-            entry_nom.insert(0, eleve.nom)
-            entry_nom.grid(row=i + 1, column=1)
+            # Colonnes dynamiques : notes pour chaque critère
+            for j, critere in enumerate(criteres):
+                note = getattr(eleve, critere, 'N/A')  # Suppose que les notes sont des attributs de l'élève
+                self._create_table_entry(i + 1, j + 3, note)
 
-            entry_id = tk.Entry(self.frame, font=("Arial", 12), disabledbackground="white", disabledforeground="black",foreground="black", width=15)
-            entry_id.insert(0, eleve.num_etudiant)
-            entry_id.grid(row=i + 1, column=2)
-
-            entry_nom.configure(state="disabled")
-            entry_prenom.configure(state="disabled")
-            entry_id.configure(state="disabled")
+    def _create_table_entry(self, row, col, text):
+        """Crée une cellule dans le tableau."""
+        entry = tk.Label(self.frame, text=text, bg="white", font=("Arial", 12), width=15)
+        entry.grid(row=row, column=col)
 
     def _on_mousewheel_windows(self, event):
         """Défilement sur Windows."""

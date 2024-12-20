@@ -21,7 +21,6 @@ class CreationGroupe(Page):
         self.nb_groupes = 5
         self.tables = []  # Liste pour garder une référence des tables des groupes
         self.eleves_restants_label = None
-        self.boutons_param = []  # Initialiser la liste pour les boutons de paramètres
         
         # Redimensionner l'image à la taille désirée
         self.img_param = Image.open("img/param.png")
@@ -39,7 +38,6 @@ class CreationGroupe(Page):
         # Créer un frame à l'intérieur du canvas
         self.inner_frame = tk.Frame(self.canvas_frame)
         self.canvas_frame.create_window((0, 0), window=self.inner_frame, anchor="nw")
-
 
     def set_data(self, eleves, criteres):
         """
@@ -60,7 +58,7 @@ class CreationGroupe(Page):
 
     def clear_ui(self):
         """
-        Méthode pour nettoyer l'interface en supprimant les éléments existants (labels, champs de texte, etc.).
+        Méthode pour nettoyer l'interface en supprimant les éléments existants (dict_labels, champs de texte, etc.).
         """
 
         for critere, text_field in self.text_fields.items():
@@ -70,11 +68,6 @@ class CreationGroupe(Page):
         for table in self.tables:
             table.destroy()
         self.tables.clear()
-
-        # Supprimer les boutons de paramètres
-        for bouton in self.boutons_param:
-            bouton.destroy()
-        self.boutons_param.clear()
 
         self.clear_labels()
 
@@ -161,7 +154,6 @@ class CreationGroupe(Page):
         for table in self.tables:
             table.destroy()  # Détruire chaque objet Table existant
         self.tables.clear()  # Réinitialiser la liste des tables
-
         # Supprimer les anciens boutons de paramètres
         for bouton in self.boutons_param:
             bouton.destroy()
