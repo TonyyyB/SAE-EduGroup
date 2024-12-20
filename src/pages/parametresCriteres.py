@@ -51,7 +51,7 @@ class ParametresCriteres(tk.Toplevel):
         # Ajouter les lignes de critères à partir de self.criteres
         for row_num, critere in enumerate(self.criteres):
             # Critère dans la première colonne
-            label = tk.Label(self.table_frame, text=critere, font=("Arial", 12, "bold"), bg="white", fg="black", width=15)
+            label = tk.Label(self.table_frame, text=critere.get_nom(), font=("Arial", 12, "bold"), bg="white", fg="black", width=15)
             label.grid(row=row_num+1, column=0, padx=5, pady=5)  # Les critères sont affichés dans la première colonne
 
             # Exemple pour les autres colonnes avec des valeurs par défaut (Vous pouvez personnaliser)

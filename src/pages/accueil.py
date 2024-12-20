@@ -11,6 +11,7 @@ from modele.eleve import Eleve
 from modele.criteres.numerique import Numerique
 from modele.criteres.categorique import Categorique
 from modele.criteres.booleen import Booleen
+from modele.critere import Critere
 
 class PageAccueil(Page):
     def __init__(self, parent, controller):
@@ -108,30 +109,20 @@ class PageAccueil(Page):
                 for col in colonnes
             ]
         df.columns = normaliser_colonnes(df.columns)
-        self.criteres = []
+        self.criteres:list[Critere] = []
         for critere in df.columns[4:]:
             self.criteres.append(detecter_type_critere(critere, df[critere]))
 
         # Créer la liste des élèves
         import random
         self.eleves = []
-        testCritere = Numerique("niveau de francais",10,True)
-        testCritere1 = Categorique("Ecole d'origine", 5, True)
-        [testCritere1.ajouter_valeur(val, i) for i, val in enumerate(["College Dunois", "Jean Zay", "Ta maison"])]
         for _, row in df.iterrows():
             eleve = Eleve(prenom=row['prenom'], nom=row['nom'], num_etudiant=row['numetudiant'], genre=row['genre'])
             for critere in self.criteres:
                 eleve.ajouter_critere(critere, row[critere.get_nom()])
             self.eleves.append(eleve)
-
-        #for critere in self.criteres:
-        #    if isinstance(critere, Numerique):
-        #        print("numérique " + str(critere.get_transpo()))
-        #    elif isinstance(critere, Booleen):
-        #        print("booléen " + str(critere.get_transpo()))
-        #    elif isinstance(critere, Categorique):
-        #        print("catégorique " + str(critere.get_transpo()))
         
+        print([c.get_transpo() for c in self.criteres])
         # Charger dynamiquement la page CreationGroupe en passant les élèves et les critères
         from pages.creationGroupe import CreationGroupe  # Import dynamique
         self.controller.show_frame(CreationGroupe, self.eleves, self.criteres)
