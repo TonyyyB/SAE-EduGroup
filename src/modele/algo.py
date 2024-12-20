@@ -123,16 +123,16 @@ if __name__ == "__main__":
     # Coefficients de pondération pour chaque matière
     partition = Partition()
     g1 = Groupe(50)
-    g1.ajouter_contrainte(critereFrancais, {1, 3})
+    g1.set_contrainte(critereFrancais, {1, 3})
 
     g2 = Groupe(50)
-    g2.ajouter_contrainte(critereFrancais, {2, 4})
+    g2.set_contrainte(critereFrancais, {2, 4})
 
     g3 = Groupe(50)
-    g3.ajouter_contrainte(critereFrancais, {3, 5})
+    g3.set_contrainte(critereFrancais, {3, 5})
 
     g4 = Groupe(50)
-    g4.ajouter_contrainte(critereFrancais, {4, 6})
+    g4.set_contrainte(critereFrancais, {4, 6})
 
     partition.ajouter_groupe(g1)
     partition.ajouter_groupe(g2)

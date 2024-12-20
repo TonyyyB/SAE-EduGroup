@@ -19,7 +19,7 @@ class Groupe:
     def a_ete_modifier(self) -> bool:
         return self.aEteModifier
     
-    def ajouter_contrainte(self, critere:Critere, vals:set|list[int]) -> None:
+    def set_contrainte(self, critere:Critere, vals:set|list[int]) -> None:
         self.contraintes[critere] = set(vals)
 
     def respecter_contraintes(self, eleve:Eleve):

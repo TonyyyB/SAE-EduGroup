@@ -9,13 +9,14 @@ class Critere:
         self.transpo:dict[int|bool|str,int] = dict()
 
     def ajouter_valeur(self, valeur:int|bool|str, correspondance:int=None) -> None:
+        if valeur in self.transpo: return
         if correspondance is None:
             if isinstance(valeur, int):
                 correspondance = valeur
             elif isinstance(valeur, bool):
                 correspondance = 1 if valeur else 0
             else:
-                raise ValueError("La correspondance doit être renseignée pour le type str")
+                correspondance = len(self.transpo)
         self.transpo[valeur] = correspondance
 
     def set_poids(self, poids:int) -> None:
@@ -42,6 +43,9 @@ class Critere:
 
     def get_transpo(self) -> dict[int|bool|str,int]:
         return self.transpo
+    
+    def get_valeurs_possibles(self, toVal=False) -> set[int]|set[int|bool|str]:
+        return set(self.transpo.keys()) if toVal else set(self.transpo.values())
 
     def __repr__(self):
         return f"{self.nom}: {self.poids}"

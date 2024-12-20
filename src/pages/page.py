@@ -50,6 +50,9 @@ class Page(tk.Frame):
 
     def go_to_next_page(self):
         pass
+
+    def clear_labels(self):
+        self.labels.clear()
     
     def create_label(self, id, x, y, text, font=MOYENNE_POLICE, fill=None, background=None):
         if id in self.labels:
@@ -90,9 +93,6 @@ class Table(tk.Frame):
         self.grid_rowconfigure(0, weight=1)
         self.grid_columnconfigure(0, weight=1)
 
-        # Lier la molette de la souris pour faire défiler le tableau
-        self._bind_mousewheel(None)
-
     def create_table_from_eleves(self, eleves, criteres):
         """
         Crée un tableau basé sur une liste d'élèves et des critères.
@@ -126,21 +126,6 @@ class Table(tk.Frame):
             entry_nom.configure(state="disabled")
             entry_prenom.configure(state="disabled")
             entry_id.configure(state="disabled")
-
-    def _bind_mousewheel(self, event):
-        """Lier les événements de la molette de la souris pour le défilement."""
-        if event is None or event.widget == self.canvas:
-            if self.winfo_toplevel().tk.call('tk', 'windowingsystem') == 'win32':
-                self.canvas.bind_all("<MouseWheel>", self._on_mousewheel_windows)
-            else:
-                self.canvas.bind_all("<Button-4>", self._on_mousewheel_linux)
-                self.canvas.bind_all("<Button-5>", self._on_mousewheel_linux)
-
-    def _unbind_mousewheel(self, event):
-        """Délier les événements de la molette de la souris."""
-        self.canvas.unbind_all("<MouseWheel>")
-        self.canvas.unbind_all("<Button-4>")
-        self.canvas.unbind_all("<Button-5>")
 
     def _on_mousewheel_windows(self, event):
         """Défilement sur Windows."""

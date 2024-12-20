@@ -14,11 +14,10 @@ from PIL import Image, ImageTk
 class CreationGroupe(Page):
     def __init__(self, parent, controller):
         super().__init__(parent, controller)
+        self.controller = controller
         self.eleves = []
         self.criteres = []
         self.text_fields = {}
-        self.labels = {}  # Pour stocker les labels créés sous forme de dictionnaire
-        self.group_titles = []  # Liste pour garder une référence des labels de titres des groupes
         self.nb_groupes = 5
         self.tables = []  # Liste pour garder une référence des tables des groupes
         self.eleves_restants_label = None
@@ -48,6 +47,13 @@ class CreationGroupe(Page):
         """
         self.eleves = eleves
         self.criteres = criteres
+        # Créer la partition
+        self.partition = Partition(self.eleves)
+        # Créer les groupes par défaut
+        for i in range(self.nb_groupes):
+            groupe = Groupe(20)
+            self.partition.ajouter_groupe(groupe)
+        self.partition.adapter_taille()
         self.clear_ui()  # Effacer l'interface existante avant de la recréer
         self.setup_ui()  # Mettre à jour l'interface après le chargement des données
         self.afficher_groupes()
@@ -56,15 +62,6 @@ class CreationGroupe(Page):
         """
         Méthode pour nettoyer l'interface en supprimant les éléments existants (labels, champs de texte, etc.).
         """
-        # Supprimer les labels des titres des groupes
-        for title_label in self.group_titles:
-            title_label.destroy()  # Détruire les labels de titres des groupes
-        self.group_titles.clear()  # Réinitialiser la liste des titres
-
-        # Supprimer les autres éléments comme les champs de texte et les tableaux
-        for label in self.labels.values():
-            label.destroy()
-        self.labels.clear()
 
         for critere, text_field in self.text_fields.items():
             text_field.destroy()
@@ -78,6 +75,8 @@ class CreationGroupe(Page):
         for bouton in self.boutons_param:
             bouton.destroy()
         self.boutons_param.clear()
+
+        self.clear_labels()
 
         if self.eleves_restants_label:
             self.eleves_restants_label.destroy()
@@ -132,7 +131,7 @@ class CreationGroupe(Page):
         bouton_retour.place(relx=0.85, rely=0.05, anchor='center')
     
     def generer_groupes(self):
-        self.partition.generer(self.eleves)
+        self.partition.generer()
         self.afficher_groupes()
 
     def decrease_group_count(self):
@@ -140,6 +139,7 @@ class CreationGroupe(Page):
         if self.nb_groupes > 1:  # Limite à 1 groupe minimum
             self.nb_groupes -= 1
             self.partition.supprimer_groupe(self.partition.get_groupes()[-1])
+            self.partition.adapter_taille()
             self.group_count_label.config(text=str(self.nb_groupes))
             self.afficher_groupes()  # Regénérer les groupes avec le nouveau nombre
 
@@ -147,6 +147,7 @@ class CreationGroupe(Page):
         """Augmente le nombre de groupes"""
         self.nb_groupes += 1
         self.partition.ajouter_groupe(Groupe(20))
+        self.partition.adapter_taille()
         self.group_count_label.config(text=str(self.nb_groupes))
         self.afficher_groupes()  # Regénérer les groupes avec le nouveau nombre
 
@@ -161,11 +162,6 @@ class CreationGroupe(Page):
             table.destroy()  # Détruire chaque objet Table existant
         self.tables.clear()  # Réinitialiser la liste des tables
 
-        # Détruire les anciens labels des titres des groupes
-        for title_label in self.group_titles:
-            title_label.destroy()
-        self.group_titles.clear()  # Réinitialiser la liste des titres
-
         # Supprimer les anciens boutons de paramètres
         for bouton in self.boutons_param:
             bouton.destroy()
@@ -176,41 +172,11 @@ class CreationGroupe(Page):
         self.inner_frame.update_idletasks()
 
         nb_colonnes = 3
-        espacement = 10
         posx, posy = 0, 0
 
         for i, groupe in enumerate(self.partition.get_groupes()):
-            # Créer une sous-grille avec 2 colonnes : une pour le label et une pour le bouton
-            group_frame = tk.Frame(self.inner_frame)
-            group_frame.grid(row=posy, column=posx, padx=espacement, pady=espacement, sticky="w")
-
-            # Ajouter un titre avec fond bleu (3D83B1) et texte blanc
-            title_label = tk.Label(group_frame, text=f"Groupe {i+1}", font=("Arial", 12, "bold"), 
-                                    bg="#3D83B1", fg="white", width=15, height=2, anchor="center")
-            title_label.grid(row=0, column=0, padx=espacement, pady=espacement, sticky="w")
-
-            # Créer le bouton avec l'image redimensionnée
-            self.bouton_param_grp = tk.Button(group_frame, image=self.img_param_tk, compound="right", anchor='e', command=self.pop_up_param_grp)
-            self.bouton_param_grp.grid(row=0, column=1, padx=espacement, pady=espacement, sticky="e")
-
-            # Garder une référence à l'image pour éviter qu'elle ne soit collectée par le garbage collector
-            self.bouton_param_grp.image = self.img_param_tk
-
-            # Ajouter le bouton à la liste
-            self.boutons_param.append(self.bouton_param_grp)
-
-            self.group_titles.append(title_label)
-
-            # Créer la table pour chaque groupe
-            table = Table(parent=self.inner_frame, controller=self, eleves=groupe.get_eleves(), criteres=self.criteres)
-            table.grid(row=posy + 1, column=posx, padx=espacement, pady=espacement)
-
-            # Personnalisation des cellules du tableau
-            for widget in table.winfo_children():
-                if isinstance(widget, tk.Label):
-                    widget.config(bg="white", fg="black", relief="solid", bd=1)
-
-            self.tables.append(table)
+            tg = TableauGroupe(self.inner_frame, self.partition, i, self.img_param_tk)
+            tg.grid(row=posy, column=posx)
 
             posx += 1
             if posx >= nb_colonnes:
@@ -220,6 +186,9 @@ class CreationGroupe(Page):
         self.inner_frame.update_idletasks()
         self.canvas_frame.config(scrollregion=self.canvas_frame.bbox("all"))
 
+        if self.scrollbar_y is not None:
+            self.scrollbar_y.pack_forget()  # Désinstaller la scrollbar si elle est déjà présente
+            self.scrollbar_y.destroy()
         self.scrollbar_y = tk.Scrollbar(self.canvas_frame, orient="vertical", command=self.canvas_frame.yview)
         self.scrollbar_y.pack(side="right", fill="y")
         self.canvas_frame.configure(yscrollcommand=self.scrollbar_y.set)
@@ -239,8 +208,30 @@ class CreationGroupe(Page):
         popup = ParametresCriteres(self, self.criteres)  # Passage des critères à la classe ParametresCriteres
         popup.grab_set()  # Pour forcer le focus sur la fenêtre pop-up
 
+    def pop_up_param_grp(self, groupe):
+        from pages.parametresGroupe import ParametresGroupe
+        popup = ParametresGroupe(self, self.partition, groupe)
+        popup.grab_set()  # Pour forcer le focus sur la fenêtre pop-up
+
+class TableauGroupe(tk.Frame):
+    def __init__(self, parent, partition:Partition, index, img_param_tk):
+        super().__init__(parent)
+        self.groupe = partition.get_groupes()[index]
+        self.partition = partition
+        title_label = tk.Label(self, text=f"Groupe {index+1}", font=("Arial", 12, "bold"), 
+                                    bg="#3D83B1", fg="white", width=15, height=2, anchor="center")
+        title_label.grid(row=0, column=0, padx=10, pady=10, sticky="w")
+        # Créer le bouton avec l'image redimensionnée
+        bouton_param_grp = tk.Button(self, image=img_param_tk, compound="right", anchor='e', command=lambda: self.pop_up_param_grp())
+        bouton_param_grp.grid(row=0, column=1, padx=10, pady=10, sticky="e")
+        # Créer la table pour chaque groupe
+        table = Table(parent=self, controller=self, eleves=self.groupe.get_eleves(), criteres=self.partition.get_criteres())
+        table.grid(row=1, column=0, padx=10, pady=10, columnspan=2)
+        # Personnalisation des cellules du tableau
+        for widget in table.winfo_children():
+            if isinstance(widget, tk.Label):
+                widget.config(bg="white", fg="black", relief="solid", bd=1)
     def pop_up_param_grp(self):
         from pages.parametresGroupe import ParametresGroupe
-        eleves_restants = self.eleves_restants_label.cget("text")
-        popup = ParametresGroupe(self, eleves_restants, self.criteres)
+        popup = ParametresGroupe(self, self.partition, self.groupe)
         popup.grab_set()  # Pour forcer le focus sur la fenêtre pop-up

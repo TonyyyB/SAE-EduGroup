@@ -1,20 +1,23 @@
 from modele.groupe import Groupe
 from modele.eleve import Eleve
+from modele.critere import Critere
 import math
 class Partition:
-    def __init__(self):
+    def __init__(self, eleves:set[Eleve]):
         self.groupes:list[Groupe] = []
+        self.eleves:set[Eleve] = eleves
+        self.criteres:set[Critere] = set() if len(eleves) == 0 else set(next(iter(eleves)).get_criteres().keys())
         self.is_genere = False
     
     def is_generer(self):
         return self.is_genere
     
-    def generer(self, eleves:list|set[Eleve]) -> 'Partition':
+    def generer(self) -> 'Partition':
         self.clear()
-        elevesAPlacer:set[Eleve] = set(eleves)
+        elevesAPlacer:set[Eleve] = set(self.eleves)
         groupes = self.get_groupes()
         # Initialisation
-        for eleve in eleves:
+        for eleve in self.eleves:
             maxi = -math.inf
             gmax = None
             for groupe in groupes:
@@ -81,16 +84,19 @@ class Partition:
         self.is_genere = True
         return self
     
-    def adapter_taille(self, eleves:list|set[Eleve]) -> None:
+    def adapter_taille(self) -> None:
         groupesTailleModif, groupesSansTailleModif = self.groupes_avec_et_sans_taille_modif()
         if len(groupesSansTailleModif) == 0: return
-        nbElevesRestants = len(eleves) - sum([groupe.get_taille() for groupe in groupesTailleModif])
+        nbElevesRestants = len(self.eleves) - sum([groupe.get_taille() for groupe in groupesTailleModif])
         nbParGroupe = nbElevesRestants // len(groupesSansTailleModif)
         for groupe in self.groupes:
             groupe.changer_taille(nbParGroupe, False)
             nbElevesRestants -= nbParGroupe
         for i in range(nbElevesRestants):
             self.groupes[i].changer_taille(self.groupes[i].get_taille()+1, False)
+        for groupe in self.groupes:
+            print(groupe.taille)
+        print()
 
     def groupes_avec_et_sans_taille_modif(self) -> tuple[list[Groupe], list[Groupe]]:
         tailleModif = []
@@ -100,14 +106,27 @@ class Partition:
             else: tailleNonModif.append(groupe)
         return tailleModif, tailleNonModif
     
+    def get_eleves_pas_possible_a_placer(self):
+        return len(self.eleves) - sum([groupe.get_taille() for groupe in self.groupes])
+    
     def ajouter_groupe(self, groupe:Groupe) -> None:
+        self.clear()
         self.groupes.append(groupe)
     
     def supprimer_groupe(self, groupe:Groupe) -> None:
-        if groupe in self.groupes: self.groupes.remove(groupe)
+        if groupe in self.groupes: 
+            self.clear()
+            self.groupes.remove(groupe)
+    def supprimer_groupe(self, i:int) -> None:
+        if i < 0 or i >= len(self.groupes): return
+        self.clear()
+        del self.groupes[i]
 
     def get_groupes(self) -> set[Groupe]:
         return self.groupes
+    
+    def get_criteres(self) -> set[Critere]:
+        return self.criteres
 
     def simule_ajout(self, groupe:Groupe, eleve:Eleve) -> float:
         if groupe not in self.groupes: return self.calcul_score()

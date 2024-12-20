@@ -6,6 +6,8 @@ from constantes import *
 from pages.page import Page
 import pandas as pd
 from modele.eleve import Eleve
+from modele.criteres.numerique import Numerique
+from modele.criteres.categorique import Categorique
 
 class PageAccueil(Page):
     def __init__(self, parent, controller):
@@ -89,11 +91,17 @@ class PageAccueil(Page):
         self.criteres = df.columns.to_list()[5:]
 
         # Créer la liste des élèves
+        import random
         self.eleves = []
+        testCritere = Numerique("niveau de francais",10,True)
+        testCritere1 = Categorique("Ecole d'origine", 5, True)
+        [testCritere1.ajouter_valeur(val, i) for i, val in enumerate(["College Dunois", "Jean Zay", "Ta maison"])]
         for _, row in df.iterrows():
             eleve = Eleve(prenom=row['Prénom'], nom=row['Nom'], num_etudiant=row['NumÉtudiant'], genre=row['Genre'])
-            # for critere in self.criteres:
-            #     eleve.ajouter_critere(critere, row[critere])
+            eleve.ajouter_critere(testCritere, random.randint(1, 6))
+            eleve.ajouter_critere(testCritere1, random.choice(["College Dunois", "Jean Zay", "Ta maison"]))
+            #for critere in self.criteres:
+            #    eleve.ajouter_critere(critere, row[critere])
             self.eleves.append(eleve)
         
         # Charger dynamiquement la page CreationGroupe en passant les élèves et les critères
