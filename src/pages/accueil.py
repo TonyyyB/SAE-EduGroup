@@ -42,13 +42,9 @@ class PageAccueil(Page):
         self.clear_button = tk.Button(self.frame, text="❌", command=self.clear_file, bg='red', fg='white', font=PETITE_POLICE, width=2)
         self.clear_button.pack(side='right')
 
-        # Bouton en bas pour importer les paramètres
-        self.import_button = tk.Button(self, text="Importer des paramètres", command=self.import_params, bg='#3498DB', fg='white', font=MOYENNE_POLICE)
-        self.import_button.place(relx=0.25, rely=0.8, anchor='center', relwidth=0.25, relheight=0.08)
-
         # Bouton pour créer les groupes
         self.create_button = tk.Button(self, text="Créer les groupes", command=self.go_to_next_page, bg='#3498DB', fg='white', font=MOYENNE_POLICE)
-        self.create_button.place(relx=0.75, rely=0.8, anchor='center', relwidth=0.25, relheight=0.08)
+        self.create_button.place(relx=0.5, rely=0.8, anchor='center', relwidth=0.25, relheight=0.08)
 
     def on_file_drop(self, event):
         # Nettoyer le chemin du fichier

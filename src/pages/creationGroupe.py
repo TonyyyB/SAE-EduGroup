@@ -29,7 +29,7 @@ class CreationGroupe(Page):
 
         # Ajouter un canvas pour le contenu
         self.canvas_frame = tk.Canvas(self.canvas)
-        self.canvas_frame.place(relx=0.11, rely=0.22, relwidth=0.78, relheight=0.6)
+        self.canvas_frame.place(relx=0.11, rely=0.25, relwidth=0.78, relheight=0.6)
 
         # Ajouter une scrollbar verticale pour le Canvas
         self.scrollbar_y = tk.Scrollbar(self.canvas_frame, orient="vertical", command=self.canvas_frame.yview)
@@ -104,24 +104,36 @@ class CreationGroupe(Page):
         bouton_generer = ctk.CTkButton(self, text="Générer les groupes", font=GRANDE_POLICE, command=self.generer_groupes)
         bouton_generer.place(relx=0.5, rely=0.12, anchor='center')
 
-        # Bouton de retour
-        bouton_exporter = ctk.CTkButton(self, text="Exporter les paramètres", font=GRANDE_POLICE, command=self.retour_page_accueil)
-        bouton_exporter.place(relx=0.85, rely=0.10, anchor='center')
 
         # Bouton de retour
         bouton_param = ctk.CTkButton(self, text="Paramètres des critères", font=GRANDE_POLICE, command=self.pop_up_criteres)
         bouton_param.place(relx=0.15, rely=0.17, anchor='center')
 
+
         # Bouton paramètres groupes
         self.bouton_parm_grp = None
 
         # Bouton de retour
-        bouton_resultats = ctk.CTkButton(self, text="Exporter les résultats", font=GRANDE_POLICE, command=self.retour_page_accueil)
-        bouton_resultats.place(relx=0.85, rely=0.15, anchor='center')
-
-        # Bouton de retour
         bouton_retour = ctk.CTkButton(self, text="Changer de fichier", font=GRANDE_POLICE, command=self.retour_page_accueil)
         bouton_retour.place(relx=0.85, rely=0.05, anchor='center')
+
+        # Bouton en bas pour importer les paramètres
+        import_button = ctk.CTkButton(self, text="Importer des paramètres", font=GRANDE_POLICE, command=self.import_params)
+        import_button.place(relx=0.85, rely=0.10, anchor='center')
+
+        # Bouton de retour
+        bouton_exporter = ctk.CTkButton(self, text="Exporter les paramètres", font=GRANDE_POLICE, command=self.retour_page_accueil)
+        bouton_exporter.place(relx=0.85, rely=0.15, anchor='center')
+
+        # Bouton de retour
+        bouton_resultats = ctk.CTkButton(self, text="Exporter les résultats", font=GRANDE_POLICE, command=self.retour_page_accueil)
+        bouton_resultats.place(relx=0.85, rely=0.20, anchor='center')
+
+
+
+    
+    def import_params(self):
+        pass
     
     def generer_groupes(self):
         self.partition.generer()
