@@ -113,14 +113,15 @@ class Partition:
         self.clear()
         self.groupes.append(groupe)
     
-    def supprimer_groupe(self, groupe:Groupe) -> None:
-        if groupe in self.groupes: 
+    def supprimer_groupe(self, groupe_or_index:Groupe|int) -> None:
+        if isinstance(groupe_or_index, Groupe):
+            if groupe_or_index in self.groupes: 
+                self.clear()
+                self.groupes.remove(groupe_or_index)
+        else:
+            if groupe_or_index < 0 or groupe_or_index >= len(self.groupes): return
             self.clear()
-            self.groupes.remove(groupe)
-    def supprimer_groupe(self, i:int) -> None:
-        if i < 0 or i >= len(self.groupes): return
-        self.clear()
-        del self.groupes[i]
+            del self.groupes[groupe_or_index]
 
     def get_groupes(self) -> set[Groupe]:
         return self.groupes

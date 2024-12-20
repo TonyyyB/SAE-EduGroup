@@ -35,7 +35,7 @@ class Page(tk.Frame):
             color = f'#{r:02x}{g:02x}{b:02x}'
             self.canvas.create_line(0, i, width, i, fill=color)
 
-        for label_key, label in self.dict_labels.items():
+        for label_key, label in self.labels.items():
             try:
                 # Assurez-vous que chaque clé nécessaire est présente
                 x = width * label.get('x', 0.5)  # Valeur par défaut si clé manquante
@@ -61,7 +61,7 @@ class Page(tk.Frame):
         self.labels.clear()
     
     def create_label(self, id, x, y, text, font=MOYENNE_POLICE, fill=None, background=None):
-        if id in self.dict_labels:
+        if id in self.labels:
             raise Exception("Label already in list")
         
         # Ajoute le label à un dictionnaire avec un id unique
@@ -105,7 +105,7 @@ class Table(tk.Frame):
         Affiche le nom, prénom, ID, et les notes pour chaque critère.
         """
         # Définir les titres de colonnes : Prénom, Nom, ID + critères
-        self.titre_colonnes = ['Prénom', 'Nom', 'ID'] + criteres
+        self.titre_colonnes = ['Prénom', 'Nom', 'ID'] + [c.get_nom() for c in criteres]
 
         # Créer les titres des colonnes
         for j, titre in enumerate(self.titre_colonnes):
@@ -121,7 +121,7 @@ class Table(tk.Frame):
 
             # Colonnes dynamiques : notes pour chaque critère
             for j, critere in enumerate(criteres):
-                note = getattr(eleve, critere, 'N/A')  # Suppose que les notes sont des attributs de l'élève
+                note = critere.to_val(eleve.get_critere(critere))
                 self._create_table_entry(i + 1, j + 3, note)
 
     def _create_table_entry(self, row, col, text):

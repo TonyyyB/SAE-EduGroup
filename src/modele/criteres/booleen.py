@@ -6,7 +6,8 @@ class Booleen(Critere):
     
     def calcul_score(self, groupe:Groupe) -> float:
         valeurs = [eleve.get_critere(self) for eleve in groupe.get_eleves()]
-        count_vrai = valeurs.count(True)
+        if len(valeurs) <= 1: return 0
+        count_vrai = valeurs.count(1)
         count_faux = len(valeurs) - count_vrai
 
         if self.est_reparti():

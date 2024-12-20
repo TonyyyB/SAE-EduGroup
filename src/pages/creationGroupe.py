@@ -154,10 +154,7 @@ class CreationGroupe(Page):
         for table in self.tables:
             table.destroy()  # Détruire chaque objet Table existant
         self.tables.clear()  # Réinitialiser la liste des tables
-        # Supprimer les anciens boutons de paramètres
-        for bouton in self.boutons_param:
-            bouton.destroy()
-        self.boutons_param.clear()
+
 
         self.change_text("eleves_restants", f"Élèves restants: {len(self.eleves)}")
 
@@ -169,6 +166,8 @@ class CreationGroupe(Page):
         for i, groupe in enumerate(self.partition.get_groupes()):
             tg = TableauGroupe(self.inner_frame, self.partition, i, self.img_param_tk)
             tg.grid(row=posy, column=posx)
+
+            self.tables.append(tg)
 
             posx += 1
             if posx >= nb_colonnes:
