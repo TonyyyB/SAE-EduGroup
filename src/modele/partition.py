@@ -31,11 +31,15 @@ class Partition:
                 elevesAPlacer.remove(eleve)
         while len(elevesAPlacer) > 0:
             eleve = elevesAPlacer.pop()
-            maxi = self.simule_ajout(groupes[0], eleve)
-            gmax = groupes[0]
-            for groupe in groupes[1:]:
+            maxi = -math.inf
+            gmax = None
+            for groupe in groupes:
                 if not groupe.place_dispo(): continue
                 score = self.simule_ajout(groupe,eleve)
+                if gmax is None:
+                    maxi = score
+                    gmax = groupe
+                    continue
                 if score > maxi:
                     maxi = score
                     gmax = groupe
@@ -78,8 +82,7 @@ class Partition:
                     evolMax[0].transferer(evolMax[1], evolMax[2], evolMax[3])
             newScore = self.calcul_score()
             if newScore > lastScore:
-                timeLastScoreNotGreater = 0
-            else:
+                #timeLastScoreNotGreater = 0
                 timeLastScoreNotGreater += 1
         self.is_genere = True
         return self

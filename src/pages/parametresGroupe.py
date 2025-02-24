@@ -86,7 +86,10 @@ class ParametresGroupe(tk.Toplevel):
                     criteres_selectionnes[critere].add(critere.to_int(val))
             if len(criteres_selectionnes) > 0:
                 self.groupe.set_contrainte(critere, criteres_selectionnes[critere])
-        self.groupe.changer_taille(int(self.entry_nb_eleve.get()))
+        newTaille = int(self.entry_nb_eleve.get())
+        if newTaille != self.groupe.get_taille():
+            self.groupe.changer_taille(newTaille)
+            self.partition.adapter_taille()
         self.destroy()
         self.update()
         self.parent.afficher_groupes()
