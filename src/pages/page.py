@@ -100,9 +100,12 @@ class Table(tk.Frame):
         self.grid_rowconfigure(0, weight=1)
         self.grid_columnconfigure(0, weight=1)
 
-    def _create_table_headers(self, titre_colonnes):
+    def _create_table_headers(self, titre_colonnes, sizes=[]):
         for j, titre in enumerate(titre_colonnes):
-            b = tk.Label(self.frame, text=titre, bg="lightgray", font=("Arial", 12))
+            if len(sizes) > j and sizes[j] is not None:
+                b = tk.Label(self.frame, text=titre, bg="lightgray", font=("Arial", 12), width=sizes[j])
+            else:
+                b = tk.Label(self.frame, text=titre, bg="lightgray", font=("Arial", 12))
             b.grid(row=0, column=j)
 
     def _create_table_entry(self, row, col, widget):
@@ -137,7 +140,7 @@ class EleveTable(Table):
         self.titre_colonnes = ['Prénom', 'Nom', 'ID'] + [c.get_nom() for c in criteres]
 
         # Créer les titres des colonnes
-        self._create_table_headers(self.titre_colonnes)
+        self._create_table_headers(self.titre_colonnes, [10]*len(self.titre_colonnes))
 
         # Remplir les lignes avec les données des élèves
         for i, eleve in enumerate(eleves):
