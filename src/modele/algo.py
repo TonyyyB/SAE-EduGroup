@@ -1,10 +1,10 @@
-from eleve import Eleve
-from groupe import Groupe
-from partition import Partition
-from critere import Critere
-from criteres.booleen import Booleen
-from criteres.categorique import Categorique
-from criteres.numerique import Numerique
+from modele.eleve import Eleve
+from modele.groupe import Groupe
+from modele.partition import Partition
+from modele.critere import Critere
+from modele.criteres.booleen import Booleen
+from modele.criteres.categorique import Categorique
+from modele.criteres.numerique import Numerique
 import math
 import time
 import random
@@ -110,36 +110,38 @@ def generer_eleves(criteres: list[Critere], nb: int) -> list[Eleve]:
             eleve.ajouter_critere(critere, random.randint(minimum, maximum))
         eleves.append(eleve)
     return eleves
-critereFrancais = Numerique("Français",10, True)
-critereMath = Numerique("Maths",5, True)
-criterePenibilite = Numerique("Pénibilité", 3, True)
-[x.ajouter_valeur(1) for x in [critereFrancais,critereMath,criterePenibilite]]
-[x.ajouter_valeur(6) for x in [critereFrancais,critereMath,criterePenibilite]]
 
-eleves = generer_eleves([critereFrancais, critereMath, criterePenibilite],200)
+if __name__ == "__main__":
+    critereFrancais = Numerique("Français",10, True)
+    critereMath = Numerique("Maths",5, True)
+    criterePenibilite = Numerique("Pénibilité", 3, True)
+    [x.ajouter_valeur(1) for x in [critereFrancais,critereMath,criterePenibilite]]
+    [x.ajouter_valeur(6) for x in [critereFrancais,critereMath,criterePenibilite]]
 
-# Coefficients de pondération pour chaque matière
-partition = Partition()
-g1 = Groupe(50)
-g1.ajouter_contrainte(critereFrancais, {1, 3})
+    eleves = generer_eleves([critereFrancais, critereMath, criterePenibilite],200)
 
-g2 = Groupe(50)
-g2.ajouter_contrainte(critereFrancais, {2, 4})
+    # Coefficients de pondération pour chaque matière
+    partition = Partition()
+    g1 = Groupe(50)
+    g1.set_contrainte(critereFrancais, {1, 3})
 
-g3 = Groupe(50)
-g3.ajouter_contrainte(critereFrancais, {3, 5})
+    g2 = Groupe(50)
+    g2.set_contrainte(critereFrancais, {2, 4})
 
-g4 = Groupe(50)
-g4.ajouter_contrainte(critereFrancais, {4, 6})
+    g3 = Groupe(50)
+    g3.set_contrainte(critereFrancais, {3, 5})
 
-partition.ajouter_groupe(g1)
-partition.ajouter_groupe(g2)
-partition.ajouter_groupe(g3)
-partition.ajouter_groupe(g4)
-start = time.time()
-# Appel de l'algorithme avec 3 groupes et des contraintes par genre
-algo(eleves,partition)
-stop = time.time()
-afficher_partition(partition)
-# Afficher la répartition finale des groupes
-print(stop-start)
+    g4 = Groupe(50)
+    g4.set_contrainte(critereFrancais, {4, 6})
+
+    partition.ajouter_groupe(g1)
+    partition.ajouter_groupe(g2)
+    partition.ajouter_groupe(g3)
+    partition.ajouter_groupe(g4)
+    start = time.time()
+    # Appel de l'algorithme avec 3 groupes et des contraintes par genre
+    algo(eleves,partition)
+    stop = time.time()
+    afficher_partition(partition)
+    # Afficher la répartition finale des groupes
+    print(stop-start)

@@ -1,5 +1,5 @@
-from critere import Critere
-from groupe import Groupe
+from modele.critere import Critere
+from modele.groupe import Groupe
 class Numerique(Critere):
     def __init__(self, nom:str, poids:int, repartition:bool):
         super().__init__(nom, poids, repartition)
