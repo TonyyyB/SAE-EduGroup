@@ -111,7 +111,7 @@ class PageAccueil(Page):
         df.columns = normaliser_colonnes(df.columns)
         self.criteres:list[Critere] = []
         for critere in df.columns[4:]:
-            self.criteres.append(detecter_type_critere(critere, df[critere]))
+            self.criteres.append(Critere(critere,5, set(df[critere])))
 
         # Créer la liste des élèves
         import random
@@ -122,7 +122,6 @@ class PageAccueil(Page):
                 eleve.ajouter_critere(critere, row[critere.get_nom()])
             self.eleves.append(eleve)
         
-        print([c.get_transpo() for c in self.criteres])
         # Charger dynamiquement la page CreationGroupe en passant les élèves et les critères
         from pages.creationGroupe import CreationGroupe  # Import dynamique
         self.controller.show_frame(CreationGroupe, self.eleves, self.criteres)
