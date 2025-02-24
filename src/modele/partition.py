@@ -1,6 +1,7 @@
 from modele.groupe import Groupe
 from modele.eleve import Eleve
 from modele.critere import Critere
+from tkinter import messagebox
 import math
 class Partition:
     def __init__(self, eleves:set[Eleve]):
@@ -89,15 +90,26 @@ class Partition:
     
     def adapter_taille(self) -> None:
         groupesTailleModif, groupesSansTailleModif = self.groupes_avec_et_sans_taille_modif()
-        if len(groupesSansTailleModif) == 0: return
-        nbElevesRestants = len(self.eleves) - sum([groupe.get_taille() for groupe in groupesTailleModif])
+
+        # S'il n'y a pas de groupes sans taille modifiée, on ne fait rien
+        if len(groupesSansTailleModif) == 0:
+            return
+
+        # Calcul du nombre d'élèves restants après avoir pris en compte les groupes modifiés
+        nbElevesRestants = len(self.eleves) - sum(groupe.get_taille() for groupe in groupesTailleModif)
+
+        # Si le nombre d'élèves restants est négatif, il y a un problème de dépassement
+        if nbElevesRestants < 0:
+            messagebox.showerror("Erreur", "La somme des tailles des groupes dépasse le nombre total d'élèves.")
+            return
+
+        # Répartir les élèves restants dans les groupes non modifiés
         nbParGroupe = nbElevesRestants // len(groupesSansTailleModif)
-        for groupe in self.groupes:
-            groupe.changer_taille(nbParGroupe, False)
-            nbElevesRestants -= nbParGroupe
-        for i in range(nbElevesRestants):
-            self.groupes[i].changer_taille(self.groupes[i].get_taille()+1, False)
-        print()
+        surplus = nbElevesRestants % len(groupesSansTailleModif)  # Pour répartir les restes
+
+        for i, groupe in enumerate(groupesSansTailleModif):
+            nouvelle_taille = nbParGroupe + (1 if i < surplus else 0)  # Ajouter un élève aux 'surplus' premiers groupes
+            groupe.changer_taille(nouvelle_taille, enregistrer=False)  # Utiliser 'enregistrer=False' ici pour ne pas marquer la modification
 
     def groupes_avec_et_sans_taille_modif(self) -> tuple[list[Groupe], list[Groupe]]:
         tailleModif = []
