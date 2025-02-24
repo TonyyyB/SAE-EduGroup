@@ -168,7 +168,7 @@ class CreationGroupe(Page):
 
     def decrease_group_count(self):
         """Réduit le nombre de groupes"""
-        if self.nb_groupes > 1:  # Limite à 1 groupe minimum
+        if self.nb_groupes > 2:  # Limite à 2 groupe minimum
             self.nb_groupes -= 1
             self.partition.supprimer_groupe(self.partition.get_groupes()[-1])
             self.partition.adapter_taille()
