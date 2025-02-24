@@ -26,7 +26,7 @@ class Critere:
 
 
 
-    def calcul_score(self, groupes:[Groupe]) -> float:
+    def calcul_score(self, groupes:['Groupe']) -> float:
         somme = 0
         for groupe in groupes:
             for val in self.valPossible:

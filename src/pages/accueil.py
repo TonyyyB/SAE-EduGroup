@@ -1,17 +1,14 @@
 import tkinter as tk
 from tkinter import filedialog, messagebox
 import unicodedata
-from modele.detection_critere import detecter_type_critere
 from tkinterdnd2 import DND_FILES
 import customtkinter as ctk
 from constantes import *
 from pages.page import Page
 import pandas as pd
 from modele.eleve import Eleve
-from modele.criteres.numerique import Numerique
-from modele.criteres.categorique import Categorique
-from modele.criteres.booleen import Booleen
 from modele.critere import Critere
+
 
 class PageAccueil(Page):
     def __init__(self, parent, controller):

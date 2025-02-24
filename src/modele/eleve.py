@@ -9,7 +9,6 @@ class Eleve:
 
     def ajouter_critere(self, critere:Critere, valeur:int|str):
         """Ajoute un critère avec une valeur associée au dictionnaire criteres."""
-        critere.ajouter_valeur(valeur)
         self.criteres[critere] = valeur
 
     def get_id(self):
