@@ -1,4 +1,5 @@
 import tkinter as tk
+from tkinter import filedialog
 from modele.eleve import Eleve
 from modele.partition import Partition
 from modele.groupe import Groupe
@@ -115,6 +116,10 @@ class CreationGroupe(Page):
         self.bouton_parm_grp = None
 
         # Bouton de retour
+        bouton_resultats = ctk.CTkButton(self, text="Exporter les résultats", font=GRANDE_POLICE, command=self.exporter_groupes)
+        bouton_resultats.place(relx=0.85, rely=0.15, anchor='center')
+
+        # Bouton de retour
         bouton_retour = ctk.CTkButton(self, text="Changer de fichier", font=GRANDE_POLICE, command=self.retour_page_accueil)
         bouton_retour.place(relx=0.85, rely=0.05, anchor='center')
 
@@ -127,7 +132,7 @@ class CreationGroupe(Page):
         bouton_exporter.place(relx=0.85, rely=0.15, anchor='center')
 
         # Bouton de retour
-        bouton_resultats = ctk.CTkButton(self, text="Exporter les résultats", font=GRANDE_POLICE, command=self.retour_page_accueil)
+        bouton_resultats = ctk.CTkButton(self, text="Exporter les résultats", font=GRANDE_POLICE, command=self.exporter_groupes)
         bouton_resultats.place(relx=0.85, rely=0.20, anchor='center')
     
     def import_params(self):
@@ -136,6 +141,30 @@ class CreationGroupe(Page):
     def generer_groupes(self):
         self.partition.generer()
         self.afficher_groupes()
+
+    def exporter_groupes(self):
+        """
+        Exporte les groupes et leurs élèves dans un fichier CSV.
+        """
+        fichier = filedialog.asksaveasfilename(defaultextension=".csv", filetypes=[("CSV files", "*.csv")])
+        if not fichier:
+            return
+        
+        data = []
+
+        for i, groupe in enumerate(self.partition.get_groupes(), start=1):
+            for eleve in groupe.get_eleves():
+                data.append({
+                    "Nom": eleve.nom,
+                    "Prénom": eleve.prenom,
+                    "Groupe": f"{i}"
+                })
+
+        df = pd.DataFrame(data)
+        df.to_csv(fichier, index=False, encoding='utf-8')
+        print(f"Exportation réussie : {fichier}")
+
+
 
     def decrease_group_count(self):
         """Réduit le nombre de groupes"""
