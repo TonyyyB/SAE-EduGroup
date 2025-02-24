@@ -31,7 +31,7 @@ class ParametresCriteres(tk.Toplevel):
         self.table_frame = tk.Frame(self.frame)
         self.table_frame.pack(pady=10, padx=10, fill="both", expand=True)
 
-        self.entetes = ["Nom des critères", "Poids", "Regrouper", "Valeur Minimale", "Valeur Maximale", "Types"]
+        self.entetes = ["Nom des critères", "Poids", "Répartis", "Valeur Minimale", "Valeur Maximale", "Types"]
 
         self.bouton_annuler = tk.Button(self.frame, text="Annuler", command=self.destroy, bg="#F0F4F7", font=("Arial", 14), width=12)
         self.bouton_annuler.pack(side="left", padx=30, pady=20)
@@ -43,6 +43,7 @@ class ParametresCriteres(tk.Toplevel):
         self.creerTableau()
 
     def creerTableau(self):
+        self.entries_var = dict()
         # Ajouter les en-têtes de colonnes
         for col_num, entete in enumerate(self.entetes):
             label = tk.Label(self.table_frame, text=entete, font=("Arial", 12, "bold"), bg="#4C8DAB", fg="white", width=15)
@@ -54,8 +55,19 @@ class ParametresCriteres(tk.Toplevel):
             label = tk.Label(self.table_frame, text=critere.get_nom(), font=("Arial", 12, "bold"), bg="white", fg="black", width=15)
             label.grid(row=row_num+1, column=0, padx=5, pady=5)  # Les critères sont affichés dans la première colonne
 
+            # Valeurs:
+            # Poids
+            poids_var = tk.IntVar(value=critere.get_poids())
+            poids = tk.Entry(self.table_frame, textvariable=poids_var, font=("Arial", 12), bg="white", fg="black", width=15)
+            poids.grid(row=row_num+1, column=1, padx=5, pady=5)
+            # Repartis
+            repartis_var = tk.BooleanVar(value=critere.est_reparti())
+            repartis = tk.Checkbutton(self.table_frame, variable=repartis_var, text="")
+            repartis.grid(row=row_num+1, column=2, padx=5, pady=5)
+
+            self.entries_var[critere] = [poids_var, repartis_var]
             # Exemple pour les autres colonnes avec des valeurs par défaut (Vous pouvez personnaliser)
-            for col_num in range(1, len(self.entetes)):
+            for col_num in range(3, len(self.entetes)):
                 label = tk.Label(self.table_frame, text="Valeur", font=("Arial", 12), bg="white", fg="black", width=15)
                 label.grid(row=row_num+1, column=col_num, padx=5, pady=5)
 
@@ -77,6 +89,28 @@ class ParametresCriteres(tk.Toplevel):
             self.canvas.create_line(0, i, width, i, fill=color)
 
     def sauvegarder_criteres(self):
+        # Valider la saisie des poids (int)
+        for critere, entries in self.entries_var.items():
+            poids_var, _ = entries
+            try:
+                poids = poids_var.get()
+                if not isinstance(poids, int):
+                    raise ValueError("Le poids doit être un entier.")
+            except ValueError as e:
+                messagebox.showerror("Erreur: vous devez saisir un nombre pour le poids du critere " + critere.get_nom())
+                return
+            except tk.t as e:
+                messagebox.showerror("Erreur: vous devez saisir un nombre pour le poids du critere " + critere.get_nom())
+                return
+
+        # Valider la saisie des valeurs des champs (int ou float)
+        # Récupérer les valeurs des champs
+        for critere, entries in self.entries_var.items():
+            poids_var, repartis_var = entries
+            critere.set_poids(poids_var.get())
+            critere.set_repratis(repartis_var.get())
+
+        # Afficher un message de confirmation et fermer la fenêtre
         messagebox.showinfo("Sauvegarde", "Les critères ont été sauvegardés avec succès !")
         self.destroy()
 

@@ -7,7 +7,6 @@ class Critere:
         self.poids:int = poids
         self.repartition:bool = repartition
         self.transpo:dict[int|bool|str,int] = dict()
-        print(str(self.transpo))
 
     def ajouter_valeur(self, valeur:int|bool|str, correspondance:int=None) -> None:
         if valeur not in self.transpo.keys():
@@ -28,6 +27,9 @@ class Critere:
         self.poids:int = poids
     def get_poids(self) -> int:
         return self.poids
+    
+    def set_repratis(self, repartis:bool) -> None:
+        self.repartition:bool = repartis
 
     def get_nom(self) -> str:
         return self.nom
