@@ -129,11 +129,6 @@ class CreationGroupe(Page):
         # Bouton de retour
         bouton_resultats = ctk.CTkButton(self, text="Exporter les résultats", font=GRANDE_POLICE, command=self.retour_page_accueil)
         bouton_resultats.place(relx=0.85, rely=0.20, anchor='center')
-
-
-
-
-
     
     def import_params(self):
         pass
@@ -231,14 +226,28 @@ class TableauCriteres(tk.Frame):
         self.table = Table(parent=self, controller=self)
         self.table._create_table_headers(["Critère","", "Valeur"])
         self.table.grid(row=0, column=0, padx=10, pady=10)
+        self.sliders = []
+        self.sliders_vars = []
 
         for i, critere in enumerate(self.criteres):
             self.table._create_table_entry(i + 1, 0, critere.get_nom())
             poids_var = tk.DoubleVar(value=critere.get_poids())
-            poids_scale = tk.Scale(self.table.frame, variable=poids_var, from_=0, to=1, resolution=0.01, orient="horizontal", length=200, showvalue=False)
+            poids_scale = tk.Scale(self.table.frame, variable=poids_var, from_=0, to=1, resolution=0.01, orient="horizontal", length=200, showvalue=False, command=lambda event, index=i: self.update_sliders(index, event))
+            self.sliders.append(poids_scale)
+            self.sliders_vars.append(poids_var)
             self.table._create_table_entry(i + 1, 1, poids_scale)
             poids_entry = tk.Entry(self.table.frame, textvariable=poids_var, width=5)
             self.table._create_table_entry(i + 1, 2, poids_entry)
+    
+    def update_sliders(self, index, event):
+        critere = self.criteres[index]
+        poids_var = self.sliders_vars[index]
+        print(1-poids_var.get())
+        for i, slider in enumerate(self.sliders):
+            if i != index:
+                curr_var = self.sliders_vars[i]
+                curr_var.set((1-poids_var.get())/(len(self.sliders)-1))
+
 class TableauGroupe(tk.Frame):
     def __init__(self, parent, page, partition:Partition, index, img_param_tk):
         super().__init__(parent)
