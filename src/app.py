@@ -11,6 +11,7 @@ class App(TkinterDnD.Tk):  # Changement ici pour utiliser TkinterDnD.Tk
     def __init__(self, *args, **kwargs):
         # Initialiser TkinterDnD.Tk plutôt que tk.Tk
         TkinterDnD.Tk.__init__(self, *args, **kwargs)
+        self.protocol("WM_DELETE_WINDOW", self.Exit)
         
         self.title("EduGroup")
         
@@ -51,6 +52,9 @@ class App(TkinterDnD.Tk):  # Changement ici pour utiliser TkinterDnD.Tk
         
         close_button = tk.Button(popup, text="Fermer", command=popup.destroy)
         close_button.pack(pady=10)
+        
+    def Exit(self):
+        self.quit()
 
 # Initialiser et exécuter l'application
 app = App()
