@@ -60,16 +60,23 @@ class ParametresCriteres(tk.Toplevel):
             poids_var = tk.IntVar(value=critere.get_poids())
             poids = tk.Entry(self.table_frame, textvariable=poids_var, font=("Arial", 12), bg="white", fg="black", width=15)
             poids.grid(row=row_num+1, column=1, padx=5, pady=5)
+
             # Repartis
             repartis_var = tk.BooleanVar(value=critere.est_reparti())
             repartis = tk.Checkbutton(self.table_frame, variable=repartis_var, text="")
             repartis.grid(row=row_num+1, column=2, padx=5, pady=5)
 
+            # Valeurs minimales et maximales
+            minimum = tk.Label(self.table_frame, text=critere.get_valeur_min(), font=("Arial", 12), bg="white", fg="black", width=15)
+            maximum = tk.Label(self.table_frame, text=critere.get_valeur_max(), font=("Arial", 12), bg="white", fg="black", width=15)
+            minimum.grid(row=row_num+1, column=3, padx=5, pady=5)
+            maximum.grid(row=row_num+1, column=4, padx=5, pady=5)
+
+            # Types de critères
+            types = tk.Label(self.table_frame, text="", font=("Arial", 12), bg="white", fg="black", width=15)
+            types.grid(row=row_num+1, column=5, padx=5, pady=5)  # Les types des critères sont affichés dans la sixième colonne
+
             self.entries_var[critere] = [poids_var, repartis_var]
-            # Exemple pour les autres colonnes avec des valeurs par défaut (Vous pouvez personnaliser)
-            for col_num in range(3, len(self.entetes)):
-                label = tk.Label(self.table_frame, text="Valeur", font=("Arial", 12), bg="white", fg="black", width=15)
-                label.grid(row=row_num+1, column=col_num, padx=5, pady=5)
 
     def create_gradient(self):
         # Dessine un dégradé du bleu vers le noir

@@ -48,7 +48,7 @@ def algo(eleves:list|set[Eleve], partition:Partition):
     lastScore = partition.calcul_score()
     newScore = lastScore + 1
     timeLastScoreNotGreater = 0
-    while(timeLastScoreNotGreater < 3):
+    while(timeLastScoreNotGreater < 1):
         lastScore = newScore
         for g1, g2 in combinaisons:
             newScore = partition.calcul_score()

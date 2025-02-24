@@ -53,6 +53,16 @@ class Critere:
     
     def get_valeurs_possibles(self, toVal=False) -> set[int]|set[int|bool|str]:
         return set(self.transpo.keys()) if toVal else set(self.transpo.values())
+    
+    def get_valeur_min(self, toVal=False) -> int|bool|str:
+        if(toVal):
+            return min(self.transpo, key = self.transpo.get)
+        return min(self.transpo)
+    
+    def get_valeur_max(self, toVal=False) -> int|bool|str:
+        if(toVal):
+            return max(self.transpo, key = self.transpo.get)
+        return max(self.transpo)
 
     def __repr__(self):
         return f"{self.nom}: {self.poids}"
