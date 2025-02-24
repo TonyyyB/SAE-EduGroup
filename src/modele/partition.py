@@ -170,12 +170,10 @@ class Partition:
         return scores
 
     def calcul_score(self) -> float:
-        moyenne = sum(groupe.calcul_score() for groupe in self.groupes) / len(self.groupes)
-        ecart_type = 0
-        for groupe in self.groupes:
-            ecart_type += (groupe.calcul_score() - moyenne) ** 2
-        ecart_type = math.sqrt(ecart_type / len(self.groupes))
-        return moyenne - ecart_type
+        score = 0
+        for critere in self.criteres:
+            score += critere.calcul_score(self.groupes)
+        return score
     
     def clear(self) -> None:
         for groupe in self.groupes:
