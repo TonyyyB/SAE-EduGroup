@@ -16,11 +16,17 @@ class Critere:
 
     def get_nom(self) -> str:
         return self.nom
+    
+    def get_proportionGlobale(self) -> float:
+        return self.proportionGlobale
+    
+    def get_valPossible(self) -> set:
+        return self.valPossible
+
 
 
 
     def calcul_score(self, groupes:[Groupe]) -> float:
-        score = 0
         somme = 0
         for groupe in groupes:
             for val in self.valPossible:

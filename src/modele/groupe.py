@@ -101,9 +101,14 @@ class Groupe:
     def get_taille(self) -> int:
         return self.taille
     
-    def calcul_score(self) -> float:
+    def calcul_score(self,critere,valCritere) -> float:
         if len(self.eleves) == 0: return 0.0
-        return sum(critere.calcul_score(self) for critere in self.criteres)
+        proportion = 0
+        for eleve in self.eleves:
+            if eleve.get_critere(critere)[valCritere]:
+                proportion += 1
+        proportion /= len(self.eleves)
+        return abs(proportion-critere.get_proportionGlobale())
     
     def clear(self) -> None:
         self.eleves.clear()
