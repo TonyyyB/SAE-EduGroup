@@ -2,11 +2,11 @@ from typing import TYPE_CHECKING
 if TYPE_CHECKING:
     from groupe import Groupe
 class Critere:
-    def __init__(self, nom:str, poids:int, valPossible:set, proportionGlobale:float):
+    def __init__(self, nom:str, poids:int, valPossible:set):
         self.nom:str = nom
         self.poids:int = poids
         self.valPossible: set = valPossible
-        self.proportionGlobale: float = proportionGlobale
+        self.proportionGlobale: float = None
         
 
     def set_poids(self, poids:int) -> None:
