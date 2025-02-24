@@ -6,7 +6,7 @@ class Critere:
         self.nom:str = nom
         self.poids:int = poids
         self.valPossible: set = valPossible
-        self.proportionGlobale: float = None
+        self.proportionGlobale: dict = None
         
 
     def set_poids(self, poids:int) -> None:
@@ -17,8 +17,19 @@ class Critere:
     def get_nom(self) -> str:
         return self.nom
     
-    def get_proportionGlobale(self) -> float:
-        return self.proportionGlobale
+    def get_proportionGlobale(self,valeur) -> float:
+        return self.proportionGlobale[valeur]
+    
+    def calcul_proportion(self, eleves):
+        nb = 0
+        dico = dict()
+        for valeur in self.valPossible:
+            for eleve in eleves:
+                if eleve.get_critere(self) == valeur:
+                    nb += 1
+            dico[valeur] = nb / len(eleves)
+        self.proportionGlobale = dico
+
     
     def get_valPossible(self) -> set:
         return self.valPossible

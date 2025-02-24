@@ -105,10 +105,10 @@ class Groupe:
         if len(self.eleves) == 0: return 0.0
         proportion = 0
         for eleve in self.eleves:
-            if eleve.get_critere(critere)[valCritere]:
+            if eleve.get_critere(critere)==valCritere:
                 proportion += 1
         proportion /= len(self.eleves)
-        return abs(proportion-critere.get_proportionGlobale())
+        return abs(proportion-critere.get_proportionGlobale(valCritere))
     
     def clear(self) -> None:
         self.eleves.clear()

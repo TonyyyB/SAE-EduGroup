@@ -119,6 +119,9 @@ class PageAccueil(Page):
                 eleve.ajouter_critere(critere, row[critere.get_nom()])
             self.eleves.append(eleve)
         
+        for critere in self.criteres:
+            critere.calcul_proportion(self.eleves)
+        
         # Charger dynamiquement la page CreationGroupe en passant les élèves et les critères
         from pages.creationGroupe import CreationGroupe  # Import dynamique
         self.controller.show_frame(CreationGroupe, self.eleves, self.criteres)
