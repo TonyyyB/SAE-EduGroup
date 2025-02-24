@@ -2,9 +2,6 @@ from modele.eleve import Eleve
 from modele.groupe import Groupe
 from modele.partition import Partition
 from modele.critere import Critere
-from modele.criteres.booleen import Booleen
-from modele.criteres.categorique import Categorique
-from modele.criteres.numerique import Numerique
 import math
 import time
 import random
@@ -19,21 +16,18 @@ def algo(eleves:list|set[Eleve], partition:Partition):
         gmax = None
         for groupe in groupes:
             if not groupe.respecter_contraintes(eleve) or not groupe.place_dispo(): continue
-            score = partition.simule_ajout(groupe, eleve)
-            if score > maxi:
-                maxi = score
-                gmax = groupe
-        if gmax is not None:
-            gmax.ajouter_eleve(eleve)
-            elevesAPlacer.remove(eleve)
+            if groupe.respecter_contraintes(eleve) and groupe.place_dispo():
+                eleve.ajouter_groupes_possible(groupe)
+        if len(eleve.get_groupes_possible) == 1:
+            eleve.get_groupes_possible[0].ajouter_eleve(eleve)
     while len(elevesAPlacer) > 0:
         eleve = elevesAPlacer.pop()
         maxi = -math.inf
         gmax = None
-        for groupe in groupes:
-            if not groupe.place_dispo(): continue
+        if not groupe.place_dispo(): continue
+        for groupe in eleve.get_groupes_possible():
             score = partition.simule_ajout(groupe,eleve)
-            if score > maxi:
+            if score < maxi:
                 maxi = score
                 gmax = groupe
         gmax.ajouter_eleve(eleve)
@@ -47,7 +41,7 @@ def algo(eleves:list|set[Eleve], partition:Partition):
 
     lastScore = partition.calcul_score()
     newScore = lastScore + 1
-    timeLastScoreNotGreater = 0
+    timeLastScoreNotSmaller = 0
     while(timeLastScoreNotGreater < 3):
         lastScore = newScore
         for g1, g2 in combinaisons:
@@ -74,7 +68,7 @@ def algo(eleves:list|set[Eleve], partition:Partition):
             else:
                 evolMax[0].transferer(evolMax[1], evolMax[2], evolMax[3])
         newScore = partition.calcul_score()
-        if newScore > lastScore:
+        if newScore < lastScore:
             timeLastScoreNotGreater = 0
         else:
             timeLastScoreNotGreater += 1
