@@ -5,7 +5,7 @@ from modele.groupe import Groupe
 import customtkinter as ctk
 from constantes import *
 from pages.page import Page
-from pages.page import Table
+from pages.page import Table, EleveTable
 from pages.accueil import PageAccueil
 from tkinter import messagebox
 import pandas as pd
@@ -29,7 +29,7 @@ class CreationGroupe(Page):
 
         # Ajouter un canvas pour le contenu
         self.canvas_frame = tk.Canvas(self.canvas)
-        self.canvas_frame.place(relx=0.11, rely=0.25, relwidth=0.78, relheight=0.6)
+        self.canvas_frame.place(relx=0.4, rely=0.25, relwidth=0.53, relheight=0.6)
 
         # Ajouter une scrollbar verticale pour le Canvas
         self.scrollbar_y = tk.Scrollbar(self.canvas_frame, orient="vertical", command=self.canvas_frame.yview)
@@ -55,6 +55,7 @@ class CreationGroupe(Page):
         self.clear_ui()  # Effacer l'interface existante avant de la recréer
         self.setup_ui()  # Mettre à jour l'interface après le chargement des données
         self.afficher_groupes()
+        self.afficher_criteres()
 
     def clear_ui(self):
         """
@@ -131,6 +132,8 @@ class CreationGroupe(Page):
 
 
 
+
+
     
     def import_params(self):
         pass
@@ -172,7 +175,7 @@ class CreationGroupe(Page):
 
         self.inner_frame.update_idletasks()
 
-        nb_colonnes = 3
+        nb_colonnes = 2
         posx, posy = 0, 0
 
         for i, groupe in enumerate(self.partition.get_groupes()):
@@ -196,6 +199,9 @@ class CreationGroupe(Page):
         self.scrollbar_y.pack(side="right", fill="y")
         self.canvas_frame.configure(yscrollcommand=self.scrollbar_y.set)
 
+    def afficher_criteres(self):
+        table = TableauCriteres(self, self, self.criteres)
+        table.place(relx=0.05, rely=0.3)
 
     def retour_page_accueil(self):
         """
@@ -216,6 +222,23 @@ class CreationGroupe(Page):
         popup = ParametresGroupe(self, self.partition, groupe)
         popup.grab_set()  # Pour forcer le focus sur la fenêtre pop-up
 
+
+class TableauCriteres(tk.Frame):
+    def __init__(self, parent, page, criteres):
+        super().__init__(parent)
+        self.criteres = criteres
+        self.page = page
+        self.table = Table(parent=self, controller=self)
+        self.table._create_table_headers(["Critère","", "Valeur"])
+        self.table.grid(row=0, column=0, padx=10, pady=10)
+
+        for i, critere in enumerate(self.criteres):
+            self.table._create_table_entry(i + 1, 0, critere.get_nom())
+            poids_var = tk.DoubleVar(value=critere.get_poids())
+            poids_scale = tk.Scale(self.table.frame, variable=poids_var, from_=0, to=1, resolution=0.01, orient="horizontal", length=200, showvalue=False)
+            self.table._create_table_entry(i + 1, 1, poids_scale)
+            poids_entry = tk.Entry(self.table.frame, textvariable=poids_var, width=5)
+            self.table._create_table_entry(i + 1, 2, poids_entry)
 class TableauGroupe(tk.Frame):
     def __init__(self, parent, page, partition:Partition, index, img_param_tk):
         super().__init__(parent)
@@ -232,7 +255,7 @@ class TableauGroupe(tk.Frame):
         bouton_param_grp = tk.Button(self, image=img_param_tk, compound="right", anchor='e', command=lambda: self.pop_up_param_grp())
         bouton_param_grp.grid(row=0, column=2, padx=10, pady=10, sticky="e")
         # Créer la table pour chaque groupe
-        table = Table(parent=self, controller=self, eleves=self.groupe.get_eleves(), criteres=self.partition.get_criteres())
+        table = EleveTable(parent=self, controller=self, eleves=self.groupe.get_eleves(), criteres=self.partition.get_criteres())
         table.grid(row=1, column=0, padx=10, pady=10, columnspan=3)
         # Personnalisation des cellules du tableau
         for widget in table.winfo_children():
