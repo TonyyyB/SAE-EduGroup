@@ -1,11 +1,14 @@
 import tkinter as tk
+import tkinter.font as tkf
+import csv
+from tkinter import filedialog
 from modele.eleve import Eleve
 from modele.partition import Partition
 from modele.groupe import Groupe
 import customtkinter as ctk
 from constantes import *
 from pages.page import Page
-from pages.page import Table
+from pages.page import Table, EleveTable
 from pages.accueil import PageAccueil
 from tkinter import messagebox
 import pandas as pd
@@ -29,7 +32,7 @@ class CreationGroupe(Page):
 
         # Ajouter un canvas pour le contenu
         self.canvas_frame = tk.Canvas(self.canvas)
-        self.canvas_frame.place(relx=0.11, rely=0.22, relwidth=0.78, relheight=0.6)
+        self.canvas_frame.place(relx=0.4, rely=0.25, relwidth=0.53, relheight=0.6)
 
         # Ajouter une scrollbar verticale pour le Canvas
         self.scrollbar_y = tk.Scrollbar(self.canvas_frame, orient="vertical", command=self.canvas_frame.yview)
@@ -55,6 +58,7 @@ class CreationGroupe(Page):
         self.clear_ui()  # Effacer l'interface existante avant de la recréer
         self.setup_ui()  # Mettre à jour l'interface après le chargement des données
         self.afficher_groupes()
+        self.afficher_criteres()
 
     def clear_ui(self):
         """
@@ -104,32 +108,69 @@ class CreationGroupe(Page):
         bouton_generer = ctk.CTkButton(self, text="Générer les groupes", font=GRANDE_POLICE, command=self.generer_groupes)
         bouton_generer.place(relx=0.5, rely=0.12, anchor='center')
 
-        # Bouton de retour
-        bouton_exporter = ctk.CTkButton(self, text="Exporter les paramètres", font=GRANDE_POLICE, command=self.retour_page_accueil)
-        bouton_exporter.place(relx=0.85, rely=0.10, anchor='center')
 
         # Bouton de retour
         bouton_param = ctk.CTkButton(self, text="Paramètres des critères", font=GRANDE_POLICE, command=self.pop_up_criteres)
         bouton_param.place(relx=0.15, rely=0.17, anchor='center')
 
+
         # Bouton paramètres groupes
         self.bouton_parm_grp = None
 
         # Bouton de retour
-        bouton_resultats = ctk.CTkButton(self, text="Exporter les résultats", font=GRANDE_POLICE, command=self.retour_page_accueil)
+        bouton_resultats = ctk.CTkButton(self, text="Exporter les résultats", font=GRANDE_POLICE, command=self.exporter_groupes)
         bouton_resultats.place(relx=0.85, rely=0.15, anchor='center')
 
         # Bouton de retour
         bouton_retour = ctk.CTkButton(self, text="Changer de fichier", font=GRANDE_POLICE, command=self.retour_page_accueil)
         bouton_retour.place(relx=0.85, rely=0.05, anchor='center')
+
+        # Bouton en bas pour importer les paramètres
+        import_button = ctk.CTkButton(self, text="Importer des paramètres", font=GRANDE_POLICE, command=self.importer_criteres)
+        import_button.place(relx=0.85, rely=0.10, anchor='center')
+
+        # Bouton de retour
+        bouton_exporter = ctk.CTkButton(self, text="Exporter les paramètres", font=GRANDE_POLICE, command=self.exporter_criteres)
+        bouton_exporter.place(relx=0.85, rely=0.15, anchor='center')
+
+        # Bouton de retour
+        bouton_resultats = ctk.CTkButton(self, text="Exporter les résultats", font=GRANDE_POLICE, command=self.exporter_groupes)
+        bouton_resultats.place(relx=0.85, rely=0.20, anchor='center')
+    
+    def import_params(self):
+        pass
     
     def generer_groupes(self):
         self.partition.generer()
         self.afficher_groupes()
 
+    def exporter_groupes(self):
+        """
+        Exporte les groupes et leurs élèves dans un fichier CSV.
+        """
+        fichier = filedialog.asksaveasfilename(defaultextension=".csv", filetypes=[("CSV files", "*.csv")])
+        if not fichier:
+            return
+        
+        data = []
+
+        for i, groupe in enumerate(self.partition.get_groupes(), start=1):
+            for eleve in groupe.get_eleves():
+                data.append({
+                    "Nom": eleve.nom,
+                    "Prénom": eleve.prenom,
+                    "Groupe": f"{i}"
+                })
+
+        df = pd.DataFrame(data)
+        df.to_csv(fichier, index=False, encoding='utf-8')
+        print(f"Exportation réussie : {fichier}")
+
+
+
     def decrease_group_count(self):
         """Réduit le nombre de groupes"""
-        if self.nb_groupes > 1:  # Limite à 1 groupe minimum
+        if self.nb_groupes > 2:  # Limite à 2 groupe minimum
             self.nb_groupes -= 1
             self.partition.supprimer_groupe(self.partition.get_groupes()[-1])
             self.partition.adapter_taille()
@@ -143,6 +184,61 @@ class CreationGroupe(Page):
         self.partition.adapter_taille()
         self.group_count_label.config(text=str(self.nb_groupes))
         self.afficher_groupes()  # Regénérer les groupes avec le nouveau nombre
+    
+    def exporter_criteres(self):
+        """
+        Exporte les critères et leurs valeurs actuelles des sliders dans un fichier CSV.
+        """
+        fichier = filedialog.asksaveasfilename(
+            defaultextension=".csv",
+            filetypes=[("CSV files", "*.csv")],
+            title="Exporter les critères"
+        )
+        
+        if not fichier:
+            return
+        
+        # Récupération des valeurs des sliders
+        data = [(critere.get_nom(), critere.get_poids()) for critere in self.criteres]
+
+        try:
+            with open(fichier, mode='w', newline='', encoding='utf-8') as file:
+                writer = csv.writer(file)
+                writer.writerow(["Critère", "Valeur"])
+                writer.writerows(data)
+            print(f"Exportation réussie : {fichier}")
+        except Exception as e:
+            print(f"Erreur lors de l'exportation : {e}")
+
+    def importer_criteres(self):
+        criteres = {critere.get_nom(): critere for critere in self.criteres}
+        filepath = filedialog.askopenfilename(filetypes=[("Fichiers CSV", "*.csv"), ("Tous les fichiers", "*.*")])
+        if filepath:
+            if not filepath.endswith(".csv"):
+                messagebox.showerror("Erreur", "Veuillez sélectionner un fichier CSV.")
+                return
+            try:
+                with open(filepath, mode='r', encoding='utf-8') as file:
+                    reader = csv.reader(file)
+                    next(reader)  # Ignorer l'en-tête
+                    data = dict(reader)
+                print(f"Importation réussie : {filepath}")
+            except Exception as e:
+                print(f"Erreur lors de l'importation : {e}")
+        if not data:
+            return messagebox.showerror("Erreur", "Aucune donnée à importer.")
+        if not all(critere in criteres for critere in data.keys()):
+            return messagebox.showerror("Erreur", "Certains critères ne sont pas reconnus.")
+        if all(critere in criteres for critere in data.keys()) and len(data.keys()) < len(criteres):
+            if not messagebox.askyesno("Confirmation", "Certains critères ne sont pas reconnus. Voulez-vous continuer l'importation ?"):
+                return messagebox.showinfo("Information", "Importation annulée.")
+        
+        for nom, critere in criteres.items():
+            if nom in data:
+                critere.set_poids(int(data[nom]))
+            else:
+                critere.set_poids(0)
+        self.afficher_criteres()    
 
     def afficher_groupes(self):
         """
@@ -160,11 +256,11 @@ class CreationGroupe(Page):
 
         self.inner_frame.update_idletasks()
 
-        nb_colonnes = 3
+        nb_colonnes = 2
         posx, posy = 0, 0
 
         for i, groupe in enumerate(self.partition.get_groupes()):
-            tg = TableauGroupe(self.inner_frame, self.partition, i, self.img_param_tk)
+            tg = TableauGroupe(self.inner_frame, self, self.partition, i, self.img_param_tk)
             tg.grid(row=posy, column=posx)
 
             self.tables.append(tg)
@@ -184,6 +280,9 @@ class CreationGroupe(Page):
         self.scrollbar_y.pack(side="right", fill="y")
         self.canvas_frame.configure(yscrollcommand=self.scrollbar_y.set)
 
+    def afficher_criteres(self):
+        table = TableauCriteres(self, self, self.criteres)
+        table.place(relx=0.05, rely=0.3)
 
     def retour_page_accueil(self):
         """
@@ -204,24 +303,105 @@ class CreationGroupe(Page):
         popup = ParametresGroupe(self, self.partition, groupe)
         popup.grab_set()  # Pour forcer le focus sur la fenêtre pop-up
 
+
+class TableauCriteres(tk.Frame):
+    def __init__(self, parent, page, criteres):
+        super().__init__(parent, background='')
+        self.criteres = criteres
+        self.page = page
+        self.table = Table(parent=self, controller=self)
+        self.table._create_table_headers(["Critère","", "Val"])
+        self.table.grid(row=0, column=0, padx=10, pady=10)
+        self.sliders = []
+        self.sliders_vars = []
+
+        for i, critere in enumerate(self.criteres):
+            self.table._create_table_entry(i + 1, 0, critere.get_nom())
+            poids_var = tk.IntVar(value=critere.get_poids())
+            poids_scale = tk.Scale(self.table.frame, variable=poids_var, from_=0, to=100, resolution=1, orient="horizontal", length=200, showvalue=False)
+            poids_scale.bind("<ButtonRelease-1>", lambda event, index=i: self.adjust_sliders(event.widget.get(), index))
+            self.sliders.append(poids_scale)
+            self.sliders_vars.append(poids_var)
+            self.table._create_table_entry(i + 1, 1, poids_scale)
+            poids_entry = tk.Entry(self.table.frame, textvariable=poids_var, width=5)
+            self.table._create_table_entry(i + 1, 2, poids_entry)
+    
+    def adjust_sliders(self, value, index):
+        value = int(round(float(value)))  # Convertir en entier pour IntVar
+        total_sliders = len(self.sliders)
+        remaining_sum = max(0, 100 - value)
+
+        # Récupérer les valeurs actuelles des autres sliders
+        current_values = [var.get() for i, var in enumerate(self.sliders_vars) if i != index]
+        current_total = sum(current_values)
+
+        # Si le slider sélectionné atteint 100, mettre les autres à 0
+        if value >= 100:
+            new_values = [0 if i != index else 100 for i in range(total_sliders)]
+        elif current_total == 0:
+            # Répartir uniformément si les autres sont à 0
+            new_values = [remaining_sum // (total_sliders - 1) if i != index else value for i in range(total_sliders)]
+        else:
+            # Ajuster les autres sliders proportionnellement
+            new_values = []
+            for i, var in enumerate(self.sliders_vars):
+                if i == index:
+                    new_values.append(value)
+                else:
+                    new_value = int(round((var.get() / current_total) * remaining_sum))
+                    new_values.append(new_value)
+
+        # Corriger les petits écarts dus aux arrondis
+        correction = 100 - sum(new_values)
+        if correction != 0:
+            for i in range(total_sliders):
+                if i != index:
+                    new_values[i] = max(0, min(100, new_values[i] + correction))
+                    break
+
+        # Mettre à jour tous les sliders
+        for i, var in enumerate(self.sliders_vars):
+            var.set(max(0, min(100, new_values[i])))
+            self.criteres[i].set_poids(new_values[i])
+
 class TableauGroupe(tk.Frame):
-    def __init__(self, parent, partition:Partition, index, img_param_tk):
+    def __init__(self, parent, page, partition:Partition, index, img_param_tk):
         super().__init__(parent)
         self.groupe = partition.get_groupes()[index]
+        self.page=page
         self.partition = partition
         title_label = tk.Label(self, text=f"Groupe {index+1}", font=("Arial", 12, "bold"), 
                                     bg="#3D83B1", fg="white", width=15, height=2, anchor="center")
         title_label.grid(row=0, column=0, padx=10, pady=10, sticky="w")
+        nb_eleves_label = tk.Label(self, text=f"{len(self.groupe.get_eleves())}/{self.groupe.get_taille()}", font=("Arial", 12, "bold"), 
+                                    bg="#3D83B1", fg="white", width=15, height=2, anchor="center")
+        nb_eleves_label.grid(row=0, column=1, padx=10, pady=10, sticky="w")
         # Créer le bouton avec l'image redimensionnée
         bouton_param_grp = tk.Button(self, image=img_param_tk, compound="right", anchor='e', command=lambda: self.pop_up_param_grp())
-        bouton_param_grp.grid(row=0, column=1, padx=10, pady=10, sticky="e")
+        bouton_param_grp.grid(row=0, column=2, padx=10, pady=10, sticky="e")
+        # Créer la liste des contraintes saisies
+        nb_critere_avec_contraintes = len([v for v in partition.get_groupes()[index].get_contraintes().values() if len(v) > 0])
+        if nb_critere_avec_contraintes > 0:
+            font_height = tkf.Font(font=("Arial", 12)).metrics('linespace')
+            print(font_height)
+            contraintes_table = Table(self, self, height=(font_height+3)*(nb_critere_avec_contraintes+1))
+            contraintes_table._create_table_headers(["Critère", "Valeurs"], [21]*2)
+            contraintes_table.grid(row=1, column=0, padx=10, pady=10, columnspan=3)
+            for i, kv in enumerate(partition.get_groupes()[index].get_contraintes().items()):
+                critere, valeurs = kv
+                if(len(valeurs) == 0):
+                    continue
+                contraintes_table._create_table_entry(i+1, 0, critere.get_nom(), width=21)
+                contraintes_table._create_table_entry(i+1, 1, ", ".join([str(critere.to_val(v)) for v in valeurs]), width=21)
         # Créer la table pour chaque groupe
-        table = Table(parent=self, controller=self, eleves=self.groupe.get_eleves(), criteres=self.partition.get_criteres())
-        table.grid(row=1, column=0, padx=10, pady=10, columnspan=2)
+        table = EleveTable(parent=self, controller=self, eleves=self.groupe.get_eleves(), criteres=self.partition.get_criteres())
+        table.grid(row=2, column=0, padx=10, pady=10, columnspan=3)
         # Personnalisation des cellules du tableau
         for widget in table.winfo_children():
             if isinstance(widget, tk.Label):
                 widget.config(bg="white", fg="black", relief="solid", bd=1)
+    def afficher_groupes(self):
+        self.page.afficher_groupes()
     def pop_up_param_grp(self):
         from pages.parametresGroupe import ParametresGroupe
         popup = ParametresGroupe(self, self.partition, self.groupe)
