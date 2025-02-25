@@ -105,7 +105,6 @@ class PageAccueil(Page):
                 for col in colonnes
             ]
         df.columns = normaliser_colonnes(df.columns)
-        print(df.columns[:4])
         if(list(df.columns[:4]) != ['numetudiant','nom','prenom','genre']):
             messagebox.showerror("Erreur", "Les colonnes du fichier CSV doivent être dans l'ordre suivant: numEtudiant, nom, prenom, genre")
             return
@@ -123,7 +122,6 @@ class PageAccueil(Page):
                 eleve.ajouter_critere(critere, row[critere.get_nom()])
             self.eleves.append(eleve)
         
-        print([c.get_transpo() for c in self.criteres])
         # Charger dynamiquement la page CreationGroupe en passant les élèves et les critères
         from pages.creationGroupe import CreationGroupe  # Import dynamique
         self.controller.show_frame(CreationGroupe, self.eleves, self.criteres)

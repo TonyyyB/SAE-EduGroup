@@ -20,7 +20,6 @@ class Critere:
                         correspondance = ord(valeur) - ord('A') + 1
                     else:
                         correspondance = len(self.transpo.keys())+1
-                    print(f"Valeur ajoutée: {valeur} -> {correspondance}")
             self.transpo[valeur] = correspondance
 
     def set_poids(self, poids:int) -> None:

@@ -88,8 +88,14 @@ class ParametresGroupe(tk.Toplevel):
                 self.groupe.set_contrainte(critere, criteres_selectionnes[critere])
         newTaille = int(self.entry_nb_eleve.get())
         if newTaille != self.groupe.get_taille():
-            self.groupe.changer_taille(newTaille)
-            self.partition.adapter_taille()
+            oldTaille = self.groupe.get_taille()
+            try:
+                self.groupe.changer_taille(newTaille)
+                self.partition.adapter_taille()
+            except ValueError:
+                self.groupe.changer_taille(oldTaille)
+                messagebox.showerror("Erreur", f"Impossible de changer la taille du groupe de {oldTaille} à {newTaille}.")
+                return
         self.destroy()
         self.update()
         self.parent.afficher_groupes()

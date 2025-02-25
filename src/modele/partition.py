@@ -100,8 +100,7 @@ class Partition:
 
         # Si le nombre d'élèves restants est négatif, il y a un problème de dépassement
         if nbElevesRestants < 0:
-            messagebox.showerror("Erreur", "La somme des tailles des groupes dépasse le nombre total d'élèves.")
-            return
+            raise ValueError("La somme des tailles des groupes dépasse le nombre total d'élèves.")
 
         # Répartir les élèves restants dans les groupes non modifiés
         nbParGroupe = nbElevesRestants // len(groupesSansTailleModif)
