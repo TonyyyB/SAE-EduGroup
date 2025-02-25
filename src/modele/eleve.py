@@ -5,21 +5,18 @@ class Eleve:
         self.nom:str = nom
         self.num_etudiant:int = num_etudiant
         self.genre:bool = genre
-        self.criteres:dict[Critere,int] = {}  # Dictionnaire pour les matières et les critères
+        self.criteres:dict[Critere,int|str] = {}  # Dictionnaire pour les matières et les critères
+        self.groupes_possible = set()
 
-    def ajouter_critere(self, critere:Critere, valeur:int|str|bool):
+    def ajouter_critere(self, critere:Critere, valeur:int|str):
         """Ajoute un critère avec une valeur associée au dictionnaire criteres."""
-        critere.ajouter_valeur(valeur)
-        self.criteres[critere] = critere.to_int(valeur)
+        self.criteres[critere] = valeur
 
-    def calculer_moyenne_ponderee(self):
-        """Calcule la moyenne pondérée des critères (matières) selon les coefficients fournis."""
-        total_coef = sum(critere.get_poids() for critere in self.criteres.keys())
-        if total_coef == 0:
-            return 0
-        score = sum(self.criteres[critere] * critere for critere in self.criteres.keys()) / total_coef
-        return score
-
+    def ajouter_groupes_possible(self, groupe):
+        self.groupes_possible.add(groupe)
+    def get_groupes_possible(self):
+        return self.groupes_possible
+    
     def get_id(self):
         return self.num_etudiant
     def get_nom(self):

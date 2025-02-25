@@ -1,17 +1,14 @@
 import tkinter as tk
 from tkinter import filedialog, messagebox
 import unicodedata
-from modele.detection_critere import detecter_type_critere
 from tkinterdnd2 import DND_FILES
 import customtkinter as ctk
 from constantes import *
 from pages.page import Page
 import pandas as pd
 from modele.eleve import Eleve
-from modele.criteres.numerique import Numerique
-from modele.criteres.categorique import Categorique
-from modele.criteres.booleen import Booleen
 from modele.critere import Critere
+
 
 class PageAccueil(Page):
     def __init__(self, parent, controller):
@@ -42,9 +39,13 @@ class PageAccueil(Page):
         self.clear_button = tk.Button(self.frame, text="❌", command=self.clear_file, bg='red', fg='white', font=PETITE_POLICE, width=2)
         self.clear_button.pack(side='right')
 
+        # Bouton en bas pour importer les paramètres
+        self.import_button = tk.Button(self, text="Importer des paramètres", command=self.import_params, bg='#3498DB', fg='white', font=MOYENNE_POLICE)
+        self.import_button.place(relx=0.25, rely=0.8, anchor='center', relwidth=0.25, relheight=0.08)
+
         # Bouton pour créer les groupes
         self.create_button = tk.Button(self, text="Créer les groupes", command=self.go_to_next_page, bg='#3498DB', fg='white', font=MOYENNE_POLICE)
-        self.create_button.place(relx=0.5, rely=0.8, anchor='center', relwidth=0.25, relheight=0.08)
+        self.create_button.place(relx=0.75, rely=0.8, anchor='center', relwidth=0.25, relheight=0.08)
 
     def on_file_drop(self, event):
         # Nettoyer le chemin du fichier
@@ -105,14 +106,10 @@ class PageAccueil(Page):
                 for col in colonnes
             ]
         df.columns = normaliser_colonnes(df.columns)
-        if(list(df.columns[:4]) != ['numetudiant','nom','prenom','genre']):
-            messagebox.showerror("Erreur", "Les colonnes du fichier CSV doivent être dans l'ordre suivant: numEtudiant, nom, prenom, genre")
-            return
         self.criteres:list[Critere] = []
         for critere in df.columns[4:]:
-            self.criteres.append(detecter_type_critere(critere, df[critere]))
-        for critere in self.criteres:
-            critere.set_poids(100//len(self.criteres))
+            self.criteres.append(Critere(critere,5, set(df[critere])))
+
         # Créer la liste des élèves
         import random
         self.eleves = []
@@ -121,6 +118,9 @@ class PageAccueil(Page):
             for critere in self.criteres:
                 eleve.ajouter_critere(critere, row[critere.get_nom()])
             self.eleves.append(eleve)
+        
+        for critere in self.criteres:
+            critere.calcul_proportion(self.eleves)
         
         # Charger dynamiquement la page CreationGroupe en passant les élèves et les critères
         from pages.creationGroupe import CreationGroupe  # Import dynamique

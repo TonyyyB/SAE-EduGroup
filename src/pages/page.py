@@ -73,46 +73,61 @@ class Page(tk.Frame):
         else:
             raise Exception("Label not found in list")
 class Table(tk.Frame):
-    def __init__(self, parent, controller, enable_scroll_x=False, enable_scroll_y=False, height=None, width=None):
+    def __init__(self, parent, controller, eleves=None, criteres=None):
         super().__init__(parent)
 
-        self.canvas = tk.Canvas(self, height=height, width=width)
-        if enable_scroll_x:
-            self.scrollbar_x = tk.Scrollbar(self, orient="horizontal", command=self.canvas.xview)
-            self.scrollbar_x.grid(row=1, column=0, sticky="ew")
-            self.canvas.configure(xscrollcommand=self.scrollbar_x.set)
-        if enable_scroll_y:
-            self.scrollbar_y = tk.Scrollbar(self, orient="vertical", command=self.canvas.yview)
-            self.scrollbar_y.grid(row=0, column=1, sticky="ns")
-            self.canvas.configure(yscrollcommand=self.scrollbar_y.set)
-        
+        self.canvas = tk.Canvas(self)
+        self.scrollbar_y = tk.Scrollbar(self, orient="vertical", command=self.canvas.yview)
+        self.scrollbar_x = tk.Scrollbar(self, orient="horizontal", command=self.canvas.xview)
+        self.canvas.configure(yscrollcommand=self.scrollbar_y.set, xscrollcommand=self.scrollbar_x.set)
 
         self.frame = tk.Frame(self.canvas)
         self.frame.bind("<Configure>", lambda e: self.canvas.configure(scrollregion=self.canvas.bbox("all")))
-        self.frame.columnconfigure(0, weight=1)
         self.canvas.create_window((0, 0), window=self.frame, anchor="nw")
 
         self.canvas.grid(row=0, column=0, sticky="nsew")
+        self.scrollbar_y.grid(row=0, column=1, sticky="ns")
+        self.scrollbar_x.grid(row=1, column=0, sticky="ew")
 
         self.controller = controller
+
+        # Si une liste d'élèves est fournie, créer le tableau à partir de ces données
+        if eleves is not None and criteres is not None:
+            self.create_table_from_eleves(eleves, criteres)
 
         # Configuration pour que le canvas s'ajuste automatiquement
         self.grid_rowconfigure(0, weight=1)
         self.grid_columnconfigure(0, weight=1)
 
-    def _create_table_headers(self, titre_colonnes, sizes=[]):
-        for j, titre in enumerate(titre_colonnes):
-            if len(sizes) > j and sizes[j] is not None:
-                b = tk.Label(self.frame, text=titre, bg="lightgray", font=("Arial", 12), width=sizes[j])
-            else:
-                b = tk.Label(self.frame, text=titre, bg="lightgray", font=("Arial", 12))
+    def create_table_from_eleves(self, eleves, criteres):
+        """
+        Crée un tableau basé sur une liste d'élèves et des critères.
+        Affiche le nom, prénom, ID, et les notes pour chaque critère.
+        """
+        # Définir les titres de colonnes : Prénom, Nom, ID + critères
+        self.titre_colonnes = ['Prénom', 'Nom', 'ID'] + [c.get_nom() for c in criteres]
+
+        # Créer les titres des colonnes
+        for j, titre in enumerate(self.titre_colonnes):
+            b = tk.Label(self.frame, text=titre, bg="lightgray", font=("Arial", 12), width=15)
             b.grid(row=0, column=j)
 
-    def _create_table_entry(self, row, col, widget, width=15):
+        # Remplir les lignes avec les données des élèves
+        for i, eleve in enumerate(eleves):
+            # Colonnes fixes : prénom, nom, ID
+            self._create_table_entry(i + 1, 0, eleve.prenom)
+            self._create_table_entry(i + 1, 1, eleve.nom)
+            self._create_table_entry(i + 1, 2, eleve.num_etudiant)
+
+            # Colonnes dynamiques : notes pour chaque critère
+            for j, critere in enumerate(criteres):
+                note = eleve.get_critere(critere)
+                self._create_table_entry(i + 1, j + 3, note)
+
+    def _create_table_entry(self, row, col, text):
         """Crée une cellule dans le tableau."""
-        if isinstance(widget, str) or isinstance(widget, int):
-            widget = tk.Label(self.frame, text=widget, bg="white", font=("Arial", 12), width=width)
-        widget.grid(row=row, column=col)
+        entry = tk.Label(self.frame, text=text, bg="white", font=("Arial", 12), width=15)
+        entry.grid(row=row, column=col)
 
     def _on_mousewheel_windows(self, event):
         """Défilement sur Windows."""

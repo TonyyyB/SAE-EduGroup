@@ -83,7 +83,7 @@ class ParametresGroupe(tk.Toplevel):
             criteres_selectionnes[critere] = set()
             for val, var in vars_list:
                 if var.get():
-                    criteres_selectionnes[critere].add(critere.to_int(val))
+                    criteres_selectionnes[critere].add(val)
             if len(criteres_selectionnes) > 0:
                 self.groupe.set_contrainte(critere, criteres_selectionnes[critere])
         newTaille = int(self.entry_nb_eleve.get())

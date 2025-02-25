@@ -2,66 +2,51 @@ from typing import TYPE_CHECKING
 if TYPE_CHECKING:
     from groupe import Groupe
 class Critere:
-    def __init__(self, nom:str, poids:int, repartition:bool):
+    def __init__(self, nom:str, poids:int, valPossible:set):
         self.nom:str = nom
         self.poids:int = poids
-        self.repartition:bool = repartition
-        self.transpo:dict[int|bool|str,int] = dict()
-
-    def ajouter_valeur(self, valeur:int|bool|str, correspondance:int=None) -> None:
-        if valeur not in self.transpo.keys():
-            if correspondance is None:
-                if isinstance(valeur, int):
-                    correspondance = valeur
-                elif isinstance(valeur, bool):
-                    correspondance = 1 if valeur else 0
-                else:
-                    if len(valeur) == 1:
-                        correspondance = ord(valeur) - ord('A') + 1
-                    else:
-                        correspondance = len(self.transpo.keys())+1
-            self.transpo[valeur] = correspondance
+        self.valPossible: set = valPossible
+        self.proportionGlobale: dict = None
+        
 
     def set_poids(self, poids:int) -> None:
         self.poids:int = poids
     def get_poids(self) -> int:
         return self.poids
-    
-    def set_repratis(self, repartis:bool) -> None:
-        self.repartition:bool = repartis
 
     def get_nom(self) -> str:
         return self.nom
-    def est_reparti(self) -> bool:
-        return self.repartition
+    
+    def get_proportionGlobale(self,valeur) -> float:
+        return self.proportionGlobale[valeur]
+    
+    def calcul_proportion(self, eleves):
+        nb = 0
+        dico = dict()
+        for valeur in self.valPossible:
+            for eleve in eleves:
+                if eleve.get_critere(self) == valeur:
+                    nb += 1
+            dico[valeur] = nb / len(eleves)
+        self.proportionGlobale = dico
 
-    def to_int(self, val:int|bool|str) -> int:
-        return self.transpo[val]
+    
+    def get_valPossible(self) -> set:
+        return self.valPossible
 
-    def to_val(self, val:int) -> int|bool|str:
-        for cle, valeur in self.transpo.items():
-            if valeur == val:
-                return cle
-        return None
 
-    def calcul_score(self, groupe:'Groupe') -> float:
-        pass
 
-    def get_transpo(self) -> dict[int|bool|str,int]:
-        return self.transpo
+
+    def calcul_score(self, groupes:['Groupe']) -> float:
+        somme = 0
+        for groupe in groupes:
+            for val in self.valPossible:
+                somme += groupe.calcul_score(self,val)
+        return somme * self.get_poids()
+
     
     def get_valeurs_possibles(self, toVal=False) -> set[int]|set[int|bool|str]:
-        return set(self.transpo.keys()) if toVal else set(self.transpo.values())
-    
-    def get_valeur_min(self, toVal=False) -> int|bool|str:
-        if(toVal):
-            return min(self.transpo, key = self.transpo.get)
-        return min(self.transpo)
-    
-    def get_valeur_max(self, toVal=False) -> int|bool|str:
-        if(toVal):
-            return max(self.transpo, key = self.transpo.get)
-        return max(self.transpo)
+        return self.valPossible
 
     def __repr__(self):
         return f"{self.nom}: {self.poids}"
