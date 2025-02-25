@@ -1,9 +1,10 @@
-try:                        # In order to be able to import tkinter for
-    import tkinter as tk    # either in python 2 or in python 3
+try:
+    import tkinter as tk
     import tkinter.font as tkf
 except ImportError:
     import Tkinter as tk
     import tkFont as tkf
+import csv
 from tkinter import filedialog
 from modele.eleve import Eleve
 from modele.partition import Partition
@@ -129,11 +130,11 @@ class CreationGroupe(Page):
         bouton_retour.place(relx=0.85, rely=0.05, anchor='center')
 
         # Bouton en bas pour importer les paramètres
-        import_button = ctk.CTkButton(self, text="Importer des paramètres", font=GRANDE_POLICE, command=self.import_params)
+        import_button = ctk.CTkButton(self, text="Importer des paramètres", font=GRANDE_POLICE, command=self.importer_criteres)
         import_button.place(relx=0.85, rely=0.10, anchor='center')
 
         # Bouton de retour
-        bouton_exporter = ctk.CTkButton(self, text="Exporter les paramètres", font=GRANDE_POLICE, command=self.retour_page_accueil)
+        bouton_exporter = ctk.CTkButton(self, text="Exporter les paramètres", font=GRANDE_POLICE, command=self.exporter_criteres)
         bouton_exporter.place(relx=0.85, rely=0.15, anchor='center')
 
         # Bouton de retour
@@ -187,6 +188,61 @@ class CreationGroupe(Page):
         self.partition.adapter_taille()
         self.group_count_label.config(text=str(self.nb_groupes))
         self.afficher_groupes()  # Regénérer les groupes avec le nouveau nombre
+    
+    def exporter_criteres(self):
+        """
+        Exporte les critères et leurs valeurs actuelles des sliders dans un fichier CSV.
+        """
+        fichier = filedialog.asksaveasfilename(
+            defaultextension=".csv",
+            filetypes=[("CSV files", "*.csv")],
+            title="Exporter les critères"
+        )
+        
+        if not fichier:
+            return
+        
+        # Récupération des valeurs des sliders
+        data = [(critere.get_nom(), critere.get_poids()) for critere in self.criteres]
+
+        try:
+            with open(fichier, mode='w', newline='', encoding='utf-8') as file:
+                writer = csv.writer(file)
+                writer.writerow(["Critère", "Valeur"])
+                writer.writerows(data)
+            print(f"Exportation réussie : {fichier}")
+        except Exception as e:
+            print(f"Erreur lors de l'exportation : {e}")
+
+    def importer_criteres(self):
+        criteres = {critere.get_nom(): critere for critere in self.criteres}
+        filepath = filedialog.askopenfilename(filetypes=[("Fichiers CSV", "*.csv"), ("Tous les fichiers", "*.*")])
+        if filepath:
+            if not filepath.endswith(".csv"):
+                messagebox.showerror("Erreur", "Veuillez sélectionner un fichier CSV.")
+                return
+            try:
+                with open(filepath, mode='r', encoding='utf-8') as file:
+                    reader = csv.reader(file)
+                    next(reader)  # Ignorer l'en-tête
+                    data = dict(reader)
+                print(f"Importation réussie : {filepath}")
+            except Exception as e:
+                print(f"Erreur lors de l'importation : {e}")
+        if not data:
+            return messagebox.showerror("Erreur", "Aucune donnée à importer.")
+        if not all(critere in criteres for critere in data.keys()):
+            return messagebox.showerror("Erreur", "Certains critères ne sont pas reconnus.")
+        if all(critere in criteres for critere in data.keys()) and len(data.keys()) < len(criteres):
+            if not messagebox.askyesno("Confirmation", "Certains critères ne sont pas reconnus. Voulez-vous continuer l'importation ?"):
+                return messagebox.showinfo("Information", "Importation annulée.")
+        
+        for nom, critere in criteres.items():
+            if nom in data:
+                critere.set_poids(int(data[nom]))
+            else:
+                critere.set_poids(0)
+        self.afficher_criteres()    
 
     def afficher_groupes(self):
         """
