@@ -73,10 +73,10 @@ class Page(tk.Frame):
         else:
             raise Exception("Label not found in list")
 class Table(tk.Frame):
-    def __init__(self, parent, controller, enable_scroll_x=False, enable_scroll_y=False):
+    def __init__(self, parent, controller, enable_scroll_x=False, enable_scroll_y=False, height=None, width=None):
         super().__init__(parent)
 
-        self.canvas = tk.Canvas(self)
+        self.canvas = tk.Canvas(self, height=height, width=width)
         if enable_scroll_x:
             self.scrollbar_x = tk.Scrollbar(self, orient="horizontal", command=self.canvas.xview)
             self.scrollbar_x.grid(row=1, column=0, sticky="ew")
@@ -108,10 +108,10 @@ class Table(tk.Frame):
                 b = tk.Label(self.frame, text=titre, bg="lightgray", font=("Arial", 12))
             b.grid(row=0, column=j)
 
-    def _create_table_entry(self, row, col, widget):
+    def _create_table_entry(self, row, col, widget, width=15):
         """Crée une cellule dans le tableau."""
         if isinstance(widget, str) or isinstance(widget, int):
-            widget = tk.Label(self.frame, text=widget, bg="white", font=("Arial", 12), width=15)
+            widget = tk.Label(self.frame, text=widget, bg="white", font=("Arial", 12), width=width)
         widget.grid(row=row, column=col)
 
     def _on_mousewheel_windows(self, event):
