@@ -1,3 +1,4 @@
+import csv
 import tkinter as tk
 from tkinter import filedialog
 from modele.eleve import Eleve
@@ -128,7 +129,7 @@ class CreationGroupe(Page):
         import_button.place(relx=0.85, rely=0.10, anchor='center')
 
         # Bouton de retour
-        bouton_exporter = ctk.CTkButton(self, text="Exporter les paramètres", font=GRANDE_POLICE, command=self.retour_page_accueil)
+        bouton_exporter = ctk.CTkButton(self, text="Exporter les paramètres", font=GRANDE_POLICE, command=self.exporter_criteres)
         bouton_exporter.place(relx=0.85, rely=0.15, anchor='center')
 
         # Bouton de retour
@@ -182,6 +183,31 @@ class CreationGroupe(Page):
         self.partition.adapter_taille()
         self.group_count_label.config(text=str(self.nb_groupes))
         self.afficher_groupes()  # Regénérer les groupes avec le nouveau nombre
+    
+    def exporter_criteres(self):
+        """
+        Exporte les critères et leurs valeurs actuelles des sliders dans un fichier CSV.
+        """
+        fichier = filedialog.asksaveasfilename(
+            defaultextension=".csv",
+            filetypes=[("CSV files", "*.csv")],
+            title="Exporter les critères"
+        )
+        
+        if not fichier:
+            return
+        
+        # Récupération des valeurs des sliders
+        data = [(critere.get_nom(), critere.get_poids()) for critere in self.criteres]
+
+        try:
+            with open(fichier, mode='w', newline='', encoding='utf-8') as file:
+                writer = csv.writer(file)
+                writer.writerow(["Critère", "Valeur"])
+                writer.writerows(data)
+            print(f"Exportation réussie : {fichier}")
+        except Exception as e:
+            print(f"Erreur lors de l'exportation : {e}")
 
     def afficher_groupes(self):
         """
