@@ -105,10 +105,15 @@ class PageAccueil(Page):
                 for col in colonnes
             ]
         df.columns = normaliser_colonnes(df.columns)
+        print(df.columns[:4])
+        if(list(df.columns[:4]) != ['numetudiant','nom','prenom','genre']):
+            messagebox.showerror("Erreur", "Les colonnes du fichier CSV doivent être dans l'ordre suivant: numEtudiant, nom, prenom, genre")
+            return
         self.criteres:list[Critere] = []
         for critere in df.columns[4:]:
             self.criteres.append(detecter_type_critere(critere, df[critere]))
-
+        for critere in self.criteres:
+            critere.set_poids(100//len(self.criteres))
         # Créer la liste des élèves
         import random
         self.eleves = []

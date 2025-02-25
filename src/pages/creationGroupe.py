@@ -1,9 +1,5 @@
-try:
-    import tkinter as tk
-    import tkinter.font as tkf
-except ImportError:
-    import Tkinter as tk
-    import tkFont as tkf
+import tkinter as tk
+import tkinter.font as tkf
 import csv
 from tkinter import filedialog
 from modele.eleve import Eleve
@@ -367,10 +363,6 @@ class TableauCriteres(tk.Frame):
         for i, var in enumerate(self.sliders_vars):
             var.set(max(0, min(100, new_values[i])))
             self.criteres[i].set_poids(new_values[i])
-        print([f"{c.get_nom()} : {c.get_poids()}" for c in self.criteres])
-
-
-
 
 class TableauGroupe(tk.Frame):
     def __init__(self, parent, page, partition:Partition, index, img_param_tk):
