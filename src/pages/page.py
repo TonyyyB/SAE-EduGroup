@@ -45,7 +45,7 @@ class Page(tk.Frame):
                 fill = label.get('fill', 'black')
 
                 # Créer le texte sur le Canvas
-                self.canvas.create_text(x, y, text=text, font=font, fill=fill)
+                self.canvas.create_text(x, y, text=text, font=font, fill=fill,tags="labels")
             except Exception as e:
                 print(f"Erreur lors de la création du texte '{label_key}': {e}")
 
@@ -70,8 +70,30 @@ class Page(tk.Frame):
     def change_text(self, id, text):
         if id in self.labels:
             self.labels[id]["text"] = text
+            self.update_labels()  # Mettre à jour l'affichage des labels
         else:
             raise Exception("Label not found in list")
+    
+    def update_labels(self):
+        """Supprime et redessine uniquement les labels sans toucher au dégradé."""
+        self.canvas.delete("labels")  # Supprime tous les anciens labels
+
+        width = self.winfo_width()
+        height = self.winfo_height()
+
+        for label_key, label in self.labels.items():
+            try:
+                x = width * label.get('x', 0.5)
+                y = height * label.get('y', 0.1)
+                text = label.get('text', "")
+                font = label.get('font', ("Arial", 12))
+                fill = label.get('fill', 'black')
+
+                # Créer le texte avec un tag "labels" pour pouvoir l'effacer plus tard
+                self.canvas.create_text(x, y, text=text, font=font, fill=fill, tags="labels")
+            except Exception as e:
+                print(f"Erreur lors de la mise à jour du texte '{label_key}': {e}")
+
 class Table(tk.Frame):
     def __init__(self, parent, controller, eleves=None, criteres=None):
         super().__init__(parent)

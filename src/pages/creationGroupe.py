@@ -98,14 +98,15 @@ class CreationGroupe(Page):
         increase_button = ctk.CTkButton(group_control_frame, text="+", font=("Arial", 16), command=self.increase_group_count)
         increase_button.grid(row=0, column=2)
 
-        self.eleves_restants_label = tk.Label(
-            self,
-            text=f"Élèves restants: {len(self.eleves)}",
-            font=MOYENNE_POLICE,
-            bg=self.master.cget("bg"),
-            fg="black",
-        )
-        self.eleves_restants_label.place(relx=0.068, rely=0) 
+        self.create_label("eleves_restants", 0.15, 0.02, text=f"Élèves restants: {len(self.eleves)}", font=MOYENNE_POLICE)
+        #self.eleves_restants_label = tk.Label(
+        #    self,
+        #    text=f"Élèves restants: {len(self.eleves)}",
+        #    font=MOYENNE_POLICE,
+        #    bg=self.canvas["bg"],
+        #    fg="black",
+        #)
+        #self.eleves_restants_label.place(relx=0.068 rely=0) 
 
         # Bouton de génération
         bouton_generer = ctk.CTkButton(self, text="Générer les groupes", font=GRANDE_POLICE, command=self.generer_groupes)
@@ -167,7 +168,7 @@ class CreationGroupe(Page):
             restant -= len(groupe.eleves)
             print(restant)
         
-        self.eleves_restants_label.config(text=f"Élèves restants: {restant}")        
+        self.change_text("eleves_restants", text=f"Élèves restants: {restant}")        
 
         self.inner_frame.update_idletasks()
 
