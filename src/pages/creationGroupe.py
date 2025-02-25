@@ -1,5 +1,10 @@
+try:
+    import tkinter as tk
+    import tkinter.font as tkf
+except ImportError:
+    import Tkinter as tk
+    import tkFont as tkf
 import csv
-import tkinter as tk
 from tkinter import filedialog
 from modele.eleve import Eleve
 from modele.partition import Partition
@@ -305,7 +310,7 @@ class CreationGroupe(Page):
 
 class TableauCriteres(tk.Frame):
     def __init__(self, parent, page, criteres):
-        super().__init__(parent)
+        super().__init__(parent, background='')
         self.criteres = criteres
         self.page = page
         self.table = Table(parent=self, controller=self)
@@ -382,9 +387,23 @@ class TableauGroupe(tk.Frame):
         # Créer le bouton avec l'image redimensionnée
         bouton_param_grp = tk.Button(self, image=img_param_tk, compound="right", anchor='e', command=lambda: self.pop_up_param_grp())
         bouton_param_grp.grid(row=0, column=2, padx=10, pady=10, sticky="e")
+        # Créer la liste des contraintes saisies
+        nb_critere_avec_contraintes = len([v for v in partition.get_groupes()[index].get_contraintes().values() if len(v) > 0])
+        if nb_critere_avec_contraintes > 0:
+            font_height = tkf.Font(font=("Arial", 12)).metrics('linespace')
+            print(font_height)
+            contraintes_table = Table(self, self, height=(font_height+3)*(nb_critere_avec_contraintes+1))
+            contraintes_table._create_table_headers(["Critère", "Valeurs"], [21]*2)
+            contraintes_table.grid(row=1, column=0, padx=10, pady=10, columnspan=3)
+            for i, kv in enumerate(partition.get_groupes()[index].get_contraintes().items()):
+                critere, valeurs = kv
+                if(len(valeurs) == 0):
+                    continue
+                contraintes_table._create_table_entry(i+1, 0, critere.get_nom(), width=21)
+                contraintes_table._create_table_entry(i+1, 1, ", ".join([str(critere.to_val(v)) for v in valeurs]), width=21)
         # Créer la table pour chaque groupe
         table = EleveTable(parent=self, controller=self, eleves=self.groupe.get_eleves(), criteres=self.partition.get_criteres())
-        table.grid(row=1, column=0, padx=10, pady=10, columnspan=3)
+        table.grid(row=2, column=0, padx=10, pady=10, columnspan=3)
         # Personnalisation des cellules du tableau
         for widget in table.winfo_children():
             if isinstance(widget, tk.Label):
