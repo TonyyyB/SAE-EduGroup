@@ -260,8 +260,8 @@ class TableauCriteres(tk.Frame):
 
         for i, critere in enumerate(self.criteres):
             self.table._create_table_entry(i + 1, 0, critere.get_nom())
-            poids_var = tk.DoubleVar(value=critere.get_poids())
-            poids_scale = tk.Scale(self.table.frame, variable=poids_var, from_=0, to=1, resolution=0.01, orient="horizontal", length=200, showvalue=False)
+            poids_var = tk.IntVar(value=critere.get_poids())
+            poids_scale = tk.Scale(self.table.frame, variable=poids_var, from_=0, to=100, resolution=1, orient="horizontal", length=200, showvalue=False)
             poids_scale.bind("<ButtonRelease-1>", lambda event, index=i: self.adjust_sliders(event.widget.get(), index))
             self.sliders.append(poids_scale)
             self.sliders_vars.append(poids_var)
@@ -270,21 +270,20 @@ class TableauCriteres(tk.Frame):
             self.table._create_table_entry(i + 1, 2, poids_entry)
     
     def adjust_sliders(self, value, index):
-        print(value)
-        value = float(value)
+        value = int(round(float(value)))  # Convertir en entier pour IntVar
         total_sliders = len(self.sliders)
-        remaining_sum = max(0, 1 - value)  # S'assurer que la somme restante est positive
+        remaining_sum = max(0, 100 - value)
 
         # Récupérer les valeurs actuelles des autres sliders
         current_values = [var.get() for i, var in enumerate(self.sliders_vars) if i != index]
         current_total = sum(current_values)
 
-        # Si le slider sélectionné atteint 1, mettre les autres à 0
-        if value >= 1:
-            new_values = [0 if i != index else 1 for i in range(total_sliders)]
+        # Si le slider sélectionné atteint 100, mettre les autres à 0
+        if value >= 100:
+            new_values = [0 if i != index else 100 for i in range(total_sliders)]
         elif current_total == 0:
-            # Si les autres sliders sont tous à 0, répartir uniformément
-            new_values = [remaining_sum / (total_sliders - 1) if i != index else value for i in range(total_sliders)]
+            # Répartir uniformément si les autres sont à 0
+            new_values = [remaining_sum // (total_sliders - 1) if i != index else value for i in range(total_sliders)]
         else:
             # Ajuster les autres sliders proportionnellement
             new_values = []
@@ -292,22 +291,23 @@ class TableauCriteres(tk.Frame):
                 if i == index:
                     new_values.append(value)
                 else:
-                    new_value = (var.get() / current_total) * remaining_sum
-                    new_values.append(round(new_value, 2))
+                    new_value = int(round((var.get() / current_total) * remaining_sum))
+                    new_values.append(new_value)
 
         # Corriger les petits écarts dus aux arrondis
-        correction = 1 - sum(new_values)
-        if abs(correction) > 0.001:
+        correction = 100 - sum(new_values)
+        if correction != 0:
             for i in range(total_sliders):
                 if i != index:
-                    new_values[i] = max(0, min(1, new_values[i] + correction))
+                    new_values[i] = max(0, min(100, new_values[i] + correction))
                     break
 
         # Mettre à jour tous les sliders
         for i, var in enumerate(self.sliders_vars):
-            var.set(max(0, min(1, new_values[i])))
+            var.set(max(0, min(100, new_values[i])))
             self.criteres[i].set_poids(new_values[i])
-        print([f"{c.get_nom()} {c.get_poids()}" for c in self.criteres])
+        print([f"{c.get_nom()} : {c.get_poids()}" for c in self.criteres])
+
 
 
 
