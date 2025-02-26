@@ -10,6 +10,7 @@ from constantes import *
 from pages.page import Page
 from pages.page import Table, EleveTable
 from pages.accueil import PageAccueil
+from pages.table import DragAndDropController
 from tkinter import messagebox
 import pandas as pd
 from PIL import Image, ImageTk
@@ -259,8 +260,10 @@ class CreationGroupe(Page):
         nb_colonnes = 2
         posx, posy = 0, 0
 
+        self.dad_controller = DragAndDropController()
+
         for i, groupe in enumerate(self.partition.get_groupes()):
-            tg = TableauGroupe(self.inner_frame, self, self.partition, i, self.img_param_tk)
+            tg = TableauGroupe(self.inner_frame, self, self.partition, i, self.img_param_tk, self.dad_controller)
             tg.grid(row=posy, column=posx)
 
             self.tables.append(tg)
@@ -309,22 +312,27 @@ class TableauCriteres(tk.Frame):
         super().__init__(parent, background='')
         self.criteres = criteres
         self.page = page
-        self.table = Table(parent=self, controller=self)
-        self.table._create_table_headers(["Critère","", "Val"])
+        self.table = Table(parent=self, headers=["Critère","", "Val"])
         self.table.grid(row=0, column=0, padx=10, pady=10)
         self.sliders = []
         self.sliders_vars = []
 
         for i, critere in enumerate(self.criteres):
-            self.table._create_table_entry(i + 1, 0, critere.get_nom())
             poids_var = tk.IntVar(value=critere.get_poids())
-            poids_scale = tk.Scale(self.table.frame, variable=poids_var, from_=0, to=100, resolution=1, orient="horizontal", length=200, showvalue=False)
+
+            # Créer les widgets en les attachant à self (TableRow s'en chargera après)
+            poids_scale = tk.Scale(self, variable=poids_var, from_=0, to=100, resolution=1, orient="horizontal", length=200, showvalue=False)
             poids_scale.bind("<ButtonRelease-1>", lambda event, index=i: self.adjust_sliders(event.widget.get(), index))
+
+            poids_entry = tk.Entry(self, textvariable=poids_var, width=5)
+
+            # Ajouter la ligne dans la table
+            self.table.add_row([critere.get_nom(), poids_scale, poids_entry])
+
+            # Stocker les références
             self.sliders.append(poids_scale)
             self.sliders_vars.append(poids_var)
-            self.table._create_table_entry(i + 1, 1, poids_scale)
-            poids_entry = tk.Entry(self.table.frame, textvariable=poids_var, width=5)
-            self.table._create_table_entry(i + 1, 2, poids_entry)
+
     
     def adjust_sliders(self, value, index):
         value = int(round(float(value)))  # Convertir en entier pour IntVar
@@ -365,7 +373,7 @@ class TableauCriteres(tk.Frame):
             self.criteres[i].set_poids(new_values[i])
 
 class TableauGroupe(tk.Frame):
-    def __init__(self, parent, page, partition:Partition, index, img_param_tk):
+    def __init__(self, parent, page, partition:Partition, index, img_param_tk, controller):
         super().__init__(parent)
         self.groupe = partition.get_groupes()[index]
         self.page=page
@@ -383,7 +391,6 @@ class TableauGroupe(tk.Frame):
         nb_critere_avec_contraintes = len([v for v in partition.get_groupes()[index].get_contraintes().values() if len(v) > 0])
         if nb_critere_avec_contraintes > 0:
             font_height = tkf.Font(font=("Arial", 12)).metrics('linespace')
-            print(font_height)
             contraintes_table = Table(self, self, height=(font_height+3)*(nb_critere_avec_contraintes+1))
             contraintes_table._create_table_headers(["Critère", "Valeurs"], [21]*2)
             contraintes_table.grid(row=1, column=0, padx=10, pady=10, columnspan=3)
@@ -394,7 +401,7 @@ class TableauGroupe(tk.Frame):
                 contraintes_table._create_table_entry(i+1, 0, critere.get_nom(), width=21)
                 contraintes_table._create_table_entry(i+1, 1, ", ".join([str(critere.to_val(v)) for v in valeurs]), width=21)
         # Créer la table pour chaque groupe
-        table = EleveTable(parent=self, controller=self, eleves=self.groupe.get_eleves(), criteres=self.partition.get_criteres())
+        table = EleveTable(parent=self, controller=controller, eleves=self.groupe.get_eleves(), criteres=self.partition.get_criteres())
         table.grid(row=2, column=0, padx=10, pady=10, columnspan=3)
         # Personnalisation des cellules du tableau
         for widget in table.winfo_children():
