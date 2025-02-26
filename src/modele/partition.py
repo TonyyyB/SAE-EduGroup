@@ -9,6 +9,7 @@ class Partition:
         self.eleves:set[Eleve] = eleves
         self.criteres:set[Critere] = set() if len(eleves) == 0 else set(next(iter(eleves)).get_criteres().keys())
         self.is_genere = False
+        self.groupeEleve = dict()
     
     def is_generer(self):
         return self.is_genere
@@ -19,75 +20,43 @@ class Partition:
         elevesAPlacer:set[Eleve] = set(self.eleves)
         groupes = self.get_groupes()
         # Initialisation
-        for eleve in self.eleves:
-            maxi = -math.inf
-            gmax = None
-            for groupe in groupes:
-                if not groupe.respecter_contraintes(eleve) or not groupe.place_dispo(): continue
-                score = self.simule_ajout(groupe, eleve)
-                if score > maxi:
-                    maxi = score
-                    gmax = groupe
-            if gmax is not None:
-                gmax.ajouter_eleve(eleve)
-                elevesAPlacer.remove(eleve)
-        while len(elevesAPlacer) > 0:
-            eleve = elevesAPlacer.pop()
-            maxi = -math.inf
-            gmax = None
-            for groupe in groupes:
-                if not groupe.place_dispo(): continue
-                score = self.simule_ajout(groupe,eleve)
-                if gmax is None:
-                    maxi = score
-                    gmax = groupe
-                    continue
-                if score > maxi:
-                    maxi = score
-                    gmax = groupe
-            gmax.ajouter_eleve(eleve)
-        # Boucle principale
-        combinaisons:set[tuple[Groupe,Groupe]] = set()
-        for groupe1 in groupes:
-            for groupe2 in groupes:
-                if groupe1 == groupe2: continue
-                if (groupe2, groupe1) not in combinaisons:
-                    combinaisons.add((groupe1, groupe2))
 
-        lastScore = self.calcul_score()
-        newScore = lastScore + 1
-        timeLastScoreNotGreater = 0
-        while(timeLastScoreNotGreater < 3):
-            lastScore = newScore
-            for g1, g2 in combinaisons:
-                newScore = self.calcul_score()
-                maxiEvol = 0
-                evolMax = None
-                maxiEvolSansContraintes = 0
-                evolMaxSansContraintes = None
-                for e1, e2 in zip(g1.get_eleves(), g2.get_eleves()):
-                    score = self.simule_transf(g1, g2, e1, e2)
-                    if not g1.respecter_contraintes(e2) or not g2.respecter_contraintes(e1):
-                        if score > maxiEvolSansContraintes:
-                            maxiEvolSansContraintes = score
-                            evolMaxSansContraintes = (g1, g2, e1, e2)
-                    else:
-                        if score > maxiEvol:
-                            maxiEvol = score
-                            evolMax = (g1, g2, e1, e2)
-                if evolMax is None:
-                    if evolMaxSansContraintes is not None:
-                        evolMaxSansContraintes[0].transferer(evolMaxSansContraintes[1], 
-                                                            evolMaxSansContraintes[2], 
-                                                            evolMaxSansContraintes[3])
+        # Groupes possibles
+        for eleve in self.eleves:
+            self.groupeEleve[eleve] = []
+            for groupe in groupes:
+                if groupe.respecter_contraintes(eleve):
+                    self.groupeEleve[eleve].append(groupe)
+            
+
+
+        # Ajout des élèves dans le seul groupe possible 
+
+        for eleve,groupe in self.eleves.items():
+            if len(groupe) == 1:
+                groupe[0].ajouter_eleve(eleve)
+                elevesAPlacer.remove(eleve)
+        
+        # Ajout des autres élèves selon le score
+        eleveNonPlacer = set()
+        score = self.calcul_score()
+        while (elevesAPlacer > 0):
+            eleve = elevesAPlacer.pop()
+            groupes = self.eleves[eleve]
+            if len(self.groupeEleve[eleve]) == 0:
+                eleveNonPlacer.add(eleve)
+            else:
+                groupeAAjouter = None
+                for groupe in groupes:
+                    if self.simule_ajout(eleve, groupe) <= score:
+                        groupeAAjouter = groupe
+                        score = self.simule_ajout(eleve, groupe)
+                if groupeAAjouter is not None:
+                    groupeAAjouter.ajouter_eleve(eleve)
                 else:
-                    evolMax[0].transferer(evolMax[1], evolMax[2], evolMax[3])
-            newScore = self.calcul_score()
-            if newScore > lastScore:
-                #timeLastScoreNotGreater = 0
-                timeLastScoreNotGreater += 1
-        self.is_genere = True
-        return self
+                    eleveNonPlacer.add(eleve)
+        elevesAPlacer = eleveNonPlacer
+       
     
     def calcul_penalite(self) -> float:
         penalite = 0
