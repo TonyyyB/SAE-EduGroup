@@ -32,7 +32,7 @@ class CreationGroupe(Page):
 
         # Ajouter un canvas pour le contenu
         self.canvas_frame = tk.Canvas(self.canvas)
-        self.canvas_frame.place(relx=0.4, rely=0.25, relwidth=0.53, relheight=0.6)
+        self.canvas_frame.place(relx=0.4, rely=0.25, relwidth=0.53, relheight=0.7)
 
         # Ajouter une scrollbar verticale pour le Canvas
         self.scrollbar_y = tk.Scrollbar(self.canvas_frame, orient="vertical", command=self.canvas_frame.yview)
@@ -93,19 +93,19 @@ class CreationGroupe(Page):
         group_control_frame = tk.Frame(self)
         group_control_frame.place(relx=0.15, rely=0.1, anchor='center')
 
-        decrease_button = ctk.CTkButton(group_control_frame, text="-", font=("Arial", 16), command=self.decrease_group_count)
+        decrease_button = ctk.CTkButton(group_control_frame, text="-", font=("Arial", 16), command=self.decrease_group_count, corner_radius=0, width=90, height=40)
         decrease_button.grid(row=0, column=0)
 
-        self.group_count_label = tk.Label(group_control_frame, text=str(self.nb_groupes), font=("Arial", 16), width=5, height=2, relief="solid")
+        self.group_count_label = tk.Label(group_control_frame, text=str(self.nb_groupes), font=("Arial", 16), width=14, height=1)
         self.group_count_label.grid(row=0, column=1)
 
-        increase_button = ctk.CTkButton(group_control_frame, text="+", font=("Arial", 16), command=self.increase_group_count)
+        increase_button = ctk.CTkButton(group_control_frame, text="+", font=("Arial", 16), command=self.increase_group_count, corner_radius=0,width=90, height=40)
         increase_button.grid(row=0, column=2)
 
         self.create_label("eleves_restants", 0.15, 0.02, text=f"Élèves restants: {len(self.eleves)}", font=MOYENNE_POLICE)
 
         # Bouton de génération
-        bouton_generer = ctk.CTkButton(self, text="Générer les groupes", font=GRANDE_POLICE, command=self.generer_groupes)
+        bouton_generer = ctk.CTkButton(self, text="Générer les groupes", font=GRANDE_POLICE, command=self.generer_groupes, corner_radius=0,height=80, width=500)
         bouton_generer.place(relx=0.5, rely=0.12, anchor='center')
 
 
@@ -113,25 +113,21 @@ class CreationGroupe(Page):
         self.bouton_parm_grp = None
 
         # Bouton de retour
-        bouton_resultats = ctk.CTkButton(self, text="Exporter les résultats", font=GRANDE_POLICE, command=self.exporter_groupes)
-        bouton_resultats.place(relx=0.85, rely=0.15, anchor='center')
+        bouton_retour = ctk.CTkButton(self, text="Changer de fichier", font=GRANDE_POLICE, command=self.retour_page_accueil, corner_radius=0,width=350)
+        bouton_retour.place(relx=0.15, rely=0.16, anchor='center')
 
         # Bouton de retour
-        bouton_retour = ctk.CTkButton(self, text="Changer de fichier", font=GRANDE_POLICE, command=self.retour_page_accueil)
-        bouton_retour.place(relx=0.85, rely=0.05, anchor='center')
+        bouton_resultats = ctk.CTkButton(self, text="Exporter les résultats", font=GRANDE_POLICE, command=self.exporter_groupes, corner_radius=0,width=400)
+        bouton_resultats.place(relx=0.7, rely=0.09, anchor='sw')
 
         # Bouton en bas pour importer les paramètres
-        import_button = ctk.CTkButton(self, text="Importer des paramètres", font=GRANDE_POLICE, command=self.importer_criteres)
-        import_button.place(relx=0.85, rely=0.10, anchor='center')
+        import_button = ctk.CTkButton(self, text="Importer des paramètres", font=GRANDE_POLICE, command=self.importer_criteres, corner_radius=0,width=400)
+        import_button.place(relx=0.7, rely=0.15, anchor='sw')
 
-        # Bouton de retour
-        bouton_exporter = ctk.CTkButton(self, text="Exporter les paramètres", font=GRANDE_POLICE, command=self.exporter_criteres)
-        bouton_exporter.place(relx=0.85, rely=0.15, anchor='center')
+        # Bouton exporter
+        bouton_exporter = ctk.CTkButton(self, text="Exporter les paramètres", font=GRANDE_POLICE, command=self.exporter_criteres, corner_radius=0,width=400)
+        bouton_exporter.place(relx=0.7, rely=0.21, anchor='sw')
 
-        # Bouton de retour
-        bouton_resultats = ctk.CTkButton(self, text="Exporter les résultats", font=GRANDE_POLICE, command=self.exporter_groupes)
-        bouton_resultats.place(relx=0.85, rely=0.20, anchor='center')
-    
     def import_params(self):
         pass
     
@@ -308,14 +304,14 @@ class TableauCriteres(tk.Frame):
         self.sliders_vars = []
 
         for i, critere in enumerate(self.criteres):
-            self.table._create_table_entry(i + 1, 0, critere.get_nom())
             poids_var = tk.IntVar(value=critere.get_poids())
             poids_scale = tk.Scale(self.table.frame, variable=poids_var, from_=0, to=100, resolution=1, orient="horizontal", length=200, showvalue=False)
             poids_scale.bind("<ButtonRelease-1>", lambda event, index=i: self.adjust_sliders(event.widget.get(), index))
             self.sliders.append(poids_scale)
             self.sliders_vars.append(poids_var)
-            self.table._create_table_entry(i + 1, 1, poids_scale)
             poids_entry = tk.Entry(self.table.frame, textvariable=poids_var, width=5)
+            self.table._create_table_entry(i + 1, 0, critere.get_nom())
+            self.table._create_table_entry(i + 1, 1, poids_scale)
             self.table._create_table_entry(i + 1, 2, poids_entry)
     
     def adjust_sliders(self, value, index):

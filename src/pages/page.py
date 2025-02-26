@@ -158,8 +158,9 @@ class EleveTable(Table):
         Crée un tableau basé sur une liste d'élèves et des critères.
         Affiche le nom, prénom, ID, et les notes pour chaque critère.
         """
+        criteres_tries = sorted(criteres, key=lambda c: c.get_poids(), reverse=True)
         # Définir les titres de colonnes : Prénom, Nom, ID + critères
-        self.titre_colonnes = ['Prénom', 'Nom', 'ID'] + [c.get_nom() for c in criteres]
+        self.titre_colonnes = ['Prénom', 'Nom'] + [c.get_nom() for c in criteres_tries]
 
         # Créer les titres des colonnes
         self._create_table_headers(self.titre_colonnes, [10]*len(self.titre_colonnes))
@@ -169,10 +170,9 @@ class EleveTable(Table):
             # Colonnes fixes : prénom, nom, ID
             self._create_table_entry(i + 1, 0, eleve.prenom)
             self._create_table_entry(i + 1, 1, eleve.nom)
-            self._create_table_entry(i + 1, 2, eleve.num_etudiant)
 
             # Colonnes dynamiques : notes pour chaque critère
-            for j, critere in enumerate(criteres):
+            for j, critere in enumerate(criteres_tries):
                 note = critere.to_val(eleve.get_critere(critere))
-                self._create_table_entry(i + 1, j + 3, note)
+                self._create_table_entry(i + 1, j + 2, note)
 
