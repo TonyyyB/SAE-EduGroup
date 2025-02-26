@@ -246,8 +246,12 @@ class CreationGroupe(Page):
             table.destroy()  # Détruire chaque objet Table existant
         self.tables.clear()  # Réinitialiser la liste des tables
 
-
-        self.change_text("eleves_restants", f"Élèves restants: {len(self.eleves)}")
+        restant = len(self.partition.eleves)
+        for groupe in self.partition.get_groupes():
+            restant -= len(groupe.eleves)
+            print(restant)
+        
+        self.change_text("eleves_restants", text=f"Élèves restants: {restant}")        
 
         self.inner_frame.update_idletasks()
 
