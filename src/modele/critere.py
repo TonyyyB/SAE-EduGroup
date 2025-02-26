@@ -21,13 +21,15 @@ class Critere:
         return self.proportionGlobale[valeur]
     
     def calcul_proportion(self, eleves):
-        nb = 0
+        
         dico = dict()
         for valeur in self.valPossible:
+            nb = 0
             for eleve in eleves:
                 if eleve.get_critere(self) == valeur:
                     nb += 1
             dico[valeur] = nb / len(eleves)
+        print(dico)
         self.proportionGlobale = dico
 
     
