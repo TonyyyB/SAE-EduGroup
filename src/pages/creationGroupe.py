@@ -216,28 +216,37 @@ class CreationGroupe(Page):
     
     def exporter_criteres(self):
         """
-        Exporte les critères et leurs valeurs actuelles des sliders dans un fichier CSV.
+            Exporte les critères, leurs valeurs et les contraintes des groupes dans un fichier CSV.
         """
         fichier = filedialog.asksaveasfilename(
             defaultextension=".csv",
             filetypes=[("CSV files", "*.csv")],
             title="Exporter les critères"
         )
-        
+
         if not fichier:
             return
-        
-        # Récupération des valeurs des sliders
-        data = [(critere.get_nom(), critere.get_poids()) for critere in self.criteres]
+
+        # Récupération des valeurs des sliders avec contraintes des groupes
+        data = []
+        for i, groupe in enumerate(self.partition.get_groupes(), start= 1):
+            for critere in self.criteres:
+                contrainte = groupe.get_contrainte(critere)
+                contrainte_str = ", ".join(map(str, contrainte)) if contrainte else "N/A"
+                data.append((i, critere.get_nom(), critere.get_poids(), contrainte_str))
 
         try:
             with open(fichier, mode='w', newline='', encoding='utf-8') as file:
                 writer = csv.writer(file)
-                writer.writerow(["Critère", "Valeur"])
+                writer.writerow(["Groupe", "Critère", "Valeur", "Contrainte"])
                 writer.writerows(data)
+
             print(f"Exportation réussie : {fichier}")
+            messagebox.showinfo("Exportation réussie", f"Les critères ont été exportés avec succès dans {fichier}.")
+
         except Exception as e:
             print(f"Erreur lors de l'exportation : {e}")
+            messagebox.showerror("Erreur d'exportation", f"Une erreur est survenue : {e}")
 
     def importer_criteres(self):
         criteres = {critere.get_nom(): critere for critere in self.criteres}
