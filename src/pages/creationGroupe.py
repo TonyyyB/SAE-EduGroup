@@ -26,6 +26,8 @@ class CreationGroupe(Page):
         self.nb_groupes = 5
         self.tables = []  # Liste pour garder une référence des tables des groupes
         self.eleves_restants_label = None
+        self.selected_eleve = None  # Pour stocker l'élève sélectionné
+        self.selected_groupe = None
         
         # Redimensionner l'image à la taille désirée
         self.img_param = Image.open("img/param.png")
@@ -398,43 +400,103 @@ class TableauCriteres(tk.Frame):
             self.criteres[i].set_poids(new_values[i])
 
 class TableauGroupe(tk.Frame):
-    def __init__(self, parent, page, partition:Partition, index, img_param_tk):
+    def __init__(self, parent, page, partition: Partition, index, img_param_tk):
         super().__init__(parent)
+        self.parent = parent
         self.groupe = partition.get_groupes()[index]
-        self.page=page
+        self.page = page
         self.partition = partition
-        title_label = tk.Label(self, text=f"Groupe {index+1}", font=("Arial", 12, "bold"), 
-                                    bg="#3D83B1", fg="white", width=15, height=2, anchor="center")
+        self.selected_eleve_widget = None  # Stocker le widget de l'élève sélectionné (ligne cliquée)
+        self.index = index
+
+        # Création du tableau de base
+        self.create_widgets()
+
+    def create_widgets(self):
+        """Crée tous les widgets de la classe, y compris la table des élèves"""
+        # Supprimer tous les widgets existants
+        for widget in self.winfo_children():
+            widget.destroy()
+
+        # Label titre de groupe
+        title_label = tk.Label(self, text=f"Groupe {self.index + 1}", font=("Arial", 12, "bold"),
+                               bg="#3D83B1", fg="white", width=15, height=2, anchor="center")
         title_label.grid(row=0, column=0, padx=10, pady=10, sticky="w")
-        nb_eleves_label = tk.Label(self, text=f"{len(self.groupe.get_eleves())}/{self.groupe.get_taille()}", font=("Arial", 12, "bold"), 
-                                    bg="#3D83B1", fg="white", width=15, height=2, anchor="center")
+        title_label.bind("<Button-1>", self.on_title_label_click)
+
+        # Label pour afficher le nombre d'élèves dans le groupe
+        nb_eleves_label = tk.Label(self, text=f"{len(self.groupe.get_eleves())}/{self.groupe.get_taille()}", font=("Arial", 12, "bold"),
+                                   bg="#3D83B1", fg="white", width=15, height=2, anchor="center")
         nb_eleves_label.grid(row=0, column=1, padx=10, pady=10, sticky="w")
-        # Créer le bouton avec l'image redimensionnée
-        bouton_param_grp = tk.Button(self, image=img_param_tk, compound="right", anchor='e', command=lambda: self.pop_up_param_grp())
+
+        # Bouton avec image pour paramètres du groupe
+        bouton_param_grp = tk.Button(self, image=self.page.img_param_tk, compound="right", anchor='e', command=self.pop_up_param_grp)
         bouton_param_grp.grid(row=0, column=2, padx=10, pady=10, sticky="e")
-        # Créer la liste des contraintes saisies
-        nb_critere_avec_contraintes = len([v for v in partition.get_groupes()[index].get_contraintes().values() if len(v) > 0])
-        if nb_critere_avec_contraintes > 0:
-            font_height = tkf.Font(font=("Arial", 12)).metrics('linespace')
-            contraintes_table = Table(self, self, height=(font_height+3)*(nb_critere_avec_contraintes+1))
-            contraintes_table._create_table_headers(["Critère", "Valeurs"], [21]*2)
-            contraintes_table.grid(row=1, column=0, padx=10, pady=10, columnspan=3)
-            for i, kv in enumerate(partition.get_groupes()[index].get_contraintes().items()):
-                critere, valeurs = kv
-                if(len(valeurs) == 0):
-                    continue
-                contraintes_table._create_table_entry(i+1, 0, critere.get_nom(), width=21)
-                contraintes_table._create_table_entry(i+1, 1, ", ".join([str(critere.to_val(v)) for v in valeurs]), width=21)
-        # Créer la table pour chaque groupe
+
+        # Table des élèves : utiliser la nouvelle EleveTable avec binding des événements
+        self.create_eleve_table()
+
+    def create_eleve_table(self):
+        """Crée ou recrée la table des élèves."""
+        # Supprimer la table existante (si elle existe déjà)
+        for widget in self.winfo_children():
+            if isinstance(widget, EleveTable):
+                widget.destroy()
+
+        # Recréation de la table avec les données actuelles des élèves
         table = EleveTable(parent=self, controller=self, eleves=self.groupe.get_eleves(), criteres=self.partition.get_criteres())
         table.grid(row=2, column=0, padx=10, pady=10, columnspan=3)
-        # Personnalisation des cellules du tableau
-        for widget in table.winfo_children():
-            if isinstance(widget, tk.Label):
-                widget.config(bg="white", fg="black", relief="solid", bd=1)
-    def afficher_groupes(self):
-        self.page.afficher_groupes()
+
+    def update_group_display(self):
+        """Met à jour l'affichage du groupe."""
+        self.create_widgets()  # Recréer tous les widgets du groupe
+
+    def on_title_label_click(self, event):
+        """Lorsque le title_label est cliqué, on transfère l'élève sélectionné vers ce groupe."""
+        if self.parent.selected_eleve:
+            try:
+                current_groupe = self.groupe
+                target_groupe = self.parent.selected_groupe
+
+                # Validation de transfert simple
+                if target_groupe and current_groupe != target_groupe:
+                    if self.parent.selected_eleve:
+                        current_groupe.transferer_simple(target_groupe, self.parent.selected_eleve)  # Transfert simple sans échange
+                        messagebox.showinfo("Transfert réussi", f"L'élève {self.parent.selected_eleve.get_nom()} a été transféré")
+                        #MAJ DE L'AFFICHAGE A AJOUTER
+                        
+                    else:
+                        messagebox.showwarning("Erreur de transfert", "Impossible de trouver l'élève pour le transfert.")
+                else:
+                    messagebox.showwarning("Erreur de sélection", "Vous devez choisir un autre groupe pour le transfert.")
+            except Exception as e:
+                messagebox.showerror("Erreur", str(e))
+        else:
+            messagebox.showwarning("Aucun élève sélectionné", "Veuillez sélectionner un élève avant de cliquer sur le groupe.")
+
     def pop_up_param_grp(self):
         from pages.parametresGroupe import ParametresGroupe
         popup = ParametresGroupe(self, self.partition, self.groupe)
-        popup.grab_set()  # Pour forcer le focus sur la fenêtre pop-up
+        popup.grab_set()
+        
+    def on_eleve_click(self, event):
+        """Lorsqu'un élève est cliqué, on le sélectionne pour un transfert."""
+        widget = event.widget
+        eleve = getattr(widget, "eleve", None)  # Récupérer l'objet Eleve directement depuis le widget
+
+        if eleve is None:
+            print("Erreur : aucun élève trouvé pour ce widget.")
+            return
+
+        # Si un élève a déjà été sélectionné, on réinitialise l'apparence du widget précédent
+        if self.selected_eleve_widget:
+            self.selected_eleve_widget.config(bg="white", fg="black")
+        
+        # Sélectionner l'élève actuel et mettre en évidence le widget
+        self.parent.selected_eleve = eleve
+        self.parent.selected_groupe = self.groupe
+        self.selected_eleve_widget = widget
+        widget.config(bg="#ffcccb", fg="black")  # Changer la couleur pour indiquer la sélection
+
+        # Debug print pour vérifier quel élève est sélectionné
+        print(f"Élève sélectionné: {eleve.get_nom()}")  # Assurez-vous que la méthode `get_nom()` existe dans Eleve

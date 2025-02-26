@@ -85,6 +85,15 @@ class Groupe:
         groupe.get_eleves().remove(eleve2)
         self.eleves.add(eleve2)
         groupe.get_eleves().add(eleve1)
+        
+    def transferer_simple(self, groupe_dest: 'Groupe', eleve: Eleve):
+        """Transférer un élève d'un groupe vers un autre sans échange."""
+        if eleve not in self.eleves:
+            return
+        
+        self.eleves.remove(eleve)
+        groupe_dest.get_eleves().add(eleve)
+        return
 
     def get_eleves(self) -> set[Eleve]:
         return self.eleves

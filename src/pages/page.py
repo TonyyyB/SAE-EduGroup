@@ -53,9 +53,6 @@ class Page(tk.Frame):
 
     def on_resize(self, event):
         self.create_gradient()
-        
-    def go_to_next_page(self):
-        pass
 
     def clear_labels(self):
         self.labels.clear()
@@ -170,16 +167,20 @@ class Table(tk.Frame):
 class EleveTable(Table):
     def __init__(self, parent, controller, eleves=None, criteres=None):
         super().__init__(parent, controller, enable_scroll_y=True, enable_scroll_x=True)
+        self.controller = controller  # Controller pour gérer les événements (comme le clic sur un élève)
+
         # Si une liste d'élèves est fournie, créer le tableau à partir de ces données
         if eleves is not None and criteres is not None:
             self.create_table_from_eleves(eleves, criteres)
+
     def create_table_from_eleves(self, eleves, criteres):
         """
         Crée un tableau basé sur une liste d'élèves et des critères.
         Affiche le nom, prénom, ID, et les notes pour chaque critère.
+        Chaque cellule du tableau est un label cliquable pour les interactions.
         """
         criteres_tries = sorted(criteres, key=lambda c: c.get_poids(), reverse=True)
-        # Définir les titres de colonnes : Prénom, Nom, ID + critères
+        # Définir les titres de colonnes : Prénom, Nom + critères
         self.titre_colonnes = ['Prénom', 'Nom'] + [c.get_nom() for c in criteres_tries]
 
         # Créer les titres des colonnes
@@ -187,12 +188,42 @@ class EleveTable(Table):
 
         # Remplir les lignes avec les données des élèves
         for i, eleve in enumerate(eleves):
-            # Colonnes fixes : prénom, nom, ID
-            self._create_table_entry(i + 1, 0, eleve.prenom)
-            self._create_table_entry(i + 1, 1, eleve.nom)
+            # Colonnes fixes : prénom, nom
+            self._create_clickable_table_entry(i + 1, 0, eleve.prenom, eleve)  # Ajout du bind sur prénom
+            self._create_clickable_table_entry(i + 1, 1, eleve.nom, eleve)     # Ajout du bind sur nom
 
             # Colonnes dynamiques : notes pour chaque critère
             for j, critere in enumerate(criteres_tries):
                 note = critere.to_val(eleve.get_critere(critere))
-                self._create_table_entry(i + 1, j + 2, note)
+                self._create_clickable_table_entry(i + 1, j + 2, note, eleve)  # Ajout du bind sur chaque note
 
+    def _create_clickable_table_entry(self, row, col, text, eleve):
+        """
+        Crée une cellule cliquable dans la table. Chaque cellule est un `Label` qui réagit aux clics.
+        """
+        # Créer un label pour chaque cellule
+        label = tk.Label(self.frame, text=text, bg="white", fg="black", width=15, height=2, anchor="w")
+        label.grid(row=row, column=col, padx=0, pady=0, sticky="w")
+        
+        # Associer l'objet élève au label pour permettre de l'identifier lors du clic
+        label.eleve = eleve
+
+        # Lier l'événement de clic sur le label pour la gestion des interactions
+        label.bind("<Button-1>", self.on_eleve_click)
+
+    def on_eleve_click(self, event):
+        """
+        Gère le clic sur une cellule de la table. L'événement récupère l'élève associé.
+        """
+        widget = event.widget
+        eleve = getattr(widget, "eleve", None)  # Récupérer l'objet Eleve associé au widget
+
+        if eleve is None:
+            print("Erreur : aucun élève trouvé pour ce widget.")
+            return
+
+        # Appel de la méthode de sélection d'élève dans le controller principal (TableauGroupe par ex.)
+        self.controller.on_eleve_click(event)  # Passer l'événement à une méthode dans le controller
+
+        # Debug pour afficher l'élève sélectionné
+        print(f"Élève sélectionné : {eleve.get_nom()}")
