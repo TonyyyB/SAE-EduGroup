@@ -6,14 +6,14 @@ class Eleve:
         self.num_etudiant:int = num_etudiant
         self.genre:bool = genre
         self.criteres:dict[Critere,int|str] = {}  # Dictionnaire pour les matières et les critères
-        self.groupes_possible = set()
+        self.groupes_possible = list()
 
     def ajouter_critere(self, critere:Critere, valeur:int|str):
         """Ajoute un critère avec une valeur associée au dictionnaire criteres."""
         self.criteres[critere] = valeur
 
     def ajouter_groupes_possible(self, groupe):
-        self.groupes_possible.add(groupe)
+        self.groupes_possible.append(groupe)
     def get_groupes_possible(self):
         return self.groupes_possible
     
