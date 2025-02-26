@@ -109,11 +109,6 @@ class CreationGroupe(Page):
         bouton_generer.place(relx=0.5, rely=0.12, anchor='center')
 
 
-        # Bouton de retour
-        bouton_param = ctk.CTkButton(self, text="Paramètres des critères", font=GRANDE_POLICE, command=self.pop_up_criteres)
-        bouton_param.place(relx=0.15, rely=0.17, anchor='center')
-
-
         # Bouton paramètres groupes
         self.bouton_parm_grp = None
 
@@ -290,13 +285,6 @@ class CreationGroupe(Page):
         """
         self.controller.show_frame(PageAccueil)  # Retour à la page d'accueil
 
-    def pop_up_criteres(self):
-        """
-        Méthode pour ouvrir un pop-up qui permet de paramétrer les critères.
-        """
-        from pages.parametresCriteres import ParametresCriteres
-        popup = ParametresCriteres(self, self.criteres)  # Passage des critères à la classe ParametresCriteres
-        popup.grab_set()  # Pour forcer le focus sur la fenêtre pop-up
 
     def pop_up_param_grp(self, groupe):
         from pages.parametresGroupe import ParametresGroupe
