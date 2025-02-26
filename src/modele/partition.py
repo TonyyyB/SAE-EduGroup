@@ -15,6 +15,7 @@ class Partition:
     
     def generer(self) -> 'Partition':
         self.clear()
+        return self
         elevesAPlacer:set[Eleve] = set(self.eleves)
         groupes = self.get_groupes()
         # Initialisation
@@ -87,6 +88,9 @@ class Partition:
                 timeLastScoreNotGreater += 1
         self.is_genere = True
         return self
+    
+    def calcul_penalite(self) -> float:
+        penalite = 0
     
     def adapter_taille(self) -> None:
         groupesTailleModif, groupesSansTailleModif = self.groupes_avec_et_sans_taille_modif()

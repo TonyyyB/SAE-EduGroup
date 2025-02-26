@@ -1,8 +1,8 @@
 class Critere:
-    def __init__(self, nom:str, poids:int):
+    def __init__(self, nom:str, poids:int, valeurs:set[str]=set()):
         self.nom:str = nom
         self.poids:int = poids
-        self.valeurs:set[str] = set()
+        self.valeurs:set[str] = valeurs
 
     def ajouter_valeur(self, valeur:str) -> None:
         self.valeurs.add(valeur)
