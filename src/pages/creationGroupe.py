@@ -99,14 +99,6 @@ class CreationGroupe(Page):
         increase_button.grid(row=0, column=2)
 
         self.create_label("eleves_restants", 0.15, 0.02, text=f"Élèves restants: {len(self.eleves)}", font=MOYENNE_POLICE)
-        #self.eleves_restants_label = tk.Label(
-        #    self,
-        #    text=f"Élèves restants: {len(self.eleves)}",
-        #    font=MOYENNE_POLICE,
-        #    bg=self.canvas["bg"],
-        #    fg="black",
-        #)
-        #self.eleves_restants_label.place(relx=0.068 rely=0) 
 
         # Bouton de génération
         bouton_generer = ctk.CTkButton(self, text="Générer les groupes", font=GRANDE_POLICE, command=self.generer_groupes)
