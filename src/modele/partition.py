@@ -102,6 +102,16 @@ class Partition:
     
     def calcul_proportion(self) -> dict[Critere,dict[str,float]]:
         self.propGlobal = dict()
+        for critere in self.criteres:
+            for valeur in critere.get_valeurs():
+                proportion_valeur = dict()
+                cpt = 0
+                for eleve in self.eleves:
+                    if eleve.get_critere(critere) == valeur:
+                        cpt+=1
+                proportion_valeur[valeur]= cpt/len(self.eleves)
+            self.propGlobal[critere] = proportion_valeur
+
     def calcul_proportion_actuel(self) -> dict[Critere,dict[str,float]]:
         propActuel = dict()
     
