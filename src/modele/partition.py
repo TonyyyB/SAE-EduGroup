@@ -58,8 +58,11 @@ class Partition:
         elevesAPlacer = eleveNonPlacer
        
     
-    def calcul_penalite(self) -> float:
+    def calcul_penalite(self, propGlobal:dict[Critere,dict[str,float]]) -> float:
         penalite = 0
+    
+    def calcul_proportion_actuel(self) -> dict[Critere,dict[str,float]]:
+        propActuel = dict()
     
     def adapter_taille(self) -> None:
         groupesTailleModif, groupesSansTailleModif = self.groupes_avec_et_sans_taille_modif()
