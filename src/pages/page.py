@@ -163,7 +163,7 @@ class EleveTable(Table):
         self.titre_colonnes = ['Prénom', 'Nom'] + [c.get_nom() for c in criteres_tries]
 
         # Créer les titres des colonnes
-        self._create_table_headers(self.titre_colonnes, [10]*len(self.titre_colonnes))
+        self._create_table_headers(self.titre_colonnes)
 
         # Remplir les lignes avec les données des élèves
         for i, eleve in enumerate(eleves):

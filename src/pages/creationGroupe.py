@@ -13,6 +13,8 @@ from pages.accueil import PageAccueil
 from tkinter import messagebox
 import pandas as pd
 from PIL import Image, ImageTk
+import threading
+from itertools import cycle
 
 class CreationGroupe(Page):
     def __init__(self, parent, controller):
@@ -132,8 +134,49 @@ class CreationGroupe(Page):
         pass
     
     def generer_groupes(self):
-        self.partition.generer()
-        self.afficher_groupes()
+        self.loading_popup = tk.Toplevel(self)
+        self.loading_popup.title("Chargement...")
+        self.loading_popup.geometry("250x120")
+        self.loading_popup.transient(self)
+        self.loading_popup.config(bg="white")
+
+
+        self.loading_popup.update_idletasks()
+        x = self.winfo_x() + (self.winfo_width() // 2) - (250 // 2)
+        y = self.winfo_y() + (self.winfo_height() // 2) - (120 // 2)
+        self.loading_popup.geometry(f"+{x}+{y}")
+
+        self.loading_label = tk.Label(self.loading_popup, text="Chargement", font=("Arial", 12), bg="white")
+        self.loading_label.pack(pady=10)
+
+        self.info_label = tk.Label(self.loading_popup, text="Veuillez patienter...", font=("Arial", 10), fg="gray", bg="white")
+        self.info_label.pack()
+
+        self.loading_states = cycle(["Chargement", "Chargement.", "Chargement..", "Chargement..."])
+
+        self.animate_loading()
+
+        self.loading_popup.grab_set()
+        self.loading_popup.update()
+
+        thread = threading.Thread(target=self.partition.generer)
+        thread.start()
+
+        self.check_task_completion(thread)
+
+    def animate_loading(self):
+        self.loading_label.config(text=next(self.loading_states))
+        self.loading_label.update_idletasks()
+        if hasattr(self, "loading_popup") and self.loading_popup.winfo_exists():
+            self.loading_popup.after(300, self.animate_loading)
+
+    def check_task_completion(self, thread):
+        if thread.is_alive():
+            self.after(100, lambda: self.check_task_completion(thread))
+        else:
+            self.loading_popup.grab_release()
+            self.afficher_groupes()
+            self.loading_popup.destroy()
 
     def exporter_groupes(self):
         """
@@ -371,7 +414,6 @@ class TableauGroupe(tk.Frame):
         nb_critere_avec_contraintes = len([v for v in partition.get_groupes()[index].get_contraintes().values() if len(v) > 0])
         if nb_critere_avec_contraintes > 0:
             font_height = tkf.Font(font=("Arial", 12)).metrics('linespace')
-            print(font_height)
             contraintes_table = Table(self, self, height=(font_height+3)*(nb_critere_avec_contraintes+1))
             contraintes_table._create_table_headers(["Critère", "Valeurs"], [21]*2)
             contraintes_table.grid(row=1, column=0, padx=10, pady=10, columnspan=3)
