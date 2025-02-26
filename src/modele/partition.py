@@ -114,7 +114,14 @@ class Partition:
 
     def calcul_proportion_actuel(self) -> dict[Critere,dict[str,float]]:
         propActuel = dict()
-    
+        for critere in self.criteres:
+            propActuel[critere] = dict()
+            for valeur in critere.get_valeurs():
+                propActuel[critere][valeur] = 0
+            for eleve in groupe.get_eleves():
+                propActuel[critere][eleve.get_critere(critere)] += 1
+            for valeur in propActuel[critere]:
+                propActuel[critere][valeur] /= groupe.get_taille()
     def adapter_taille(self) -> None:
         groupesTailleModif, groupesSansTailleModif = self.groupes_avec_et_sans_taille_modif()
 
