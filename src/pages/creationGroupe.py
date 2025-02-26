@@ -165,7 +165,10 @@ class CreationGroupe(Page):
         self.check_task_completion(thread)
 
     def animate_loading(self):
-        self.loading_label.config(text=next(self.loading_states))
+        restant = len(self.partition.eleves)
+        for groupe in self.partition.get_groupes():
+            restant -= len(groupe.eleves)
+        self.loading_label.config(text=f"{next(self.loading_states)}\nÉlèves restants: {restant}")
         self.loading_label.update_idletasks()
         if hasattr(self, "loading_popup") and self.loading_popup.winfo_exists():
             self.loading_popup.after(300, self.animate_loading)
