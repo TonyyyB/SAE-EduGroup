@@ -22,6 +22,9 @@ class CreationGroupe(Page):
         self.controller = controller
         self.eleves = []
         self.criteres = []
+        self.selected_eleve = None  # Aucun élève sélectionné au départ
+        self.selected_eleve_2 = None  # Deuxième élève pour échange
+        self.eleves_restants_label = None
         self.text_fields = {}
         self.nb_groupes = 5
         self.tables = []  # Liste pour garder une référence des tables des groupes
@@ -199,6 +202,24 @@ class CreationGroupe(Page):
         df = pd.DataFrame(data)
         df.to_csv(fichier, index=False, encoding='utf-8')
         print(f"Exportation réussie : {fichier}")
+
+    def echanger_eleves(self):
+        """Fonction pour échanger deux élèves sélectionnés."""
+        if self.selected_eleve is not None and self.selected_eleve_2 is not None:
+            # Échanger les deux élèves dans les groupes ou la partition
+            groupe_1 = self.selected_eleve.get_groupe()
+            groupe_2 = self.selected_eleve_2.get_groupe()
+
+            # Vous pouvez maintenant échanger les élèves dans leurs groupes respectifs
+            groupe_1.remove(self.selected_eleve)
+            groupe_2.remove(self.selected_eleve_2)
+            groupe_1.add(self.selected_eleve_2)
+            groupe_2.add(self.selected_eleve)
+
+            # Mettre à jour l'interface utilisateur
+            self.afficher_groupes()
+            self.selected_eleve = None  # Réinitialiser la sélection
+            self.selected_eleve_2 = None
 
 
 
@@ -435,3 +456,41 @@ class TableauGroupe(tk.Frame):
         from pages.parametresGroupe import ParametresGroupe
         popup = ParametresGroupe(self, self.partition, self.groupe)
         popup.grab_set()  # Pour forcer le focus sur la fenêtre pop-up
+    
+class EleveTable(tk.Frame):
+    def __init__(self, parent, controller, eleves, criteres):
+        super().__init__(parent)
+        self.controller = controller
+        self.eleves = eleves
+        self.criteres = criteres
+        self.selected_eleve = None  # Suivre l'élève sélectionné dans ce tableau
+
+        # Créer un tableau d'élèves (labels, boutons, etc.)
+        for i, eleve in enumerate(self.eleves):
+            self.create_eleve_row(i, eleve)
+    
+    def create_eleve_row(self, index, eleve):
+        """Créer une ligne dans le tableau pour un élève."""
+        nom_label = tk.Label(self, text=eleve.nom, width=20, relief="solid")
+        nom_label.grid(row=index, column=0)
+
+        # Ajouter un événement pour gérer la sélection d'un élève
+        nom_label.bind("<Button-1>", lambda event, el=eleve: self.select_eleve(event, el))
+
+    def select_eleve(self, event, eleve):
+        """Gère la sélection de l'élève au clic."""
+        if self.controller.selected_eleve is None:
+            # Première sélection
+            self.controller.selected_eleve = eleve
+            print(f"Élève sélectionné : {eleve.nom}")
+        elif self.controller.selected_eleve_2 is None:
+            # Deuxième sélection
+            self.controller.selected_eleve_2 = eleve
+            print(f"Deuxième élève sélectionné : {eleve.nom}")
+            # Appeler la fonction pour échanger les élèves une fois le second élève sélectionné
+            self.controller.echanger_eleves()
+        else:
+            # Réinitialiser la sélection si deux élèves sont déjà sélectionnés
+            self.controller.selected_eleve = eleve
+            self.controller.selected_eleve_2 = None
+            print(f"Réinitialisation, nouvel élève sélectionné : {eleve.nom}")
