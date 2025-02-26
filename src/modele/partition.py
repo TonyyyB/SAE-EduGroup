@@ -10,13 +10,13 @@ class Partition:
         self.criteres:set[Critere] = set() if len(eleves) == 0 else set(next(iter(eleves)).get_criteres().keys())
         self.is_genere = False
         self.groupeEleve = dict()
+        self.propGlobal:dict[Critere,dict[str,float]] = dict()
     
     def is_generer(self):
         return self.is_genere
     
     def generer(self) -> 'Partition':
         self.clear()
-        return self
         elevesAPlacer:set[Eleve] = set(self.eleves)
         groupes = self.get_groupes()
         # Initialisation
@@ -56,11 +56,52 @@ class Partition:
                 else:
                     eleveNonPlacer.add(eleve)
         elevesAPlacer = eleveNonPlacer
-       
     
-    def calcul_penalite(self, propGlobal:dict[Critere,dict[str,float]]) -> float:
+    def simule_ajout(self, groupe:Groupe, eleve:Eleve) -> float:
+        if groupe not in self.groupes: return self.calcul_score()
+        if eleve in groupe.get_eleves() or len(groupe.get_eleves()) + 1 > groupe.taille: return self.calcul_score()
+        groupe.get_eleves().add(eleve)
+        score = self.calcul_score()
+        groupe.get_eleves().remove(eleve)
+        return score
+
+    def simule_supp(self, groupe:Groupe, eleve:Eleve) -> float:
+        if groupe not in self.groupes: return self.calcul_score()
+        if eleve not in groupe.get_eleves(): return self.calcul_score()
+        groupe.get_eleves().remove(eleve)
+        score = self.calcul_score()
+        groupe.get_eleves().add(eleve)
+        return score
+
+    def simule_transf(self, groupe1:Groupe, groupe2:Groupe, eleve1:Eleve, eleve2:Eleve) -> tuple[float,float]: # type: ignore
+        """Renvoie les deux score des deux groupes si un transfer est effectuer entre les deux élèves
+
+        Args:
+            groupe1 (Groupe): premier groupe
+            groupe2 (Groupe): deuxième groupe
+            eleve1 (Eleve): eleve du groupe
+            eleve2 (Eleve): eleve de l'autre groupe
+
+        Returns:
+            float: score de la partition
+        """
+        if eleve1 not in groupe1.get_eleves() or eleve2 not in groupe2.get_eleves(): return self.calcul_score()
+        groupe1.get_eleves().remove(eleve1)
+        groupe2.get_eleves().remove(eleve2)
+        groupe1.get_eleves().add(eleve2)
+        groupe2.get_eleves().add(eleve1)
+        scores = self.calcul_score()
+        groupe1.get_eleves().remove(eleve2)
+        groupe2.get_eleves().remove(eleve1)
+        groupe1.get_eleves().add(eleve1)
+        groupe2.get_eleves().add(eleve2)
+        return scores
+    
+    def calcul_penalite(self, propGlobal) -> float:
         penalite = 0
     
+    def calcul_proportion(self) -> dict[Critere,dict[str,float]]:
+        self.propGlobal = dict()
     def calcul_proportion_actuel(self) -> dict[Critere,dict[str,float]]:
         propActuel = dict()
     
