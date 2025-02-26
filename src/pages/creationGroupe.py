@@ -130,9 +130,6 @@ class CreationGroupe(Page):
         bouton_exporter = ctk.CTkButton(self, text="Exporter les paramètres", font=GRANDE_POLICE, command=self.exporter_criteres, corner_radius=0,width=400)
         bouton_exporter.place(relx=0.7, rely=0.21, anchor='sw')
 
-    def import_params(self):
-        pass
-    
     def generer_groupes(self):
         self.loading_popup = tk.Toplevel(self)
         self.loading_popup.title("Chargement...")
@@ -199,8 +196,6 @@ class CreationGroupe(Page):
         df = pd.DataFrame(data)
         df.to_csv(fichier, index=False, encoding='utf-8')
         print(f"Exportation réussie : {fichier}")
-
-
 
     def decrease_group_count(self):
         """Réduit le nombre de groupes"""
