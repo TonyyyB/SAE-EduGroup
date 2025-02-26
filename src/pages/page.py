@@ -94,6 +94,8 @@ class Page(tk.Frame):
             except Exception as e:
                 print(f"Erreur lors de la mise à jour du texte '{label_key}': {e}")
 
+import tkinter as tk
+
 class Table(tk.Frame):
     def __init__(self, parent, controller, enable_scroll_x=False, enable_scroll_y=False, height=None, width=None):
         super().__init__(parent)
@@ -107,7 +109,6 @@ class Table(tk.Frame):
             self.scrollbar_y = tk.Scrollbar(self, orient="vertical", command=self.canvas.yview)
             self.scrollbar_y.grid(row=0, column=1, sticky="ns")
             self.canvas.configure(yscrollcommand=self.scrollbar_y.set)
-        
 
         self.frame = tk.Frame(self.canvas)
         self.frame.bind("<Configure>", lambda e: self.canvas.configure(scrollregion=self.canvas.bbox("all")))
@@ -115,12 +116,31 @@ class Table(tk.Frame):
         self.canvas.create_window((0, 0), window=self.frame, anchor="nw")
 
         self.canvas.grid(row=0, column=0, sticky="nsew")
+        self.canvas.bind_all("<MouseWheel>", self._on_mousewheel_windows)  # Windows
+        self.canvas.bind_all("<Button-4>", self._on_mousewheel_linux)  # Linux (Scroll Up)
+        self.canvas.bind_all("<Button-5>", self._on_mousewheel_linux)  # Linux (Scroll Down)
+
+        # Lier les événements de la molette au canvas
+        self.canvas.bind("<Enter>", self._bind_mousewheel)
+        self.canvas.bind("<Leave>", self._unbind_mousewheel)
 
         self.controller = controller
 
         # Configuration pour que le canvas s'ajuste automatiquement
         self.grid_rowconfigure(0, weight=1)
         self.grid_columnconfigure(0, weight=1)
+
+    def _bind_mousewheel(self, event):
+        """Lie les événements de la molette au canvas."""
+        self.canvas.bind_all("<MouseWheel>", self._on_mousewheel_windows)
+        self.canvas.bind_all("<Button-4>", self._on_mousewheel_linux)
+        self.canvas.bind_all("<Button-5>", self._on_mousewheel_linux)
+
+    def _unbind_mousewheel(self, event):
+        """Délie les événements de la molette du canvas."""
+        self.canvas.unbind_all("<MouseWheel>")
+        self.canvas.unbind_all("<Button-4>")
+        self.canvas.unbind_all("<Button-5>")
 
     def _create_table_headers(self, titre_colonnes, sizes=[]):
         for j, titre in enumerate(titre_colonnes):

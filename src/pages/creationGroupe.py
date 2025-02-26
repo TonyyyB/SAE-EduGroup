@@ -288,7 +288,6 @@ class CreationGroupe(Page):
         restant = len(self.partition.eleves)
         for groupe in self.partition.get_groupes():
             restant -= len(groupe.eleves)
-            print(restant)
         
         self.change_text("eleves_restants", text=f"Élèves restants: {restant}")        
 
