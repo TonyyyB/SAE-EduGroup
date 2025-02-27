@@ -411,6 +411,9 @@ class TableauGroupe(tk.Frame):
 
         # Création du tableau de base
         self.create_widgets()
+        
+    def afficher_groupes(self):
+        self.page.afficher_groupes()
 
     def create_widgets(self):
         """Crée tous les widgets de la classe, y compris la table des élèves"""
@@ -432,6 +435,20 @@ class TableauGroupe(tk.Frame):
         # Bouton avec image pour paramètres du groupe
         bouton_param_grp = tk.Button(self, image=self.page.img_param_tk, compound="right", anchor='e', command=self.pop_up_param_grp)
         bouton_param_grp.grid(row=0, column=2, padx=10, pady=10, sticky="e")
+        
+        # Créer la liste des contraintes saisies
+        nb_critere_avec_contraintes = len([v for v in self.partition.get_groupes()[self.index].get_contraintes().values() if len(v) > 0])
+        if nb_critere_avec_contraintes > 0:
+            font_height = tkf.Font(font=("Arial", 12)).metrics('linespace')
+            contraintes_table = Table(self, self, height=(font_height+3)*(nb_critere_avec_contraintes+1))
+            contraintes_table._create_table_headers(["Critère", "Valeurs"], [21]*2)
+            contraintes_table.grid(row=1, column=0, padx=10, pady=10, columnspan=3)
+            for i, kv in enumerate(self.partition.get_groupes()[self.index].get_contraintes().items()):
+                critere, valeurs = kv
+                if(len(valeurs) == 0):
+                    continue
+                contraintes_table._create_table_entry(i+1, 0, critere.get_nom(), width=21)
+                contraintes_table._create_table_entry(i+1, 1, ", ".join([str(v) for v in valeurs]), width=21)
 
         # Table des élèves : utiliser la nouvelle EleveTable avec binding des événements
         self.create_eleve_table()

@@ -49,8 +49,6 @@ class Page(tk.Frame):
             except Exception as e:
                 print(f"Erreur lors de la création du texte '{label_key}': {e}")
 
-
-
     def on_resize(self, event):
         self.create_gradient()
 
