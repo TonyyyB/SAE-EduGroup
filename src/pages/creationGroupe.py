@@ -88,10 +88,10 @@ class CreationGroupe(Page):
         self.controller.minsize(1600, 1000)
 
         # Titre principal
-        self.create_label("instruction_text", 0.5, 0.05, "Création du groupe", font=GRANDE_POLICE)
+        self.create_label("instruction_text", 0.5, 0.05, "Création du groupe", font=GRANDE_POLICE, fill="white")
 
         # Contrôle du nombre de groupes
-        self.create_label("label_nb_groupes", 0.15, 0.05, "Nombre de groupes", font=MOYENNE_POLICE)
+        self.create_label("label_nb_groupes", 0.15, 0.05, "Nombre de groupes", font=MOYENNE_POLICE, fill="white")
 
         # Affichage du nombre de groupes avec boutons +
         group_control_frame = tk.Frame(self)
@@ -106,7 +106,7 @@ class CreationGroupe(Page):
         increase_button = ctk.CTkButton(group_control_frame, text="+", font=("Arial", 16), command=self.increase_group_count, corner_radius=0,width=90, height=40)
         increase_button.grid(row=0, column=2)
 
-        self.create_label("eleves_restants", 0.15, 0.02, text=f"Élèves restants: {len(self.eleves)}", font=MOYENNE_POLICE)
+        self.create_label("eleves_restants", 0.15, 0.02, text=f"Élèves restants: {len(self.eleves)}", font=MOYENNE_POLICE, fill="white")
 
         # Bouton de génération
         bouton_generer = ctk.CTkButton(self, text="Générer les groupes", font=GRANDE_POLICE, command=self.generer_groupes, corner_radius=0,height=80, width=500)
