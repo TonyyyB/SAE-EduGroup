@@ -193,6 +193,6 @@ class EleveTable(Table):
 
             # Colonnes dynamiques : notes pour chaque critère
             for j, critere in enumerate(criteres_tries):
-                note = critere.to_val(eleve.get_critere(critere))
+                note = eleve.get_critere(critere)
                 self._create_table_entry(i + 1, j + 2, note)
 

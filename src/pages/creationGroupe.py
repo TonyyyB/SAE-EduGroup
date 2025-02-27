@@ -51,10 +51,10 @@ class CreationGroupe(Page):
         self.eleves = eleves
         self.criteres = criteres
         # Créer la partition
-        self.partition = Partition(self.eleves)
+        self.partition = Partition(self.eleves, self.criteres)
         # Créer les groupes par défaut
         for i in range(self.nb_groupes):
-            groupe = Groupe(20)
+            groupe = Groupe(20, self.criteres)
             self.partition.ajouter_groupe(groupe)
         self.partition.adapter_taille()
         self.clear_ui()  # Effacer l'interface existante avant de la recréer
@@ -217,7 +217,7 @@ class CreationGroupe(Page):
     def increase_group_count(self):
         """Augmente le nombre de groupes"""
         self.nb_groupes += 1
-        self.partition.ajouter_groupe(Groupe(20))
+        self.partition.ajouter_groupe(Groupe(20, self.criteres))
         self.partition.adapter_taille()
         self.group_count_label.config(text=str(self.nb_groupes))
         self.afficher_groupes()  # Regénérer les groupes avec le nouveau nombre

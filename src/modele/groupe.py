@@ -1,11 +1,11 @@
 from modele.eleve import Eleve
 from modele.critere import Critere
 class Groupe:
-    def __init__(self, taille:int, contraintes:set[Critere]=dict()):
+    def __init__(self, taille:int, criteres:set[Critere]=set(), contraintes:dict[Critere,set[str]]=dict()):
         self.taille:int = taille
         self.contraintes:dict[Critere,set[str]] = contraintes  # Dictionnaire pour les contraintes
         self.eleves:set[Eleve] = set()
-        self.criteres:set[Critere] = set()
+        self.criteres:set[Critere] = criteres
         self.aEteModifier = False
     
     def changer_taille(self, taille:int, enregistrer=True) -> None:
@@ -27,6 +27,18 @@ class Groupe:
             if eleve.get_critere(critere) not in valeurs:
                 return False
         return True
+    
+    def calcul_prop(self) -> dict[Critere,dict[str,float]]:
+        propActuel = dict()
+        for critere in self.criteres:
+            propActuel[critere] = dict()
+            for valeur in critere.get_valeurs():
+                propActuel[critere][valeur] = 0
+            for eleve in self.get_eleves():
+                propActuel[critere][eleve.get_critere(critere)] += 1
+            for valeur in propActuel[critere]:
+                propActuel[critere][valeur] /= self.get_taille()
+        return propActuel
     
     def ajouter_eleve(self, eleve:Eleve) -> None:
         if len(self.eleves) + 1 > self.taille:
@@ -57,15 +69,11 @@ class Groupe:
     def get_taille(self) -> int:
         return self.taille
     
-    def calcul_score(self) -> float:
-        if len(self.eleves) == 0: return 0.0
-        return sum(critere.calcul_score(self) for critere in self.criteres)
-    
     def clear(self) -> None:
         self.eleves.clear()
 
     def __repr__(self):
-        return f"Groupe de {len(self.eleves)} score de {self.calcul_score()}"
+        return f"Groupe de {len(self.eleves)}"
 
     def __hash__(self):
         return hash((self.taille, frozenset(self.eleves), frozenset(self.criteres)))

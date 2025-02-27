@@ -23,4 +23,4 @@ class Critere:
         return f"{self.nom}: {self.poids}"
 
     def __hash__(self) -> int:
-        return hash(self.nom, self.poids)
+        return hash(self.nom)

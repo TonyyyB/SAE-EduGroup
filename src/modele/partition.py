@@ -4,10 +4,10 @@ from modele.critere import Critere
 from tkinter import messagebox
 import math
 class Partition:
-    def __init__(self, eleves:set[Eleve]):
+    def __init__(self, eleves:set[Eleve], criteres:set[Critere]):
         self.groupes:list[Groupe] = []
         self.eleves:set[Eleve] = eleves
-        self.criteres:set[Critere] = set() if len(eleves) == 0 else set(next(iter(eleves)).get_criteres().keys())
+        self.criteres:set[Critere] = criteres
         self.is_genere = False
         self.groupeEleve = dict()
         self.propGlobal:dict[Critere,dict[str,float]] = dict()
@@ -17,6 +17,7 @@ class Partition:
     
     def generer(self) -> 'Partition':
         self.clear()
+        self.calcul_proportion()
         elevesAPlacer:set[Eleve] = set(self.eleves)
         groupes = self.get_groupes()
         # Initialisation
@@ -27,22 +28,20 @@ class Partition:
             for groupe in groupes:
                 if groupe.respecter_contraintes(eleve):
                     self.groupeEleve[eleve].append(groupe)
-            
-
 
         # Ajout des élèves dans le seul groupe possible 
 
-        for eleve,groupe in self.eleves.items():
+        for eleve,groupe in self.groupeEleve.items():
             if len(groupe) == 1:
                 groupe[0].ajouter_eleve(eleve)
                 elevesAPlacer.remove(eleve)
         
         # Ajout des autres élèves selon le score
         eleveNonPlacer = set()
-        score = self.calcul_score()
-        while (elevesAPlacer > 0):
+        score = self.calcul_penalite()
+        while (len(elevesAPlacer) > 0):
             eleve = elevesAPlacer.pop()
-            groupes = self.eleves[eleve]
+            groupes = self.groupeEleve[eleve]
             if len(self.groupeEleve[eleve]) == 0:
                 eleveNonPlacer.add(eleve)
             else:
@@ -58,18 +57,18 @@ class Partition:
         elevesAPlacer = eleveNonPlacer
     
     def simule_ajout(self, groupe:Groupe, eleve:Eleve) -> float:
-        if groupe not in self.groupes: return self.calcul_score()
-        if eleve in groupe.get_eleves() or len(groupe.get_eleves()) + 1 > groupe.taille: return self.calcul_score()
+        if groupe not in self.groupes: return self.calcul_penalite()
+        if eleve in groupe.get_eleves() or len(groupe.get_eleves()) + 1 > groupe.taille: return self.calcul_penalite()
         groupe.get_eleves().add(eleve)
-        score = self.calcul_score()
+        score = self.calcul_penalite()
         groupe.get_eleves().remove(eleve)
         return score
 
     def simule_supp(self, groupe:Groupe, eleve:Eleve) -> float:
-        if groupe not in self.groupes: return self.calcul_score()
-        if eleve not in groupe.get_eleves(): return self.calcul_score()
+        if groupe not in self.groupes: return self.calcul_penalite()
+        if eleve not in groupe.get_eleves(): return self.calcul_penalite()
         groupe.get_eleves().remove(eleve)
-        score = self.calcul_score()
+        score = self.calcul_penalite()
         groupe.get_eleves().add(eleve)
         return score
 
@@ -85,43 +84,44 @@ class Partition:
         Returns:
             float: score de la partition
         """
-        if eleve1 not in groupe1.get_eleves() or eleve2 not in groupe2.get_eleves(): return self.calcul_score()
+        if eleve1 not in groupe1.get_eleves() or eleve2 not in groupe2.get_eleves(): return self.calcul_penalite()
         groupe1.get_eleves().remove(eleve1)
         groupe2.get_eleves().remove(eleve2)
         groupe1.get_eleves().add(eleve2)
         groupe2.get_eleves().add(eleve1)
-        scores = self.calcul_score()
+        scores = self.calcul_penalite()
         groupe1.get_eleves().remove(eleve2)
         groupe2.get_eleves().remove(eleve1)
         groupe1.get_eleves().add(eleve1)
         groupe2.get_eleves().add(eleve2)
         return scores
     
-    def calcul_penalite(self, propGlobal) -> float:
+    def calcul_penalite(self) -> float:
         penalite = 0
-    
+        propsGroupes:dict[Groupe,dict[Critere,dict[str,float]]] = dict()
+        for groupe in self.groupes:
+            propsGroupes[groupe] = groupe.calcul_prop()
+
+        for critere in self.criteres:
+            penaliteCritere = 0
+            for groupe in self.groupes:
+                for valeur in critere.get_valeurs():
+                    penaliteCritere += abs(propsGroupes[groupe][critere][valeur] - self.propGlobal[critere][valeur])
+            penalite += critere.get_poids() + penaliteCritere
+        return penalite
+
     def calcul_proportion(self) -> dict[Critere,dict[str,float]]:
         self.propGlobal = dict()
         for critere in self.criteres:
+            self.propGlobal[critere] = dict()
             for valeur in critere.get_valeurs():
-                proportion_valeur = dict()
-                cpt = 0
-                for eleve in self.eleves:
-                    if eleve.get_critere(critere) == valeur:
-                        cpt+=1
-                proportion_valeur[valeur]= cpt/len(self.eleves)
-            self.propGlobal[critere] = proportion_valeur
+                self.propGlobal[critere][valeur] = 0
+            for eleve in self.eleves:
+                self.propGlobal[critere][eleve.get_critere(critere)] += 1
+            for valeur in self.propGlobal[critere]:
+                self.propGlobal[critere][valeur] /= len(self.eleves)
+        return self.propGlobal
 
-    def calcul_proportion_actuel(self) -> dict[Critere,dict[str,float]]:
-        propActuel = dict()
-        for critere in self.criteres:
-            propActuel[critere] = dict()
-            for valeur in critere.get_valeurs():
-                propActuel[critere][valeur] = 0
-            for eleve in groupe.get_eleves():
-                propActuel[critere][eleve.get_critere(critere)] += 1
-            for valeur in propActuel[critere]:
-                propActuel[critere][valeur] /= groupe.get_taille()
     def adapter_taille(self) -> None:
         groupesTailleModif, groupesSansTailleModif = self.groupes_avec_et_sans_taille_modif()
 
