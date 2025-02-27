@@ -18,7 +18,7 @@ class PageAccueil(Page):
         self.frame.place(relx=0.5, rely=0.4, anchor='center', relwidth=0.6, relheight=0.2)
 
         # Instruction centrée
-        self.create_label("instruction_text", 0.5, 0.2, "Choisir le chemin du fichier :", font=GRANDE_POLICE)
+        self.create_label("instruction_text", 0.5, 0.2, "Choisir le chemin du fichier :", font=GRANDE_POLICE, fill="white")
 
         # Initialiser la fonctionnalité DnD pour la fenêtre Tkinter
         self.dnd_frame = self.frame

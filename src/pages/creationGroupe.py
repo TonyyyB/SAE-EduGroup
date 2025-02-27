@@ -28,6 +28,7 @@ class CreationGroupe(Page):
         self.eleves_restants_label = None
         self.selected_eleve = None  # Pour stocker l'élève sélectionné
         self.selected_groupe = None
+        self.selected_eleve_widget = None
         
         # Redimensionner l'image à la taille désirée
         self.img_param = Image.open("img/param.png")
@@ -88,10 +89,10 @@ class CreationGroupe(Page):
         self.controller.minsize(1600, 1000)
 
         # Titre principal
-        self.create_label("instruction_text", 0.5, 0.05, "Création du groupe", font=GRANDE_POLICE)
+        self.create_label("instruction_text", 0.5, 0.05, "Création du groupe", font=GRANDE_POLICE, fill="white")
 
         # Contrôle du nombre de groupes
-        self.create_label("label_nb_groupes", 0.15, 0.05, "Nombre de groupes", font=MOYENNE_POLICE)
+        self.create_label("label_nb_groupes", 0.15, 0.05, "Nombre de groupes", font=MOYENNE_POLICE, fill="white")
 
         # Affichage du nombre de groupes avec boutons +
         group_control_frame = tk.Frame(self)
@@ -106,7 +107,7 @@ class CreationGroupe(Page):
         increase_button = ctk.CTkButton(group_control_frame, text="+", font=("Arial", 16), command=self.increase_group_count, corner_radius=0,width=90, height=40)
         increase_button.grid(row=0, column=2)
 
-        self.create_label("eleves_restants", 0.15, 0.02, text=f"Élèves restants: {len(self.eleves)}", font=MOYENNE_POLICE)
+        self.create_label("eleves_restants", 0.15, 0.02, text=f"Élèves restants: {len(self.eleves)}", font=MOYENNE_POLICE, fill="white")
 
         # Bouton de génération
         bouton_generer = ctk.CTkButton(self, text="Générer les groupes", font=GRANDE_POLICE, command=self.generer_groupes, corner_radius=0,height=80, width=500)
@@ -410,12 +411,11 @@ class TableauGroupe(tk.Frame):
         self.groupe = partition.get_groupes()[index]
         self.page = page
         self.partition = partition
-        self.selected_eleve_widget = None  # Stocker le widget de l'élève sélectionné (ligne cliquée)
         self.index = index
-
+        
         # Création du tableau de base
         self.create_widgets()
-        
+
     def afficher_groupes(self):
         self.page.afficher_groupes()
 
@@ -519,10 +519,6 @@ class TableauGroupe(tk.Frame):
             print("Erreur : aucun élève trouvé pour ce widget.")
             return
 
-        # Si un élève a déjà été sélectionné, on réinitialise l'apparence du widget précédent
-        if self.selected_eleve_widget:
-            self.selected_eleve_widget.config(bg="white", fg="black")
-        
         # Sélectionner l'élève actuel et mettre en évidence le widget
         self.parent.selected_eleve = eleve
         self.parent.selected_groupe = self.index
@@ -582,3 +578,11 @@ class TableauElevesRestants(tk.Frame):
 
         # Debug print pour vérifier quel élève est sélectionné
         print(f"Élève sélectionné: {eleve.get_nom()}")  # Assurez-vous que la méthode `get_nom()` existe dans Eleve
+        self.parent.selected_eleve_widget = widget
+        widget.config(bg="#ffcccb", fg="black")
+        widget.after(1000, lambda: self.reset_color(widget))  # Utilisation de lambda pour retarder l'exécution
+
+        print(f"Élève sélectionné: {eleve.get_nom()}")
+
+    def reset_color(self, widget):
+        widget.config(bg="white", fg="black")
