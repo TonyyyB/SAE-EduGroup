@@ -524,10 +524,13 @@ class TableauGroupe(tk.Frame):
         self.parent.selected_groupe = self.index
         self.parent.on_group = True
         self.selected_eleve_widget = widget
-        widget.config(bg="#ffcccb", fg="black")  # Changer la couleur pour indiquer la sélection
+        widget.config(bg="#ffcccb", fg="black")
+        widget.after(1000, lambda: self.reset_color(widget))  # Utilisation de lambda pour retarder l'exécution
 
-        # Debug print pour vérifier quel élève est sélectionné
-        print(f"Élève sélectionné: {eleve.get_nom()}")  # Assurez-vous que la méthode `get_nom()` existe dans Eleve
+        print(f"Élève sélectionné: {eleve.get_nom()}")
+
+    def reset_color(self, widget):
+        widget.config(bg="white", fg="black")
 
 
 class TableauElevesRestants(tk.Frame):
