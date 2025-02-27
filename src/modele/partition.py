@@ -58,12 +58,14 @@ class Partition:
     def generer(self) -> 'Partition':
         self.clear()
         self.calcul_proportion()
+        print([groupe.get_contraintes() for groupe in self.groupes])
         # Calcul dico Eleve => groupes possibles
         groupesPossible:dict[Eleve, set[Groupe]] = dict()
         for eleve in self.eleves:
             groupesPossible[eleve] = set(groupe for groupe in self.groupes if groupe.respecter_contraintes(eleve))
         # Ajout des élèves dans le seul groupe possible
-        for eleve, groupes in groupesPossible.items():
+        for eleve in list(groupesPossible.keys()):
+            groupes = groupesPossible[eleve]
             if len(groupes) == 1:
                 groupes.pop().ajouter_eleve(eleve)
                 del groupesPossible[eleve]

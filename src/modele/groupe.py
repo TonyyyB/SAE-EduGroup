@@ -93,6 +93,22 @@ class Groupe:
         groupe1.get_eleves().add(eleve1)
         groupe2.get_eleves().add(eleve2)
         return scores
+    
+    def transferer(self, groupe:'Groupe', eleve1:Eleve, eleve2:Eleve):
+        if eleve1 not in self.eleves or eleve2 not in groupe.get_eleves(): return self.calcul_score(), groupe.calcul_score()
+        self.eleves.remove(eleve1)
+        groupe.get_eleves().remove(eleve2)
+        self.eleves.add(eleve2)
+        groupe.get_eleves().add(eleve1)
+        
+    def transferer_simple(self, groupe_dest: 'Groupe', eleve: Eleve):
+        """Transférer un élève d'un groupe vers un autre sans échange."""
+        if eleve not in self.eleves:
+            return
+        
+        self.eleves.remove(eleve)
+        groupe_dest.get_eleves().add(eleve)
+        return
 
     def get_eleves(self) -> set[Eleve]:
         return self.eleves
