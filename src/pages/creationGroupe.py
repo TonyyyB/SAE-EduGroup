@@ -53,10 +53,10 @@ class CreationGroupe(Page):
         self.eleves = eleves
         self.criteres = criteres
         # Créer la partition
-        self.partition = Partition(self.eleves)
+        self.partition = Partition(self.eleves, self.criteres)
         # Créer les groupes par défaut
         for i in range(self.nb_groupes):
-            groupe = Groupe(20)
+            groupe = Groupe(20, self.criteres)
             self.partition.ajouter_groupe(groupe)
         self.partition.adapter_taille()
         self.clear_ui()  # Effacer l'interface existante avant de la recréer
@@ -205,8 +205,6 @@ class CreationGroupe(Page):
         df.to_csv(fichier, index=False, encoding='utf-8')
         print(f"Exportation réussie : {fichier}")
 
-
-
     def decrease_group_count(self):
         """Réduit le nombre de groupes"""
         if self.nb_groupes > 2:  # Limite à 2 groupe minimum
@@ -219,7 +217,7 @@ class CreationGroupe(Page):
     def increase_group_count(self):
         """Augmente le nombre de groupes"""
         self.nb_groupes += 1
-        self.partition.ajouter_groupe(Groupe(20))
+        self.partition.ajouter_groupe(Groupe(20, self.criteres))
         self.partition.adapter_taille()
         self.group_count_label.config(text=str(self.nb_groupes))
         self.afficher_groupes()  # Regénérer les groupes avec le nouveau nombre
@@ -360,6 +358,7 @@ class TableauCriteres(tk.Frame):
             self.table._create_table_entry(i + 1, 0, critere.get_nom())
             self.table._create_table_entry(i + 1, 1, poids_scale)
             self.table._create_table_entry(i + 1, 2, poids_entry)
+        self.adjust_sliders(100//len(self.criteres), 0)  # Répartir uniformément les poids au début
     
     def adjust_sliders(self, value, index):
         value = int(round(float(value)))  # Convertir en entier pour IntVar
@@ -449,7 +448,6 @@ class TableauGroupe(tk.Frame):
                     continue
                 contraintes_table._create_table_entry(i+1, 0, critere.get_nom(), width=21)
                 contraintes_table._create_table_entry(i+1, 1, ", ".join([str(v) for v in valeurs]), width=21)
-
         # Table des élèves : utiliser la nouvelle EleveTable avec binding des événements
         self.create_eleve_table()
 

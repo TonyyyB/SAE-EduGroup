@@ -4,90 +4,149 @@ from modele.critere import Critere
 from tkinter import messagebox
 import math
 class Partition:
-    def __init__(self, eleves:set[Eleve]):
+    def __init__(self, eleves:set[Eleve], criteres:set[Critere]):
         self.groupes:list[Groupe] = []
         self.eleves:set[Eleve] = eleves
-        self.criteres:set[Critere] = set() if len(eleves) == 0 else set(next(iter(eleves)).get_criteres().keys())
+        self.criteres:set[Critere] = criteres
         self.is_genere = False
+        self.propGlobal:dict[Critere,dict[str,float]] = dict()
     
     def is_generer(self):
         return self.is_genere
     
+    #def generer(self) -> 'Partition':
+    #    self.clear()
+    #    self.calcul_proportion()
+    #    elevesAPlacer:set[Eleve] = set(self.eleves)
+    #    groupes = self.get_groupes()
+    #    # Initialisation
+#
+    #    # Groupes possibles
+    #    for eleve in self.eleves:
+    #        self.groupeEleve[eleve] = []
+    #        for groupe in groupes:
+    #            if groupe.respecter_contraintes(eleve):
+    #                self.groupeEleve[eleve].append(groupe)
+#
+    #    # Ajout des élèves dans le seul groupe possible 
+#
+    #    for eleve,groupe in self.groupeEleve.items():
+    #        if len(groupe) == 1:
+    #            groupe[0].ajouter_eleve(eleve)
+    #            elevesAPlacer.remove(eleve)
+    #    
+    #    # Ajout des autres élèves selon le score
+    #    eleveNonPlacer = set()
+    #    score = self.calcul_penalite()
+    #    while (len(elevesAPlacer) > 0):
+    #        eleve = elevesAPlacer.pop()
+    #        groupes = self.groupeEleve[eleve]
+    #        if len(self.groupeEleve[eleve]) == 0:
+    #            eleveNonPlacer.add(eleve)
+    #        else:
+    #            groupeAAjouter = None
+    #            for groupe in groupes:
+    #                if self.simule_ajout(eleve, groupe) <= score:
+    #                    groupeAAjouter = groupe
+    #                    score = self.simule_ajout(eleve, groupe)
+    #            if groupeAAjouter is not None:
+    #                groupeAAjouter.ajouter_eleve(eleve)
+    #            else:
+    #                eleveNonPlacer.add(eleve)
+    #    elevesAPlacer = eleveNonPlacer
+
     def generer(self) -> 'Partition':
         self.clear()
-        elevesAPlacer:set[Eleve] = set(self.eleves)
-        groupes = self.get_groupes()
-        # Initialisation
+        self.calcul_proportion()
+        # Calcul dico Eleve => groupes possibles
+        groupesPossible:dict[Eleve, set[Groupe]] = dict()
         for eleve in self.eleves:
-            maxi = -math.inf
+            groupesPossible[eleve] = set(groupe for groupe in self.groupes if groupe.respecter_contraintes(eleve))
+        # Ajout des élèves dans le seul groupe possible
+        for eleve, groupes in groupesPossible.items():
+            if len(groupes) == 1:
+                groupes.pop().ajouter_eleve(eleve)
+                del groupesPossible[eleve]
+                print(f"Eleve {eleve.get_prenom()} {eleve.get_nom()} ajouté dans un groupe")
+        # Ajouter les autres élèves
+        for eleve, groupes in groupesPossible.items():
             gmax = None
+            score = self.calcul_penalite()
             for groupe in groupes:
-                if not groupe.respecter_contraintes(eleve) or not groupe.place_dispo(): continue
-                score = self.simule_ajout(groupe, eleve)
-                if score > maxi:
-                    maxi = score
+                score_groupe = self.simule_ajout(groupe, eleve)
+                if score_groupe < score or gmax is None:
+                    score = score_groupe
                     gmax = groupe
             if gmax is not None:
                 gmax.ajouter_eleve(eleve)
-                elevesAPlacer.remove(eleve)
-        while len(elevesAPlacer) > 0:
-            eleve = elevesAPlacer.pop()
-            maxi = -math.inf
-            gmax = None
-            for groupe in groupes:
-                if not groupe.place_dispo(): continue
-                score = self.simule_ajout(groupe,eleve)
-                if gmax is None:
-                    maxi = score
-                    gmax = groupe
-                    continue
-                if score > maxi:
-                    maxi = score
-                    gmax = groupe
-            gmax.ajouter_eleve(eleve)
-        # Boucle principale
-        combinaisons:set[tuple[Groupe,Groupe]] = set()
-        for groupe1 in groupes:
-            for groupe2 in groupes:
-                if groupe1 == groupe2: continue
-                if (groupe2, groupe1) not in combinaisons:
-                    combinaisons.add((groupe1, groupe2))
-
-        lastScore = self.calcul_score()
-        newScore = lastScore + 1
-        timeLastScoreNotGreater = 0
-        while(timeLastScoreNotGreater < 3):
-            lastScore = newScore
-            for g1, g2 in combinaisons:
-                newScore = self.calcul_score()
-                maxiEvol = 0
-                evolMax = None
-                maxiEvolSansContraintes = 0
-                evolMaxSansContraintes = None
-                for e1, e2 in zip(g1.get_eleves(), g2.get_eleves()):
-                    score = self.simule_transf(g1, g2, e1, e2)
-                    if not g1.respecter_contraintes(e2) or not g2.respecter_contraintes(e1):
-                        if score > maxiEvolSansContraintes:
-                            maxiEvolSansContraintes = score
-                            evolMaxSansContraintes = (g1, g2, e1, e2)
-                    else:
-                        if score > maxiEvol:
-                            maxiEvol = score
-                            evolMax = (g1, g2, e1, e2)
-                if evolMax is None:
-                    if evolMaxSansContraintes is not None:
-                        evolMaxSansContraintes[0].transferer(evolMaxSansContraintes[1], 
-                                                            evolMaxSansContraintes[2], 
-                                                            evolMaxSansContraintes[3])
-                else:
-                    evolMax[0].transferer(evolMax[1], evolMax[2], evolMax[3])
-            newScore = self.calcul_score()
-            if newScore > lastScore:
-                #timeLastScoreNotGreater = 0
-                timeLastScoreNotGreater += 1
-        self.is_genere = True
         return self
     
+    def simule_ajout(self, groupe:Groupe, eleve:Eleve) -> float:
+        if groupe not in self.groupes: return self.calcul_penalite()
+        if eleve in groupe.get_eleves() or len(groupe.get_eleves()) + 1 > groupe.taille: return self.calcul_penalite()
+        groupe.get_eleves().add(eleve)
+        score = self.calcul_penalite()
+        groupe.get_eleves().remove(eleve)
+        return score
+
+    def simule_supp(self, groupe:Groupe, eleve:Eleve) -> float:
+        if groupe not in self.groupes: return self.calcul_penalite()
+        if eleve not in groupe.get_eleves(): return self.calcul_penalite()
+        groupe.get_eleves().remove(eleve)
+        score = self.calcul_penalite()
+        groupe.get_eleves().add(eleve)
+        return score
+
+    def simule_transf(self, groupe1:Groupe, groupe2:Groupe, eleve1:Eleve, eleve2:Eleve) -> tuple[float,float]: # type: ignore
+        """Renvoie les deux score des deux groupes si un transfer est effectuer entre les deux élèves
+
+        Args:
+            groupe1 (Groupe): premier groupe
+            groupe2 (Groupe): deuxième groupe
+            eleve1 (Eleve): eleve du groupe
+            eleve2 (Eleve): eleve de l'autre groupe
+
+        Returns:
+            float: score de la partition
+        """
+        if eleve1 not in groupe1.get_eleves() or eleve2 not in groupe2.get_eleves(): return self.calcul_penalite()
+        groupe1.get_eleves().remove(eleve1)
+        groupe2.get_eleves().remove(eleve2)
+        groupe1.get_eleves().add(eleve2)
+        groupe2.get_eleves().add(eleve1)
+        scores = self.calcul_penalite()
+        groupe1.get_eleves().remove(eleve2)
+        groupe2.get_eleves().remove(eleve1)
+        groupe1.get_eleves().add(eleve1)
+        groupe2.get_eleves().add(eleve2)
+        return scores
+    
+    def calcul_penalite(self) -> float:
+        penalite = 0
+        propsGroupes:dict[Groupe,dict[Critere,dict[str,float]]] = dict()
+        for groupe in self.groupes:
+            propsGroupes[groupe] = groupe.calcul_prop()
+
+        for critere in self.criteres:
+            penaliteCritere = 0
+            for groupe in self.groupes:
+                for valeur in critere.get_valeurs():
+                    penaliteCritere += abs(propsGroupes[groupe][critere][valeur] - self.propGlobal[critere][valeur])
+            penalite += critere.get_poids() + penaliteCritere
+        return penalite
+
+    def calcul_proportion(self) -> dict[Critere,dict[str,float]]:
+        self.propGlobal = dict()
+        for critere in self.criteres:
+            self.propGlobal[critere] = dict()
+            for valeur in critere.get_valeurs():
+                self.propGlobal[critere][valeur] = 0
+            for eleve in self.eleves:
+                self.propGlobal[critere][eleve.get_critere(critere)] += 1
+            for valeur in self.propGlobal[critere]:
+                self.propGlobal[critere][valeur] /= len(self.eleves)
+        return self.propGlobal
+
     def adapter_taille(self) -> None:
         groupesTailleModif, groupesSansTailleModif = self.groupes_avec_et_sans_taille_modif()
 
@@ -140,54 +199,6 @@ class Partition:
     
     def get_criteres(self) -> set[Critere]:
         return self.criteres
-
-    def simule_ajout(self, groupe:Groupe, eleve:Eleve) -> float:
-        if groupe not in self.groupes: return self.calcul_score()
-        if eleve in groupe.get_eleves() or len(groupe.get_eleves()) + 1 > groupe.taille: return self.calcul_score()
-        groupe.get_eleves().add(eleve)
-        score = self.calcul_score()
-        groupe.get_eleves().remove(eleve)
-        return score
-
-    def simule_supp(self, groupe:Groupe, eleve:Eleve) -> float:
-        if groupe not in self.groupes: return self.calcul_score()
-        if eleve not in groupe.get_eleves(): return self.calcul_score()
-        groupe.get_eleves().remove(eleve)
-        score = self.calcul_score()
-        groupe.get_eleves().add(eleve)
-        return score
-
-    def simule_transf(self, groupe1:Groupe, groupe2:Groupe, eleve1:Eleve, eleve2:Eleve) -> tuple[float,float]: # type: ignore
-        """Renvoie les deux score des deux groupes si un transfer est effectuer entre les deux élèves
-
-        Args:
-            groupe1 (Groupe): premier groupe
-            groupe2 (Groupe): deuxième groupe
-            eleve1 (Eleve): eleve du groupe
-            eleve2 (Eleve): eleve de l'autre groupe
-
-        Returns:
-            float: score de la partition
-        """
-        if eleve1 not in groupe1.get_eleves() or eleve2 not in groupe2.get_eleves(): return self.calcul_score()
-        groupe1.get_eleves().remove(eleve1)
-        groupe2.get_eleves().remove(eleve2)
-        groupe1.get_eleves().add(eleve2)
-        groupe2.get_eleves().add(eleve1)
-        scores = self.calcul_score()
-        groupe1.get_eleves().remove(eleve2)
-        groupe2.get_eleves().remove(eleve1)
-        groupe1.get_eleves().add(eleve1)
-        groupe2.get_eleves().add(eleve2)
-        return scores
-
-    def calcul_score(self) -> float:
-        moyenne = sum(groupe.calcul_score() for groupe in self.groupes) / len(self.groupes)
-        ecart_type = 0
-        for groupe in self.groupes:
-            ecart_type += (groupe.calcul_score() - moyenne) ** 2
-        ecart_type = math.sqrt(ecart_type / len(self.groupes))
-        return moyenne - ecart_type
     
     def clear(self) -> None:
         for groupe in self.groupes:

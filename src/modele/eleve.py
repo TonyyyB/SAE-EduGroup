@@ -10,7 +10,7 @@ class Eleve:
     def ajouter_critere(self, critere:Critere, valeur:int|str|bool):
         """Ajoute un critère avec une valeur associée au dictionnaire criteres."""
         critere.ajouter_valeur(valeur)
-        self.criteres[critere] = critere.to_int(valeur)
+        self.criteres[critere] = valeur
 
     def calculer_moyenne_ponderee(self):
         """Calcule la moyenne pondérée des critères (matières) selon les coefficients fournis."""

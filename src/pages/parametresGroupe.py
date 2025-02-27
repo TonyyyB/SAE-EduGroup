@@ -1,8 +1,10 @@
 import tkinter as tk
 from tkinter import messagebox
+from modele.partition import Partition
+from modele.groupe import Groupe
 
 class ParametresGroupe(tk.Toplevel):
-    def __init__(self, parent, partition, groupe):
+    def __init__(self, parent, partition: Partition, groupe: Groupe):
         super().__init__(parent)
         self.parent = parent
         self.partition = partition
@@ -37,7 +39,7 @@ class ParametresGroupe(tk.Toplevel):
         # Critères et valeurs possibles avec Checkboxes dynamiques
         self.criteres_values = dict()
         for critere in self.partition.get_criteres():
-            self.criteres_values[critere]=sorted(list(critere.get_valeurs_possibles(toVal=True)))
+            self.criteres_values[critere]=sorted(list(critere.get_valeurs()))
 
         self.checkbox_vars = {}  # Stocke les variables des checkboxes pour chaque critère
 
@@ -55,7 +57,7 @@ class ParametresGroupe(tk.Toplevel):
             for i, valeur in enumerate(valeurs):
                 var = tk.BooleanVar()  # Variable pour chaque checkbox
                 if valeurs_possibles_actuels is not None:
-                    var.set(critere.to_int(valeur) in valeurs_possibles_actuels)
+                    var.set(valeur in valeurs_possibles_actuels)
                 checkbox = tk.Checkbutton(checkbox_frame, text=str(valeur), variable=var, bg="white")
                 checkbox.pack(side="left", padx=5)
                 self.checkbox_vars[critere].append((valeur,var))
@@ -78,14 +80,12 @@ class ParametresGroupe(tk.Toplevel):
 
     def sauvegarder_criteres(self):
         # Récupérer les valeurs cochées pour chaque critère
-        criteres_selectionnes = {}
         for critere, vars_list in self.checkbox_vars.items():
-            criteres_selectionnes[critere] = set()
+            criteres_selectionnes = set()
             for val, var in vars_list:
                 if var.get():
-                    criteres_selectionnes[critere].add(critere.to_int(val))
-            if len(criteres_selectionnes) > 0:
-                self.groupe.set_contrainte(critere, criteres_selectionnes[critere])
+                    criteres_selectionnes.add(val)
+            self.groupe.set_contrainte(critere, criteres_selectionnes)
         newTaille = int(self.entry_nb_eleve.get())
         if newTaille != self.groupe.get_taille():
             oldTaille = self.groupe.get_taille()
