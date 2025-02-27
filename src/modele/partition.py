@@ -71,16 +71,26 @@ class Partition:
                 del groupesPossible[eleve]
                 print(f"Eleve {eleve.get_prenom()} {eleve.get_nom()} ajouté dans un groupe")
         # Ajouter les autres élèves
-        for eleve, groupes in groupesPossible.items():
+        elevesRestants = set()
+        print(len(groupesPossible))
+        for eleve in list(groupesPossible.keys()):
+            groupes = groupesPossible[eleve]
             gmax = None
             score = self.calcul_penalite()
             for groupe in groupes:
                 score_groupe = self.simule_ajout(groupe, eleve)
-                if score_groupe < score or gmax is None:
+                if (score_groupe < score or gmax is None) and (groupe.place_dispo()>0):
                     score = score_groupe
                     gmax = groupe
+
             if gmax is not None:
+                print(f"Eleve {eleve.get_prenom()} {eleve.get_nom()} ajouté dans un groupe")
                 gmax.ajouter_eleve(eleve)
+                del groupesPossible[eleve]
+            else : 
+                elevesRestants.add(eleve)
+        self.eleves_restant = elevesRestants
+        self.is_genere = True
         return self
     
     def simule_ajout(self, groupe:Groupe, eleve:Eleve) -> float:
@@ -90,6 +100,12 @@ class Partition:
         score = self.calcul_penalite()
         groupe.get_eleves().remove(eleve)
         return score
+    
+    def get_eleves_restant(self):
+        if self.is_genere:
+            return self.eleves_restant
+        else:
+            return self.eleves
 
     def simule_supp(self, groupe:Groupe, eleve:Eleve) -> float:
         if groupe not in self.groupes: return self.calcul_penalite()

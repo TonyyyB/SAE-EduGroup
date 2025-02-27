@@ -321,6 +321,11 @@ class CreationGroupe(Page):
         self.scrollbar_y.pack(side="right", fill="y")
         self.canvas_frame.configure(yscrollcommand=self.scrollbar_y.set)
 
+        table_eleves_restant = TableauElevesRestants(self.inner_frame, self, self.partition.get_eleves_restant())
+        table_eleves_restant.place(relx=0.05, rely=0.6)
+
+        self.tables.append(table_eleves_restant)
+
     def afficher_criteres(self):
         table = TableauCriteres(self, self, self.criteres)
         table.place(relx=0.05, rely=0.3)
@@ -470,22 +475,31 @@ class TableauGroupe(tk.Frame):
         """Lorsque le title_label est cliqué, on transfère l'élève sélectionné vers ce groupe."""
         if self.parent.selected_eleve:
             try:
-                current_groupe = self.partition.get_groupes()[self.parent.selected_groupe]
-                target_groupe = self.partition.get_groupes()[self.index]
+                if self.parent.on_group:
+                    current_groupe = self.partition.get_groupes()[self.parent.selected_groupe]
+                    target_groupe = self.partition.get_groupes()[self.index]
 
                 # Validation de transfert simple
-                if target_groupe and current_groupe != target_groupe:
-                    if self.parent.selected_eleve:
-                        current_groupe.transferer_simple(target_groupe, self.parent.selected_eleve)  # Transfert simple sans échange
-                        messagebox.showinfo("Transfert réussi", f"L'élève {self.parent.selected_eleve.get_nom()} a été transféré")
-                        #MAJ DE L'AFFICHAGE A AJOUTER
-                        self.parent.selected_eleve = None
-                        self.parent.selected_groupe = None
-                        self.page.afficher_groupes()
+                    if target_groupe and current_groupe != target_groupe:
+                        if self.parent.selected_eleve:
+                            current_groupe.transferer_simple(target_groupe, self.parent.selected_eleve)  # Transfert simple sans échange
+                            messagebox.showinfo("Transfert réussi", f"L'élève {self.parent.selected_eleve.get_nom()} a été transféré")
+                            #MAJ DE L'AFFICHAGE A AJOUTER
+                            self.parent.selected_eleve = None
+                            self.parent.selected_groupe = None
+                            self.page.afficher_groupes()
+                        else:
+                                messagebox.showwarning("Erreur de transfert", "Impossible de trouver l'élève pour le transfert.")
                     else:
-                        messagebox.showwarning("Erreur de transfert", "Impossible de trouver l'élève pour le transfert.")
+                        messagebox.showwarning("Erreur de sélection", "Vous devez choisir un autre groupe pour le transfert.")
                 else:
-                    messagebox.showwarning("Erreur de sélection", "Vous devez choisir un autre groupe pour le transfert.")
+                    target_groupe = self.partition.get_groupes()[self.index]
+                    target_groupe.get_eleves().add(self.parent.selected_eleve)
+                    self.partition.get_eleves_restant().remove(self.parent.selected_eleve)
+                    self.parent.selected_eleve = None
+                    self.parent.selected_groupe = None
+                    self.page.afficher_groupes()
+                        
             except Exception as e:
                 messagebox.showerror("Erreur", str(e))
         else:
@@ -508,6 +522,62 @@ class TableauGroupe(tk.Frame):
         # Sélectionner l'élève actuel et mettre en évidence le widget
         self.parent.selected_eleve = eleve
         self.parent.selected_groupe = self.index
+        self.parent.on_group = True
+        self.selected_eleve_widget = widget
+        widget.config(bg="#ffcccb", fg="black")  # Changer la couleur pour indiquer la sélection
+
+        # Debug print pour vérifier quel élève est sélectionné
+        print(f"Élève sélectionné: {eleve.get_nom()}")  # Assurez-vous que la méthode `get_nom()` existe dans Eleve
+
+
+class TableauElevesRestants(tk.Frame):
+    def __init__(self, parent, page, eleves):
+        super().__init__(page)
+        self.parent = parent
+        self.page = page
+        self.eleves = eleves
+        self.selected_eleve_widget = None  # Stocker le widget de l'élève sélectionné (ligne cliquée)
+
+        # Création du tableau de base
+        self.create_widgets()
+
+    def create_widgets(self):
+        """Crée tous les widgets de la classe, y compris la table des élèves"""
+        # Supprimer tous les widgets existants
+        for widget in self.winfo_children():
+            widget.destroy()
+
+        # Label titre de groupe
+        title_label = tk.Label(self, text="Élèves restants", font=("Arial", 12, "bold"),
+                               bg="#3D83B1", fg="white", width=15, height=2, anchor="center")
+        title_label.grid(row=0, column=0, padx=10, pady=10, sticky="w")
+
+
+        # Table des élèves restants
+        table = EleveTable(parent=self, controller=self, eleves=self.eleves, criteres=self.page.criteres)
+        table.grid(row=1, column=0, padx=10, pady=10, columnspan=2)
+    
+    def on_eleve_click(self, event):
+        """Lorsqu'un élève est cliqué, on le sélectionne pour un transfert."""
+        widget = event.widget
+        eleve = getattr(widget, "eleve", None)  # Récupérer l'objet Eleve directement depuis le widget
+
+        if eleve is None:
+            print("Erreur : aucun élève trouvé pour ce widget.")
+            return
+
+        # Si un élève a déjà été sélectionné, on réinitialise l'apparence du widget précédent
+        if self.selected_eleve_widget:
+            self.selected_eleve_widget.config(bg="white", fg="black")
+        
+        # Sélectionner l'élève actuel et mettre en évidence le widget
+        self.parent.selected_eleve = eleve
+        self.parent.on_group = False
+        self.selected_eleve_widget = widget
+        widget.config(bg="#ffcccb", fg="black")  # Changer la couleur pour indiquer la sélection
+
+        # Debug print pour vérifier quel élève est sélectionné
+        print(f"Élève sélectionné: {eleve.get_nom()}")  # Assurez-vous que la méthode `get_nom()` existe dans Eleve
         self.parent.selected_eleve_widget = widget
         widget.config(bg="#ffcccb", fg="black")
         widget.after(1000, lambda: self.reset_color(widget))  # Utilisation de lambda pour retarder l'exécution
