@@ -289,7 +289,6 @@ class CreationGroupe(Page):
 
             # Mettre à jour le nombre de groupes dans la Partition
             self.mettre_a_jour_nombre_de_groupes(nombre_de_groupes)
-
             # Traiter chaque groupe
             for i, groupe_data in enumerate(data):
                 groupe = self.groupes[i]  # Récupérer le groupe correspondant
@@ -313,6 +312,8 @@ class CreationGroupe(Page):
                         groupe.set_contrainte(critere, contrainte_valeurs)
 
             # Afficher les critères mis à jour
+            self.partition.adapter_taille()
+            self.afficher_groupes()
             self.afficher_criteres()
 
     def mettre_a_jour_nombre_de_groupes(self, nombre_de_groupes):
@@ -326,6 +327,7 @@ class CreationGroupe(Page):
         for _ in range(nombre_de_groupes):
             nouveau_groupe = Groupe(taille=0)  # Crée un groupe avec une taille par défaut
             self.groupes.append(nouveau_groupe)
+            self.partition.ajouter_groupe(nouveau_groupe)
 
         print(f"Nombre de groupes mis à jour : {nombre_de_groupes}")
 
