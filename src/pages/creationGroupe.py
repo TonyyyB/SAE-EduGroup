@@ -455,8 +455,8 @@ class TableauGroupe(tk.Frame):
         """Lorsque le title_label est cliqué, on transfère l'élève sélectionné vers ce groupe."""
         if self.parent.selected_eleve:
             try:
-                current_groupe = self.groupe
-                target_groupe = self.parent.selected_groupe
+                current_groupe = self.partition.get_groupes()[self.parent.selected_groupe]
+                target_groupe = self.partition.get_groupes()[self.index]
 
                 # Validation de transfert simple
                 if target_groupe and current_groupe != target_groupe:
@@ -464,7 +464,9 @@ class TableauGroupe(tk.Frame):
                         current_groupe.transferer_simple(target_groupe, self.parent.selected_eleve)  # Transfert simple sans échange
                         messagebox.showinfo("Transfert réussi", f"L'élève {self.parent.selected_eleve.get_nom()} a été transféré")
                         #MAJ DE L'AFFICHAGE A AJOUTER
-                        
+                        self.parent.selected_eleve = None
+                        self.parent.selected_groupe = None
+                        self.page.afficher_groupes()
                     else:
                         messagebox.showwarning("Erreur de transfert", "Impossible de trouver l'élève pour le transfert.")
                 else:
@@ -494,7 +496,7 @@ class TableauGroupe(tk.Frame):
         
         # Sélectionner l'élève actuel et mettre en évidence le widget
         self.parent.selected_eleve = eleve
-        self.parent.selected_groupe = self.groupe
+        self.parent.selected_groupe = self.index
         self.selected_eleve_widget = widget
         widget.config(bg="#ffcccb", fg="black")  # Changer la couleur pour indiquer la sélection
 
