@@ -21,6 +21,7 @@ class CreationGroupe(Page):
     def __init__(self, parent, controller):
         super().__init__(parent, controller)
         self.controller = controller
+        self.groupes = []
         self.eleves = []
         self.criteres = []
         self.text_fields = {}
@@ -259,34 +260,74 @@ class CreationGroupe(Page):
         return data  # Retourne les données sous forme de JSON
 
     def importer_criteres(self):
+        # Dictionnaire des critères existants
         criteres = {critere.get_nom(): critere for critere in self.criteres}
-        filepath = filedialog.askopenfilename(filetypes=[("Fichiers CSV", "*.csv"), ("Tous les fichiers", "*.*")])
+        
+        # Ouvrir une boîte de dialogue pour sélectionner un fichier JSON
+        filepath = filedialog.askopenfilename(filetypes=[("Fichiers JSON", "*.json"), ("Tous les fichiers", "*.*")])
         if filepath:
-            if not filepath.endswith(".csv"):
-                messagebox.showerror("Erreur", "Veuillez sélectionner un fichier CSV.")
+            if not filepath.endswith(".json"):
+                messagebox.showerror("Erreur", "Veuillez sélectionner un fichier JSON.")
                 return
+            
             try:
+                # Lire le fichier JSON
                 with open(filepath, mode='r', encoding='utf-8') as file:
-                    reader = csv.reader(file)
-                    next(reader)  # Ignorer l'en-tête
-                    data = dict(reader)
+                    data = json.load(file)
                 print(f"Importation réussie : {filepath}")
             except Exception as e:
                 print(f"Erreur lors de l'importation : {e}")
-        if not data:
-            return messagebox.showerror("Erreur", "Aucune donnée à importer.")
-        if not all(critere in criteres for critere in data.keys()):
-            return messagebox.showerror("Erreur", "Certains critères ne sont pas reconnus.")
-        if all(critere in criteres for critere in data.keys()) and len(data.keys()) < len(criteres):
-            if not messagebox.askyesno("Confirmation", "Certains critères ne sont pas reconnus. Voulez-vous continuer l'importation ?"):
-                return messagebox.showinfo("Information", "Importation annulée.")
-        
-        for nom, critere in criteres.items():
-            if nom in data:
-                critere.set_poids(int(data[nom]))
-            else:
-                critere.set_poids(0)
-        self.afficher_criteres()    
+                return
+
+            # Vérifier si le fichier contient des données
+            if not data:
+                return messagebox.showerror("Erreur", "Aucune donnée à importer.")
+
+            # Déterminer le nombre de groupes dans le fichier JSON
+            nombre_de_groupes = len(data)
+            print(f"Nombre de groupes détectés : {nombre_de_groupes}")
+
+            # Mettre à jour le nombre de groupes dans la Partition
+            self.mettre_a_jour_nombre_de_groupes(nombre_de_groupes)
+
+            # Traiter chaque groupe
+            for i, groupe_data in enumerate(data):
+                groupe = self.groupes[i]  # Récupérer le groupe correspondant
+                for critere_data in groupe_data['criteres']:
+                    nom_critere = critere_data['nom']
+                    valeur = critere_data['valeur']
+                    contrainte = critere_data['contrainte']
+
+                    # Vérifier si le critère existe
+                    if nom_critere not in criteres:
+                        print(f"Critère non reconnu : {nom_critere}")
+                        continue
+
+                    # Appliquer la valeur du critère
+                    critere = criteres[nom_critere]
+                    critere.set_poids(valeur)
+
+                    # Appliquer les contraintes
+                    if contrainte != "N/A":
+                        contrainte_valeurs = set(map(int, contrainte.split(", ")))
+                        groupe.set_contrainte(critere, contrainte_valeurs)
+
+            # Afficher les critères mis à jour
+            self.afficher_criteres()
+
+    def mettre_a_jour_nombre_de_groupes(self, nombre_de_groupes):
+        """
+        Met à jour le nombre de groupes dans la Partition.
+        """
+        # Supprimer les groupes existants si nécessaire
+        self.partition.groupes.clear()
+
+        # Ajouter de nouveaux groupes
+        for _ in range(nombre_de_groupes):
+            nouveau_groupe = Groupe(taille=0)  # Crée un groupe avec une taille par défaut
+            self.groupes.append(nouveau_groupe)
+
+        print(f"Nombre de groupes mis à jour : {nombre_de_groupes}")
 
     def afficher_groupes(self):
         """

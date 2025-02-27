@@ -134,6 +134,8 @@ class Partition:
             if groupe_or_index < 0 or groupe_or_index >= len(self.groupes): return
             self.clear()
             del self.groupes[groupe_or_index]
+            
+    
 
     def get_groupes(self) -> set[Groupe]:
         return self.groupes

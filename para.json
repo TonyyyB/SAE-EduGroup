@@ -1,0 +1,152 @@
+[
+    {
+        "groupe": 1,
+        "criteres": [
+            {
+                "nom": "niveaufrancais",
+                "valeur": 7,
+                "contrainte": "3"
+            },
+            {
+                "nom": "niveaumaths",
+                "valeur": 21,
+                "contrainte": "3, 4, 5"
+            },
+            {
+                "nom": "penibilite",
+                "valeur": 18,
+                "contrainte": "1"
+            },
+            {
+                "nom": "test",
+                "valeur": 19,
+                "contrainte": "N/A"
+            },
+            {
+                "nom": "bool",
+                "valeur": 35,
+                "contrainte": "1"
+            }
+        ]
+    },
+    {
+        "groupe": 2,
+        "criteres": [
+            {
+                "nom": "niveaufrancais",
+                "valeur": 7,
+                "contrainte": "3"
+            },
+            {
+                "nom": "niveaumaths",
+                "valeur": 21,
+                "contrainte": "3, 4"
+            },
+            {
+                "nom": "penibilite",
+                "valeur": 18,
+                "contrainte": "N/A"
+            },
+            {
+                "nom": "test",
+                "valeur": 19,
+                "contrainte": "3"
+            },
+            {
+                "nom": "bool",
+                "valeur": 35,
+                "contrainte": "1"
+            }
+        ]
+    },
+    {
+        "groupe": 3,
+        "criteres": [
+            {
+                "nom": "niveaufrancais",
+                "valeur": 7,
+                "contrainte": "N/A"
+            },
+            {
+                "nom": "niveaumaths",
+                "valeur": 21,
+                "contrainte": "N/A"
+            },
+            {
+                "nom": "penibilite",
+                "valeur": 18,
+                "contrainte": "N/A"
+            },
+            {
+                "nom": "test",
+                "valeur": 19,
+                "contrainte": "N/A"
+            },
+            {
+                "nom": "bool",
+                "valeur": 35,
+                "contrainte": "N/A"
+            }
+        ]
+    },
+    {
+        "groupe": 4,
+        "criteres": [
+            {
+                "nom": "niveaufrancais",
+                "valeur": 7,
+                "contrainte": "N/A"
+            },
+            {
+                "nom": "niveaumaths",
+                "valeur": 21,
+                "contrainte": "N/A"
+            },
+            {
+                "nom": "penibilite",
+                "valeur": 18,
+                "contrainte": "N/A"
+            },
+            {
+                "nom": "test",
+                "valeur": 19,
+                "contrainte": "N/A"
+            },
+            {
+                "nom": "bool",
+                "valeur": 35,
+                "contrainte": "N/A"
+            }
+        ]
+    },
+    {
+        "groupe": 5,
+        "criteres": [
+            {
+                "nom": "niveaufrancais",
+                "valeur": 7,
+                "contrainte": "N/A"
+            },
+            {
+                "nom": "niveaumaths",
+                "valeur": 21,
+                "contrainte": "N/A"
+            },
+            {
+                "nom": "penibilite",
+                "valeur": 18,
+                "contrainte": "N/A"
+            },
+            {
+                "nom": "test",
+                "valeur": 19,
+                "contrainte": "N/A"
+            },
+            {
+                "nom": "bool",
+                "valeur": 35,
+                "contrainte": "N/A"
+            }
+        ]
+    }
+]
