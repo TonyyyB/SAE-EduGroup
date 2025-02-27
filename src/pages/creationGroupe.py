@@ -28,6 +28,7 @@ class CreationGroupe(Page):
         self.eleves_restants_label = None
         self.selected_eleve = None  # Pour stocker l'élève sélectionné
         self.selected_groupe = None
+        self.selected_eleve_widget = None
         
         # Redimensionner l'image à la taille désirée
         self.img_param = Image.open("img/param.png")
@@ -405,12 +406,11 @@ class TableauGroupe(tk.Frame):
         self.groupe = partition.get_groupes()[index]
         self.page = page
         self.partition = partition
-        self.selected_eleve_widget = None  # Stocker le widget de l'élève sélectionné (ligne cliquée)
         self.index = index
-
+        
         # Création du tableau de base
         self.create_widgets()
-        
+
     def afficher_groupes(self):
         self.page.afficher_groupes()
 
@@ -505,15 +505,14 @@ class TableauGroupe(tk.Frame):
             print("Erreur : aucun élève trouvé pour ce widget.")
             return
 
-        # Si un élève a déjà été sélectionné, on réinitialise l'apparence du widget précédent
-        if self.selected_eleve_widget:
-            self.selected_eleve_widget.config(bg="white", fg="black")
-        
         # Sélectionner l'élève actuel et mettre en évidence le widget
         self.parent.selected_eleve = eleve
         self.parent.selected_groupe = self.index
-        self.selected_eleve_widget = widget
-        widget.config(bg="#ffcccb", fg="black")  # Changer la couleur pour indiquer la sélection
+        self.parent.selected_eleve_widget = widget
+        widget.config(bg="#ffcccb", fg="black")
+        widget.after(1000, lambda: self.reset_color(widget))  # Utilisation de lambda pour retarder l'exécution
 
-        # Debug print pour vérifier quel élève est sélectionné
-        print(f"Élève sélectionné: {eleve.get_nom()}")  # Assurez-vous que la méthode `get_nom()` existe dans Eleve
+        print(f"Élève sélectionné: {eleve.get_nom()}")
+
+    def reset_color(self, widget):
+        widget.config(bg="white", fg="black")
