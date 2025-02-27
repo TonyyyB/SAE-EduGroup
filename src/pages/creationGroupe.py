@@ -203,8 +203,6 @@ class CreationGroupe(Page):
         df.to_csv(fichier, index=False, encoding='utf-8')
         print(f"Exportation réussie : {fichier}")
 
-
-
     def decrease_group_count(self):
         """Réduit le nombre de groupes"""
         if self.nb_groupes > 2:  # Limite à 2 groupe minimum
@@ -358,6 +356,7 @@ class TableauCriteres(tk.Frame):
             self.table._create_table_entry(i + 1, 0, critere.get_nom())
             self.table._create_table_entry(i + 1, 1, poids_scale)
             self.table._create_table_entry(i + 1, 2, poids_entry)
+        self.adjust_sliders(100//len(self.criteres), 0)  # Répartir uniformément les poids au début
     
     def adjust_sliders(self, value, index):
         value = int(round(float(value)))  # Convertir en entier pour IntVar
@@ -424,7 +423,7 @@ class TableauGroupe(tk.Frame):
                 if(len(valeurs) == 0):
                     continue
                 contraintes_table._create_table_entry(i+1, 0, critere.get_nom(), width=21)
-                contraintes_table._create_table_entry(i+1, 1, ", ".join([str(critere.to_val(v)) for v in valeurs]), width=21)
+                contraintes_table._create_table_entry(i+1, 1, ", ".join([str(v) for v in valeurs]), width=21)
         # Créer la table pour chaque groupe
         table = EleveTable(parent=self, controller=self, eleves=self.groupe.get_eleves(), criteres=self.partition.get_criteres())
         table.grid(row=2, column=0, padx=10, pady=10, columnspan=3)

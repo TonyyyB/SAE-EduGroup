@@ -1,9 +1,9 @@
 from modele.eleve import Eleve
 from modele.critere import Critere
 class Groupe:
-    def __init__(self, taille:int, criteres:set[Critere]=set(), contraintes:dict[Critere,set[str]]=dict()):
+    def __init__(self, taille:int, criteres:set[Critere]=set()):
         self.taille:int = taille
-        self.contraintes:dict[Critere,set[str]] = contraintes  # Dictionnaire pour les contraintes
+        self.contraintes:dict[Critere,set[str]] = dict()  # Dictionnaire pour les contraintes
         self.eleves:set[Eleve] = set()
         self.criteres:set[Critere] = criteres
         self.aEteModifier = False
@@ -24,7 +24,7 @@ class Groupe:
 
     def respecter_contraintes(self, eleve:Eleve):
         for critere, valeurs in self.contraintes.items():
-            if eleve.get_critere(critere) not in valeurs:
+            if eleve.get_critere(critere) not in valeurs and len(valeurs) != 0:
                 return False
         return True
     

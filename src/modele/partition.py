@@ -9,52 +9,77 @@ class Partition:
         self.eleves:set[Eleve] = eleves
         self.criteres:set[Critere] = criteres
         self.is_genere = False
-        self.groupeEleve = dict()
         self.propGlobal:dict[Critere,dict[str,float]] = dict()
     
     def is_generer(self):
         return self.is_genere
     
+    #def generer(self) -> 'Partition':
+    #    self.clear()
+    #    self.calcul_proportion()
+    #    elevesAPlacer:set[Eleve] = set(self.eleves)
+    #    groupes = self.get_groupes()
+    #    # Initialisation
+#
+    #    # Groupes possibles
+    #    for eleve in self.eleves:
+    #        self.groupeEleve[eleve] = []
+    #        for groupe in groupes:
+    #            if groupe.respecter_contraintes(eleve):
+    #                self.groupeEleve[eleve].append(groupe)
+#
+    #    # Ajout des élèves dans le seul groupe possible 
+#
+    #    for eleve,groupe in self.groupeEleve.items():
+    #        if len(groupe) == 1:
+    #            groupe[0].ajouter_eleve(eleve)
+    #            elevesAPlacer.remove(eleve)
+    #    
+    #    # Ajout des autres élèves selon le score
+    #    eleveNonPlacer = set()
+    #    score = self.calcul_penalite()
+    #    while (len(elevesAPlacer) > 0):
+    #        eleve = elevesAPlacer.pop()
+    #        groupes = self.groupeEleve[eleve]
+    #        if len(self.groupeEleve[eleve]) == 0:
+    #            eleveNonPlacer.add(eleve)
+    #        else:
+    #            groupeAAjouter = None
+    #            for groupe in groupes:
+    #                if self.simule_ajout(eleve, groupe) <= score:
+    #                    groupeAAjouter = groupe
+    #                    score = self.simule_ajout(eleve, groupe)
+    #            if groupeAAjouter is not None:
+    #                groupeAAjouter.ajouter_eleve(eleve)
+    #            else:
+    #                eleveNonPlacer.add(eleve)
+    #    elevesAPlacer = eleveNonPlacer
+
     def generer(self) -> 'Partition':
         self.clear()
         self.calcul_proportion()
-        elevesAPlacer:set[Eleve] = set(self.eleves)
-        groupes = self.get_groupes()
-        # Initialisation
-
-        # Groupes possibles
+        # Calcul dico Eleve => groupes possibles
+        groupesPossible:dict[Eleve, set[Groupe]] = dict()
         for eleve in self.eleves:
-            self.groupeEleve[eleve] = []
+            groupesPossible[eleve] = set(groupe for groupe in self.groupes if groupe.respecter_contraintes(eleve))
+        # Ajout des élèves dans le seul groupe possible
+        for eleve, groupes in groupesPossible.items():
+            if len(groupes) == 1:
+                groupes.pop().ajouter_eleve(eleve)
+                del groupesPossible[eleve]
+                print(f"Eleve {eleve.get_prenom()} {eleve.get_nom()} ajouté dans un groupe")
+        # Ajouter les autres élèves
+        for eleve, groupes in groupesPossible.items():
+            gmax = None
+            score = self.calcul_penalite()
             for groupe in groupes:
-                if groupe.respecter_contraintes(eleve):
-                    self.groupeEleve[eleve].append(groupe)
-
-        # Ajout des élèves dans le seul groupe possible 
-
-        for eleve,groupe in self.groupeEleve.items():
-            if len(groupe) == 1:
-                groupe[0].ajouter_eleve(eleve)
-                elevesAPlacer.remove(eleve)
-        
-        # Ajout des autres élèves selon le score
-        eleveNonPlacer = set()
-        score = self.calcul_penalite()
-        while (len(elevesAPlacer) > 0):
-            eleve = elevesAPlacer.pop()
-            groupes = self.groupeEleve[eleve]
-            if len(self.groupeEleve[eleve]) == 0:
-                eleveNonPlacer.add(eleve)
-            else:
-                groupeAAjouter = None
-                for groupe in groupes:
-                    if self.simule_ajout(eleve, groupe) <= score:
-                        groupeAAjouter = groupe
-                        score = self.simule_ajout(eleve, groupe)
-                if groupeAAjouter is not None:
-                    groupeAAjouter.ajouter_eleve(eleve)
-                else:
-                    eleveNonPlacer.add(eleve)
-        elevesAPlacer = eleveNonPlacer
+                score_groupe = self.simule_ajout(groupe, eleve)
+                if score_groupe < score or gmax is None:
+                    score = score_groupe
+                    gmax = groupe
+            if gmax is not None:
+                gmax.ajouter_eleve(eleve)
+        return self
     
     def simule_ajout(self, groupe:Groupe, eleve:Eleve) -> float:
         if groupe not in self.groupes: return self.calcul_penalite()
