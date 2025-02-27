@@ -202,7 +202,7 @@ class EleveTable(Table):
         Crée une cellule cliquable dans la table. Chaque cellule est un `Label` qui réagit aux clics.
         """
         # Créer un label pour chaque cellule
-        label = tk.Label(self.frame, text=text, bg="white", fg="black", width=15, height=2, anchor="w")
+        label = tk.Label(self.frame, text=text, bg="white", fg="black", width=12, height=2, anchor="w")
         label.grid(row=row, column=col, padx=0, pady=0, sticky="w")
         
         # Associer l'objet élève au label pour permettre de l'identifier lors du clic
