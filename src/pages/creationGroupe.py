@@ -1,3 +1,4 @@
+import json
 import tkinter as tk
 import tkinter.font as tkf
 import csv
@@ -216,11 +217,11 @@ class CreationGroupe(Page):
     
     def exporter_criteres(self):
         """
-            Exporte les critères, leurs valeurs et les contraintes des groupes dans un fichier CSV.
+        Exporte les critères, leurs valeurs et les contraintes des groupes sous forme de JSON.
         """
         fichier = filedialog.asksaveasfilename(
-            defaultextension=".csv",
-            filetypes=[("CSV files", "*.csv")],
+            defaultextension=".json",
+            filetypes=[("JSON files", "*.json")],
             title="Exporter les critères"
         )
 
@@ -229,17 +230,24 @@ class CreationGroupe(Page):
 
         # Récupération des valeurs des sliders avec contraintes des groupes
         data = []
-        for i, groupe in enumerate(self.partition.get_groupes(), start= 1):
+        for i, groupe in enumerate(self.partition.get_groupes(), start=1):
+            groupe_data = {
+                "groupe": i,
+                "criteres": []
+            }
             for critere in self.criteres:
                 contrainte = groupe.get_contrainte(critere)
                 contrainte_str = ", ".join(map(str, contrainte)) if contrainte else "N/A"
-                data.append((i, critere.get_nom(), critere.get_poids(), contrainte_str))
+                groupe_data["criteres"].append({
+                    "nom": critere.get_nom(),
+                    "valeur": critere.get_poids(),
+                    "contrainte": contrainte_str
+                })
+            data.append(groupe_data)
 
         try:
-            with open(fichier, mode='w', newline='', encoding='utf-8') as file:
-                writer = csv.writer(file)
-                writer.writerow(["Groupe", "Critère", "Valeur", "Contrainte"])
-                writer.writerows(data)
+            with open(fichier, mode='w', encoding='utf-8') as file:
+                json.dump(data, file, indent=4, ensure_ascii=False)
 
             print(f"Exportation réussie : {fichier}")
             messagebox.showinfo("Exportation réussie", f"Les critères ont été exportés avec succès dans {fichier}.")
@@ -247,6 +255,8 @@ class CreationGroupe(Page):
         except Exception as e:
             print(f"Erreur lors de l'exportation : {e}")
             messagebox.showerror("Erreur d'exportation", f"Une erreur est survenue : {e}")
+
+        return data  # Retourne les données sous forme de JSON
 
     def importer_criteres(self):
         criteres = {critere.get_nom(): critere for critere in self.criteres}
