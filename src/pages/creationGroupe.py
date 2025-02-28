@@ -303,7 +303,7 @@ class CreationGroupe(Page):
             self.mettre_a_jour_nombre_de_groupes(nombre_de_groupes)
             # Traiter chaque groupe
             for i, groupe_data in enumerate(data):
-                groupe = self.groupes[i]  # Récupérer le groupe correspondant
+                groupe = self.partition.get_groupes()[i]  # Récupérer le groupe correspondant
                 for critere_data in groupe_data['criteres']:
                     nom_critere = critere_data['nom']
                     valeur = critere_data['valeur']
@@ -316,6 +316,7 @@ class CreationGroupe(Page):
 
                     # Appliquer la valeur du critère
                     critere = criteres[nom_critere]
+                    print(critere)
                     critere.set_poids(valeur)
 
                     # Appliquer les contraintes
@@ -466,9 +467,9 @@ class TableauCriteres(tk.Frame):
                     break
 
         # Mettre à jour tous les sliders
-        for i, var in enumerate(self.sliders_vars):
-            var.set(max(0, min(100, new_values[i])))
-            self.criteres[i].set_poids(new_values[i])
+        #for i, var in enumerate(self.sliders_vars):
+        #    var.set(max(0, min(100, new_values[i])))
+        #    self.criteres[i].set_poids(new_values[i])
 
 class TableauGroupe(tk.Frame):
     def __init__(self, parent, controller, page, partition: Partition, index, img_param_tk, elevesRestants=False):
