@@ -564,7 +564,6 @@ class TableauGroupe(tk.Frame):
                 else:
                     target_groupe = self.partition.get_groupes()[self.index]
                     target_groupe.get_eleves().add(self.parent.selected_eleve)
-                    self.partition.get_eleves_restant().remove(self.parent.selected_eleve)
                     self.parent.selected_eleve = None
                     self.parent.selected_groupe = None
                     self.parent.selected_eleve_widget = None

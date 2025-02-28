@@ -111,7 +111,11 @@ class Partition:
         if self.is_genere:
             return self.eleves_restant
         else:
-            return self.eleves
+            eleves = self.eleves.copy()
+            for groupe in self.groupes:
+                for eleve in groupe.get_eleves():
+                    eleves.remove(eleve)
+            return eleves
 
     def simule_supp(self, groupe:Groupe, eleve:Eleve) -> float:
         if groupe not in self.groupes: return self.calcul_penalite()
