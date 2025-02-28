@@ -150,6 +150,8 @@ class Partition:
         for critere in self.criteres:
             penaliteCritere = 0
             for groupe in self.groupes:
+                if critere not in propsGroupes[groupe]:
+                    continue
                 for valeur in critere.get_valeurs():
                     penaliteCritere += abs(propsGroupes[groupe][critere][valeur] - self.propGlobal[critere][valeur])
             penalite += critere.get_poids() + penaliteCritere
