@@ -180,6 +180,8 @@ class CreationGroupe(Page):
             self.after(100, lambda: self.check_task_completion(thread))
         else:
             self.loading_popup.grab_release()
+            self.eleves_restants = Groupe(len(self.partition.get_groupes()))
+            [self.eleves_restants.ajouter_eleve(eleve) for eleve in self.partition.get_eleves_restant()]
             self.afficher_groupes()
             self.loading_popup.destroy()
 
@@ -390,7 +392,7 @@ class CreationGroupe(Page):
         self.canvas_frame.configure(yscrollcommand=self.scrollbar_y.set)
 
         table_eleves_restant = TableauGroupe(self, self.inner_frame, self, self.partition, -1, None, elevesRestants=True)
-        table_eleves_restant.place(relx=0.05, rely=0.6)
+        table_eleves_restant.place(relx=0.01, rely=0.6)
 
         self.tables.append(table_eleves_restant)
 
@@ -501,34 +503,35 @@ class TableauGroupe(tk.Frame):
             widget.destroy()
 
         # Label titre de groupe
-        title_label = tk.Label(self, text=f"Groupe {self.index + 1}", font=("Arial", 12, "bold"),
+        title_label = tk.Label(self, text="Eleves restants" if self.elevesRestants else f"Groupe {self.index + 1}", font=("Arial", 12, "bold"),
                                bg="#3D83B1", fg="white", width=15, height=2, anchor="center")
         title_label.grid(row=0, column=0, padx=10, pady=10, sticky="w")
         title_label.bind("<Button-1>", self.on_title_label_click)
 
         # Label pour afficher le nombre d'élèves dans le groupe
-        nb_eleves_label = tk.Label(self, text=f"{len(self.groupe.get_eleves())}/{self.groupe.get_taille()}", font=("Arial", 12, "bold"),
+        nb_eleves_label = tk.Label(self, text=f"{len(self.groupe.get_eleves())}"+("" if self.elevesRestants else f"/{self.groupe.get_taille()}"), font=("Arial", 12, "bold"),
                                    bg="#3D83B1", fg="white", width=15, height=2, anchor="center")
         nb_eleves_label.grid(row=0, column=1, padx=10, pady=10, sticky="w")
 
-        # Bouton avec image pour paramètres du groupe
-        bouton_param_grp = tk.Button(self, image=self.page.img_param_tk, compound="right", anchor='e', command=self.pop_up_param_grp)
-        bouton_param_grp.grid(row=0, column=2, padx=10, pady=10, sticky="e")
-        
-        # Créer la liste des contraintes saisies
-        nb_critere_avec_contraintes = len([v for v in self.partition.get_groupes()[self.index].get_contraintes().values() if len(v) > 0])
-        if nb_critere_avec_contraintes > 0:
-            font_height = tkf.Font(font=("Arial", 12)).metrics('linespace')
-            contraintes_table = Table(self, self, height=(font_height+3)*(nb_critere_avec_contraintes+1))
-            contraintes_table._create_table_headers(["Critère", "Valeurs"], [21]*2)
-            contraintes_table.grid(row=1, column=0, padx=10, pady=10, columnspan=3)
-            for i, kv in enumerate(self.partition.get_groupes()[self.index].get_contraintes().items()):
-                critere, valeurs = kv
-                if(len(valeurs) == 0):
-                    continue
-                contraintes_table._create_table_entry(i+1, 0, critere.get_nom(), width=21)
-                contraintes_table._create_table_entry(i+1, 1, ", ".join([str(v) for v in valeurs]), width=21)
-        # Table des élèves : utiliser la nouvelle EleveTable avec binding des événements
+        if not self.elevesRestants:
+            # Bouton avec image pour paramètres du groupe
+            bouton_param_grp = tk.Button(self, image=self.page.img_param_tk, compound="right", anchor='e', command=self.pop_up_param_grp)
+            bouton_param_grp.grid(row=0, column=2, padx=10, pady=10, sticky="e")
+            
+            # Créer la liste des contraintes saisies
+            nb_critere_avec_contraintes = len([v for v in self.partition.get_groupes()[self.index].get_contraintes().values() if len(v) > 0])
+            if nb_critere_avec_contraintes > 0:
+                font_height = tkf.Font(font=("Arial", 12)).metrics('linespace')
+                contraintes_table = Table(self, self, height=(font_height+3)*(nb_critere_avec_contraintes+1))
+                contraintes_table._create_table_headers(["Critère", "Valeurs"], [21]*2)
+                contraintes_table.grid(row=1, column=0, padx=10, pady=10, columnspan=3)
+                for i, kv in enumerate(self.partition.get_groupes()[self.index].get_contraintes().items()):
+                    critere, valeurs = kv
+                    if(len(valeurs) == 0):
+                        continue
+                    contraintes_table._create_table_entry(i+1, 0, critere.get_nom(), width=21)
+                    contraintes_table._create_table_entry(i+1, 1, ", ".join([str(v) for v in valeurs]), width=21)
+            # Table des élèves : utiliser la nouvelle EleveTable avec binding des événements
         self.create_eleve_table()
 
     def create_eleve_table(self):
@@ -551,7 +554,6 @@ class TableauGroupe(tk.Frame):
         """Lorsque le title_label est cliqué, on transfère l'élève sélectionné vers ce groupe."""
         if self.controller.selected_eleve:
             try:
-                if self.controller.on_group:
                     current_groupe = self.controller.selected_groupe
                     target_groupe = self.partition.get_groupes()[self.index]
 
@@ -560,6 +562,7 @@ class TableauGroupe(tk.Frame):
                         if self.controller.selected_eleve:
                             current_groupe.transferer_simple(target_groupe, self.controller.selected_eleve)  # Transfert simple sans échange
                             #MAJ DE L'AFFICHAGE A AJOUTER
+                            self.partition.update_eleves_restants()
                             self.controller.selected_eleve = None
                             self.controller.selected_groupe = None
                             self.controller.selected_eleve_widget = None
@@ -568,14 +571,6 @@ class TableauGroupe(tk.Frame):
                                 messagebox.showwarning("Erreur de transfert", "Impossible de trouver l'élève pour le transfert.")
                     else:
                         messagebox.showwarning("Erreur de sélection", "Vous devez choisir un autre groupe pour le transfert.")
-                else:
-                    target_groupe = self.partition.get_groupes()[self.index]
-                    target_groupe.get_eleves().add(self.parent.selected_eleve)
-                    self.partition.get_eleves_restant().remove(self.parent.selected_eleve)
-                    self.parent.selected_eleve = None
-                    self.parent.selected_groupe = None
-                    self.parent.selected_eleve_widget = None
-                    self.page.afficher_groupes()
                         
             except Exception as e:
                 messagebox.showerror("Erreur", str(e))

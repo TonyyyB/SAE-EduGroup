@@ -135,6 +135,12 @@ class Partition:
             for valeur in self.propGlobal[critere]:
                 self.propGlobal[critere][valeur] /= len(self.eleves)
         return self.propGlobal
+    
+    def update_eleves_restants(self) -> None:
+        self.eleves_restant = [eleve for eleve in self.eleves]
+        for groupe in self.groupes:
+            for eleve in groupe.get_eleves():
+                self.eleves_restant.remove(eleve)
 
     def adapter_taille(self) -> None:
         groupesTailleModif, groupesSansTailleModif = self.groupes_avec_et_sans_taille_modif()
