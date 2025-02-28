@@ -202,7 +202,7 @@ class EleveTable(Table):
         """
         # Créer un label pour chaque cellule
         label = tk.Label(self.frame, text=text, bg="white", fg="black", width=12, height=2, anchor="w")
-        label.grid(row=row, column=col, padx=0, pady=0, sticky="w")
+        label.grid(row=row, column=col, padx=0, pady=0, sticky="we")
         
         # Associer l'objet élève au label pour permettre de l'identifier lors du clic
         label.eleve = eleve
