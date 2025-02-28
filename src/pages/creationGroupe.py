@@ -39,7 +39,7 @@ class CreationGroupe(Page):
 
         # Ajouter un canvas pour le contenu
         self.canvas_frame = tk.Canvas(self.canvas)
-        self.canvas_frame.place(relx=0.4, rely=0.25, relwidth=0.53, relheight=0.7)
+        self.canvas_frame.place(relx=0.3, rely=0.25, relwidth=0.67, relheight=0.7)
 
         # Ajouter une scrollbar verticale pour le Canvas
         self.scrollbar_y = tk.Scrollbar(self.canvas_frame, orient="vertical", command=self.canvas_frame.yview)
@@ -87,8 +87,8 @@ class CreationGroupe(Page):
 
     def setup_ui(self):
         # Fixer la taille minimale de la fenêtre
-        self.controller.geometry("1600x1000")
-        self.controller.minsize(1600, 1000)
+        self.controller.geometry("1900x1060")
+        self.controller.minsize(1900, 1060)
 
         # Titre principal
         self.create_label("instruction_text", 0.5, 0.05, "Création du groupe", font=GRANDE_POLICE, fill="white")
@@ -365,7 +365,7 @@ class CreationGroupe(Page):
 
         self.inner_frame.update_idletasks()
 
-        nb_colonnes = 2
+        nb_colonnes = 3
         posx, posy = 0, 0
 
         for i, groupe in enumerate(self.partition.get_groupes()):
@@ -390,13 +390,13 @@ class CreationGroupe(Page):
         self.canvas_frame.configure(yscrollcommand=self.scrollbar_y.set)
 
         table_eleves_restant = TableauElevesRestants(self.inner_frame, self, self.partition.get_eleves_restant())
-        table_eleves_restant.place(relx=0.05, rely=0.6)
+        table_eleves_restant.place(relx=0.01, rely=0.6)
 
         self.tables.append(table_eleves_restant)
 
     def afficher_criteres(self):
         table = TableauCriteres(self, self, self.criteres)
-        table.place(relx=0.05, rely=0.3)
+        table.place(relx=0.01, rely=0.3)
 
     def retour_page_accueil(self):
         """
