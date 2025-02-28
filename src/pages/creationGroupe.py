@@ -260,61 +260,56 @@ class CreationGroupe(Page):
         return data  # Retourne les données sous forme de JSON
 
     def importer_criteres(self):
-        # Dictionnaire des critères existants
-        criteres = {critere.get_nom(): critere for critere in self.criteres}
-        
-        # Ouvrir une boîte de dialogue pour sélectionner un fichier JSON
-        filepath = filedialog.askopenfilename(filetypes=[("Fichiers JSON", "*.json"), ("Tous les fichiers", "*.*")])
-        if filepath:
-            if not filepath.endswith(".json"):
-                messagebox.showerror("Erreur", "Veuillez sélectionner un fichier JSON.")
-                return
-            
-            try:
-                # Lire le fichier JSON
-                with open(filepath, mode='r', encoding='utf-8') as file:
-                    data = json.load(file)
-                print(f"Importation réussie : {filepath}")
-            except Exception as e:
-                print(f"Erreur lors de l'importation : {e}")
-                return
+        """
+        Importe les critères, leurs valeurs et les contraintes des groupes à partir d'un fichier JSON.
+        Gère les erreurs de format et d'accès aux données pour éviter les plantages.
+        """
+        fichier = filedialog.askopenfilename(
+            filetypes=[("Fichiers JSON", "*.json")],
+            title="Importer les critères"
+        )
 
-            # Vérifier si le fichier contient des données
-            if not data:
-                return messagebox.showerror("Erreur", "Aucune donnée à importer.")
+        if not fichier:
+            return
 
-            # Déterminer le nombre de groupes dans le fichier JSON
-            nombre_de_groupes = len(data)
-            print(f"Nombre de groupes détectés : {nombre_de_groupes}")
+        try:
+            with open(fichier, mode='r', encoding='utf-8') as file:
+                data = json.load(file)
 
-            # Mettre à jour le nombre de groupes dans la Partition
-            self.mettre_a_jour_nombre_de_groupes(nombre_de_groupes)
-            # Traiter chaque groupe
-            for i, groupe_data in enumerate(data):
-                groupe = self.groupes[i]  # Récupérer le groupe correspondant
-                for critere_data in groupe_data['criteres']:
-                    nom_critere = critere_data['nom']
-                    valeur = critere_data['valeur']
-                    contrainte = critere_data['contrainte']
+            if not isinstance(data, list):
+                raise ValueError("Le fichier JSON doit contenir une liste de groupes.")
 
-                    # Vérifier si le critère existe
-                    if nom_critere not in criteres:
-                        print(f"Critère non reconnu : {nom_critere}")
+            for groupe_data in data:
+                if not isinstance(groupe_data, dict) or "groupe" not in groupe_data or "criteres" not in groupe_data:
+                    continue
+
+                groupe = self.partition.get_groupes()
+                if groupe is None:
+                    continue
+
+                for critere_data in groupe_data["criteres"]:
+                    if not isinstance(critere_data, dict) or "nom" not in critere_data or "valeur" not in critere_data or "contrainte" not in critere_data:
                         continue
 
-                    # Appliquer la valeur du critère
-                    critere = criteres[nom_critere]
-                    critere.set_poids(valeur)
+                    critere = self.get_critere(critere_data["nom"])
+                    if critere:
+                        try:
+                            critere.set_poids(float(critere_data["valeur"]))  
+                        except ValueError:
+                            continue
 
-                    # Appliquer les contraintes
-                    if contrainte != "N/A":
-                        contrainte_valeurs = set(map(int, contrainte.split(", ")))
-                        groupe.set_contrainte(critere, contrainte_valeurs)
+                        if critere_data["contrainte"] and critere_data["contrainte"] != "N/A":
+                            groupe.set_contrainte(critere, critere_data["contrainte"])
 
-            # Afficher les critères mis à jour
-            self.partition.adapter_taille()
-            self.afficher_groupes()
-            self.afficher_criteres()
+            print(f"Importation réussie : {fichier}")
+            messagebox.showinfo("Importation réussie", "Les critères ont été importés avec succès.")
+
+        except json.JSONDecodeError:
+            messagebox.showerror("Erreur d'importation", "Le fichier JSON est invalide ou corrompu.")
+        except Exception as e:
+            print(f"Erreur lors de l'importation : {e}")
+            messagebox.showerror("Erreur d'importation", f"Une erreur est survenue : {e}")
+
 
     def mettre_a_jour_nombre_de_groupes(self, nombre_de_groupes):
         """
@@ -390,6 +385,15 @@ class CreationGroupe(Page):
         from pages.parametresGroupe import ParametresGroupe
         popup = ParametresGroupe(self, self.partition, groupe)
         popup.grab_set()  # Pour forcer le focus sur la fenêtre pop-up
+    
+    def get_critere(self,nom):
+        """
+        Renvoie le critère correspondant au nom passé en argument.
+        """
+        for critere in self.criteres:
+            if critere.get_nom() == nom:
+                return critere
+        return None
 
 
 class TableauCriteres(tk.Frame):
