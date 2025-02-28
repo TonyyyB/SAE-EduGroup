@@ -312,6 +312,8 @@ class CreationGroupe(Page):
                         groupe.set_contrainte(critere, contrainte_valeurs)
 
             # Afficher les critères mis à jour
+            self.nb_groupes = nombre_de_groupes
+            self.group_count_label.config(text=str(self.nb_groupes))
             self.partition.adapter_taille()
             self.afficher_groupes()
             self.afficher_criteres()

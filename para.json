@@ -118,35 +118,5 @@
                 "contrainte": "N/A"
             }
         ]
-    },
-    {
-        "groupe": 5,
-        "criteres": [
-            {
-                "nom": "niveaufrancais",
-                "valeur": 7,
-                "contrainte": "N/A"
-            },
-            {
-                "nom": "niveaumaths",
-                "valeur": 21,
-                "contrainte": "N/A"
-            },
-            {
-                "nom": "penibilite",
-                "valeur": 18,
-                "contrainte": "N/A"
-            },
-            {
-                "nom": "test",
-                "valeur": 19,
-                "contrainte": "N/A"
-            },
-            {
-                "nom": "bool",
-                "valeur": 35,
-                "contrainte": "N/A"
-            }
-        ]
     }
 ]
