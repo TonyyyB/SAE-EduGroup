@@ -244,11 +244,10 @@ class CreationGroupe(Page):
             }
             for critere in self.criteres:
                 contrainte = groupe.get_contrainte(critere)
-                contrainte_str = ", ".join(map(str, contrainte)) if contrainte else "N/A"
                 groupe_data["criteres"].append({
                     "nom": critere.get_nom(),
                     "valeur": critere.get_poids(),
-                    "contrainte": contrainte_str
+                    "contrainte": list(contrainte) if contrainte else []
                 })
             data.append(groupe_data)
 
@@ -313,9 +312,8 @@ class CreationGroupe(Page):
                     critere.set_poids(valeur)
 
                     # Appliquer les contraintes
-                    if contrainte != "N/A":
-                        contrainte_valeurs = set(map(int, contrainte.split(", ")))
-                        groupe.set_contrainte(critere, contrainte_valeurs)
+                    if len(contrainte) > 0:
+                        groupe.set_contrainte(critere, contrainte)
 
             # Afficher les critères mis à jour
             self.nb_groupes = nombre_de_groupes
