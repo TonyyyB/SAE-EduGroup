@@ -83,7 +83,6 @@ class Partition:
                     evolMax[0].transferer(evolMax[1], evolMax[2], evolMax[3])
             newScore = self.calcul_score()
             if newScore > lastScore:
-                #timeLastScoreNotGreater = 0
                 timeLastScoreNotGreater += 1
         self.is_genere = True
         return self

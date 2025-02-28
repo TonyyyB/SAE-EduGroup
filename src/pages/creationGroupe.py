@@ -263,7 +263,7 @@ class CreationGroupe(Page):
         # Dictionnaire des critères existants
         criteres = {critere.get_nom(): critere for critere in self.criteres}
         
-        # Ouvrir une boîte de dialogue pour sélectionner un fichier JSON
+        
         filepath = filedialog.askopenfilename(filetypes=[("Fichiers JSON", "*.json"), ("Tous les fichiers", "*.*")])
         if filepath:
             if not filepath.endswith(".json"):
@@ -271,7 +271,7 @@ class CreationGroupe(Page):
                 return
             
             try:
-                # Lire le fichier JSON
+                
                 with open(filepath, mode='r', encoding='utf-8') as file:
                     data = json.load(file)
                 print(f"Importation réussie : {filepath}")
@@ -289,9 +289,9 @@ class CreationGroupe(Page):
 
             # Mettre à jour le nombre de groupes dans la Partition
             self.mettre_a_jour_nombre_de_groupes(nombre_de_groupes)
-            # Traiter chaque groupe
+            
             for i, groupe_data in enumerate(data):
-                groupe = self.groupes[i]  # Récupérer le groupe correspondant
+                groupe = self.groupes[i]  
                 for critere_data in groupe_data['criteres']:
                     nom_critere = critere_data['nom']
                     valeur = critere_data['valeur']
@@ -325,9 +325,9 @@ class CreationGroupe(Page):
         # Supprimer les groupes existants si nécessaire
         self.partition.groupes.clear()
 
-        # Ajouter de nouveaux groupes
+        
         for _ in range(nombre_de_groupes):
-            nouveau_groupe = Groupe(taille=0)  # Crée un groupe avec une taille par défaut
+            nouveau_groupe = Groupe(taille=0)  
             self.groupes.append(nouveau_groupe)
             self.partition.ajouter_groupe(nouveau_groupe)
 
@@ -365,13 +365,13 @@ class CreationGroupe(Page):
             posx += 1
             if posx >= nb_colonnes:
                 posx = 0
-                posy += 2  # Décaler de 2 lignes pour séparer le titre du tableau
+                posy += 2  
 
         self.inner_frame.update_idletasks()
         self.canvas_frame.config(scrollregion=self.canvas_frame.bbox("all"))
 
         if self.scrollbar_y is not None:
-            self.scrollbar_y.pack_forget()  # Désinstaller la scrollbar si elle est déjà présente
+            self.scrollbar_y.pack_forget()  
             self.scrollbar_y.destroy()
         self.scrollbar_y = tk.Scrollbar(self.canvas_frame, orient="vertical", command=self.canvas_frame.yview)
         self.scrollbar_y.pack(side="right", fill="y")
@@ -466,7 +466,7 @@ class TableauGroupe(tk.Frame):
         nb_eleves_label = tk.Label(self, text=f"{len(self.groupe.get_eleves())}/{self.groupe.get_taille()}", font=("Arial", 12, "bold"), 
                                     bg="#3D83B1", fg="white", width=15, height=2, anchor="center")
         nb_eleves_label.grid(row=0, column=1, padx=10, pady=10, sticky="w")
-        # Créer le bouton avec l'image redimensionnée
+        
         bouton_param_grp = tk.Button(self, image=img_param_tk, compound="right", anchor='e', command=lambda: self.pop_up_param_grp())
         bouton_param_grp.grid(row=0, column=2, padx=10, pady=10, sticky="e")
         # Créer la liste des contraintes saisies
@@ -494,4 +494,4 @@ class TableauGroupe(tk.Frame):
     def pop_up_param_grp(self):
         from pages.parametresGroupe import ParametresGroupe
         popup = ParametresGroupe(self, self.partition, self.groupe)
-        popup.grab_set()  # Pour forcer le focus sur la fenêtre pop-up
+        popup.grab_set()  
