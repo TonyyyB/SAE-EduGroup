@@ -144,6 +144,14 @@ class Table(tk.Frame):
             else:
                 b = tk.Label(self.frame, text=titre, bg="lightgray", font=("Arial", 12))
             b.grid(row=0, column=j)
+            
+    def _create_table_headers_button(self, titre_colonnes, sizes=[]):
+        for j, titre in enumerate(titre_colonnes):
+            if len(sizes) > j and sizes[j] is not None:
+                b = tk.Button(self.frame, text=titre, bg="lightgray", font=("Arial", 12), width=sizes[j], command=lambda : self.toggle_sort(titre))
+            else:
+                b = tk.Button(self.frame, text=titre, bg="lightgray", font=("Arial", 12), command=lambda : self.toggle_sort(titre))
+            b.grid(row=0, column=j)
 
     def _create_table_entry(self, row, col, widget, width=15, color=None):
         """Crée une cellule dans le tableau."""
@@ -166,11 +174,56 @@ class EleveTable(Table):
     def __init__(self, parent, controller, eleves=None, criteres=None):
         super().__init__(parent, controller, enable_scroll_y=True, enable_scroll_x=True)
         self.controller = controller  # Controller pour gérer les événements (comme le clic sur un élève)
+        self.criteres = criteres
+        self.eleves = eleves
+        self.sorting_states = {critere.get_nom(): None for critere in self.criteres}
+        self.critere_buttons = {}  # Dictionary to store buttons for each criterion
 
         # Si une liste d'élèves est fournie, créer le tableau à partir de ces données
         if eleves is not None and criteres is not None:
             self.create_table_from_eleves(eleves, criteres)
 
+    def _create_table_headers_button(self, titre_colonnes, sizes=[]):
+        for j, titre in enumerate(titre_colonnes):
+            if len(sizes) > j and sizes[j] is not None:
+                b = tk.Button(self.frame, text=titre, bg="lightgray", font=("Arial", 12), width=sizes[j], command=lambda t=titre: self.toggle_sort(t))
+            else:
+                b = tk.Button(self.frame, text=titre, bg="lightgray", font=("Arial", 12), command=lambda t=titre: self.toggle_sort(t))
+            b.grid(row=0, column=j)
+
+            # Store buttons in a dictionary, only if it matches one of the criteres
+            for critere in self.criteres:
+                if critere.get_nom() == titre:
+                    self.critere_buttons[titre] = b
+
+    def toggle_sort(self, critere_nom):
+        """Changer l'état de tri pour un critère donné et mettre à jour l'affichage"""
+        current_state = self.sorting_states.get(critere_nom, None)
+
+        # Passer à l'état suivant (None -> "asc" -> "desc")
+        if current_state is None:
+            new_state = "asc"
+        elif current_state == "asc":
+            new_state = "desc"
+        else:
+            new_state = None
+
+        # Mettre à jour l'état du tri pour ce critère
+        self.sorting_states[critere_nom] = new_state
+
+        # Mettre à jour la couleur et le texte du bouton selon l'état
+        button = self.critere_buttons.get(critere_nom)
+        if button:
+            if new_state == "asc":
+                button.config(text=f"{critere_nom} (↑)", bg="green")
+            elif new_state == "desc":
+                button.config(text=f"{critere_nom} (↓)", bg="red")
+            else:
+                button.config(text=f"{critere_nom} (Sans tri)", bg="lightgray")
+
+        # Trier et mettre à jour la table des élèves
+        self.sort_eleve_table(critere_nom, new_state)
+        
     def create_table_from_eleves(self, eleves, criteres):
         """
         Crée un tableau basé sur une liste d'élèves et des critères.
@@ -182,7 +235,7 @@ class EleveTable(Table):
         self.titre_colonnes = ['Prénom', 'Nom', 'Genre'] + [c.get_nom() for c in criteres_tries]
 
         # Créer les titres des colonnes
-        self._create_table_headers(self.titre_colonnes)
+        self._create_table_headers_button(self.titre_colonnes)
 
         # Remplir les lignes avec les données des élèves
         for i, eleve in enumerate(eleves):
@@ -195,7 +248,7 @@ class EleveTable(Table):
             for j, critere in enumerate(criteres_tries):
                 note = eleve.get_critere(critere)
                 self._create_clickable_table_entry(i + 1, j + 3, note, eleve)  # Ajout du bind sur chaque note
-
+                
     def _create_clickable_table_entry(self, row, col, text, eleve):
         """
         Crée une cellule cliquable dans la table. Chaque cellule est un `Label` qui réagit aux clics.
@@ -226,3 +279,58 @@ class EleveTable(Table):
 
         # Debug pour afficher l'élève sélectionné
         print(f"Élève sélectionné : {eleve.get_nom()}")
+        
+    def sort_eleve_table(self, critere_nom, sort_order):
+        """
+        Trie les élèves en fonction du critère sélectionné et de l'ordre de tri.
+        :param critere_nom: Le nom du critère par lequel trier (ex. 'Prénom', 'Nom', 'Genre', ou critère de note).
+        :param sort_order: Ordre de tri ('asc' pour ascendant, 'desc' pour descendant, None pour sans tri).
+        """
+        if sort_order is None:
+            # Si aucun ordre de tri n'est défini, ne pas trier
+            return
+
+        # Trier les élèves en fonction du critère
+        if critere_nom == "Prénom":
+            key_function = lambda eleve: eleve.prenom
+        elif critere_nom == "Nom":
+            key_function = lambda eleve: eleve.nom
+        elif critere_nom == "Genre":
+            key_function = lambda eleve: eleve.genre
+        else:
+            # Si le critère est une note (nom d'un critère), trier par la note du critère
+            critere_obj = next((c for c in self.criteres if c.get_nom() == critere_nom), None)
+            if critere_obj is None:
+                print(f"Critère non trouvé : {critere_nom}")
+                return
+            key_function = lambda eleve: eleve.get_critere(critere_obj)
+
+        # Tri ascendant ou descendant selon l'ordre de tri
+        reverse = (sort_order == "desc")
+        self.eleves = sorted(self.eleves, key=key_function, reverse=reverse)
+
+        # Après le tri, on recrée le tableau avec les élèves triés
+        self.update_table()
+
+    def update_table(self):
+        """
+        Met à jour l'affichage du tableau en supprimant les anciennes entrées et en redessinant les élèves.
+        """
+        # Supprimer tout le contenu du tableau (sauf les en-têtes)
+        for widget in self.frame.winfo_children():
+            widget.destroy()
+
+        # Créer à nouveau les en-têtes
+        self._create_table_headers_button(self.titre_colonnes)
+
+        # Remplir les lignes avec les élèves triés
+        for i, eleve in enumerate(self.eleves):
+            # Colonnes fixes : prénom, nom, genre
+            self._create_clickable_table_entry(i + 1, 0, eleve.prenom, eleve)
+            self._create_clickable_table_entry(i + 1, 1, eleve.nom, eleve)
+            self._create_clickable_table_entry(i + 1, 2, eleve.genre, eleve)
+
+            # Colonnes dynamiques : notes pour chaque critère
+            for j, critere in enumerate(sorted(self.criteres, key=lambda c: c.get_poids(), reverse=True)):
+                note = eleve.get_critere(critere)
+                self._create_clickable_table_entry(i + 1, j + 3, note, eleve)
