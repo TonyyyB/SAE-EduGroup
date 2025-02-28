@@ -395,6 +395,7 @@ class CreationGroupe(Page):
 
     def afficher_criteres(self):
         table = TableauCriteres(self, self, self.criteres)
+        
         table.place(relx=0.01, rely=0.3)
 
     def retour_page_accueil(self):
@@ -420,7 +421,9 @@ class TableauCriteres(tk.Frame):
         self.table.grid(row=0, column=0, padx=10, pady=10)
         self.sliders = []
         self.sliders_vars = []
-
+        
+        #self.adjust_sliders(100//len(self.criteres), 0)
+        
         for i, critere in enumerate(self.criteres):
             poids_var = tk.IntVar(value=critere.get_poids())
             poids_scale = tk.Scale(self.table.frame, variable=poids_var, from_=0, to=100, resolution=1, orient="horizontal", length=200, showvalue=False)
@@ -431,7 +434,7 @@ class TableauCriteres(tk.Frame):
             self.table._create_table_entry(i + 1, 0, critere.get_nom())
             self.table._create_table_entry(i + 1, 1, poids_scale)
             self.table._create_table_entry(i + 1, 2, poids_entry)
-        self.adjust_sliders(100//len(self.criteres), 0)  # Répartir uniformément les poids au début
+          # Répartir uniformément les poids au début
     
     def adjust_sliders(self, value, index):
         value = int(round(float(value)))  # Convertir en entier pour IntVar
@@ -441,13 +444,16 @@ class TableauCriteres(tk.Frame):
         # Récupérer les valeurs actuelles des autres sliders
         current_values = [var.get() for i, var in enumerate(self.sliders_vars) if i != index]
         current_total = sum(current_values)
-
+        
+        #valeur bonne ici mais manque première 
+        print(index)
         # Si le slider sélectionné atteint 100, mettre les autres à 0
         if value >= 100:
             new_values = [0 if i != index else 100 for i in range(total_sliders)]
         elif current_total == 0:
             # Répartir uniformément si les autres sont à 0
             new_values = [remaining_sum // (total_sliders - 1) if i != index else value for i in range(total_sliders)]
+            print(new_values)
         else:
             # Ajuster les autres sliders proportionnellement
             new_values = []
@@ -467,9 +473,10 @@ class TableauCriteres(tk.Frame):
                     break
 
         # Mettre à jour tous les sliders
-        #for i, var in enumerate(self.sliders_vars):
-        #    var.set(max(0, min(100, new_values[i])))
-        #    self.criteres[i].set_poids(new_values[i])
+        for i, var in enumerate(self.sliders_vars):
+            var.set(max(0, min(100, new_values[i])))
+            print(new_values[i])
+            self.criteres[i].set_poids(new_values[i])
 
 class TableauGroupe(tk.Frame):
     def __init__(self, parent, controller, page, partition: Partition, index, img_param_tk, elevesRestants=False):

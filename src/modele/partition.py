@@ -121,6 +121,7 @@ class Partition:
                     continue
                 for valeur in critere.get_valeurs():
                     penaliteCritere += abs(propsGroupes[groupe][critere][valeur] - self.propGlobal[critere][valeur])
+                    print(critere.get_poids())
             penalite += critere.get_poids() + penaliteCritere
         return penalite
 
