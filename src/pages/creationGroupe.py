@@ -200,6 +200,13 @@ class CreationGroupe(Page):
                     "Prénom": eleve.prenom,
                     "Groupe": f"{i}"
                 })
+        
+        for eleve in self.partition.eleves_restant:
+            data.append({
+                    "Nom": eleve.nom,
+                    "Prénom": eleve.prenom,
+                    "Groupe": "-1"
+                })
 
         df = pd.DataFrame(data)
         df.to_csv(fichier, index=False, encoding='utf-8')
