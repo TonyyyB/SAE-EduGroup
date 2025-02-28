@@ -2,7 +2,7 @@ from modele.eleve import Eleve
 from modele.critere import Critere
 class Groupe:
     def __init__(self, taille:int, criteres:set[Critere]=set()):
-        self.taille:int = taille
+        self.taille:int = taille if taille > 0 else 1
         self.contraintes:dict[Critere,set[str]] = dict()  # Dictionnaire pour les contraintes
         self.eleves:set[Eleve] = set()
         self.criteres:set[Critere] = criteres
@@ -11,7 +11,7 @@ class Groupe:
     def changer_taille(self, taille:int, enregistrer=True) -> None:
         if enregistrer:
             self.aEteModifier = True
-        self.taille = taille
+        self.taille = taille if taille > 0 else 1
     
     def set_a_ete_modifier(self, aEteModifier) -> None:
         self.aEteModifier = aEteModifier

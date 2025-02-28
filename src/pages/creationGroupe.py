@@ -542,7 +542,6 @@ class TableauGroupe(tk.Frame):
                     if target_groupe and current_groupe != target_groupe:
                         if self.parent.selected_eleve:
                             current_groupe.transferer_simple(target_groupe, self.parent.selected_eleve)  # Transfert simple sans échange
-                            messagebox.showinfo("Transfert réussi", f"L'élève {self.parent.selected_eleve.get_nom()} a été transféré")
                             #MAJ DE L'AFFICHAGE A AJOUTER
                             self.parent.selected_eleve = None
                             self.parent.selected_groupe = None
@@ -581,9 +580,12 @@ class TableauGroupe(tk.Frame):
             return
 
         # Sélectionner l'élève actuel et mettre en évidence le widget
-        if(hasattr(self.parent,"selected_eleve_widget")):
-            if(self.parent.selected_eleve_widget is not None):
-                self.parent.selected_eleve_widget.config(bg="white", fg="black")
+        try:
+            if(hasattr(self.parent,"selected_eleve_widget")):
+                if(self.parent.selected_eleve_widget is not None):
+                    self.parent.selected_eleve_widget.config(bg="white", fg="black")
+        except Exception:
+            pass
         self.parent.selected_eleve = eleve
         self.parent.selected_groupe = self.index
         self.parent.on_group = True
