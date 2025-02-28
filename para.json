@@ -1,0 +1,131 @@
+[
+    {
+        "groupe": 1,
+        "criteres": [
+            {
+                "nom": "niveaufrancais",
+                "valeur": 25,
+                "contrainte": []
+            },
+            {
+                "nom": "niveaumath",
+                "valeur": 25,
+                "contrainte": []
+            },
+            {
+                "nom": "penibilite",
+                "valeur": 25,
+                "contrainte": [
+                    "B",
+                    "C",
+                    "A"
+                ]
+            },
+            {
+                "nom": "handicape",
+                "valeur": 25,
+                "contrainte": []
+            }
+        ]
+    },
+    {
+        "groupe": 2,
+        "criteres": [
+            {
+                "nom": "niveaufrancais",
+                "valeur": 25,
+                "contrainte": []
+            },
+            {
+                "nom": "niveaumath",
+                "valeur": 25,
+                "contrainte": []
+            },
+            {
+                "nom": "penibilite",
+                "valeur": 25,
+                "contrainte": []
+            },
+            {
+                "nom": "handicape",
+                "valeur": 25,
+                "contrainte": []
+            }
+        ]
+    },
+    {
+        "groupe": 3,
+        "criteres": [
+            {
+                "nom": "niveaufrancais",
+                "valeur": 25,
+                "contrainte": []
+            },
+            {
+                "nom": "niveaumath",
+                "valeur": 25,
+                "contrainte": []
+            },
+            {
+                "nom": "penibilite",
+                "valeur": 25,
+                "contrainte": []
+            },
+            {
+                "nom": "handicape",
+                "valeur": 25,
+                "contrainte": []
+            }
+        ]
+    },
+    {
+        "groupe": 4,
+        "criteres": [
+            {
+                "nom": "niveaufrancais",
+                "valeur": 25,
+                "contrainte": []
+            },
+            {
+                "nom": "niveaumath",
+                "valeur": 25,
+                "contrainte": []
+            },
+            {
+                "nom": "penibilite",
+                "valeur": 25,
+                "contrainte": []
+            },
+            {
+                "nom": "handicape",
+                "valeur": 25,
+                "contrainte": []
+            }
+        ]
+    },
+    {
+        "groupe": 5,
+        "criteres": [
+            {
+                "nom": "niveaufrancais",
+                "valeur": 25,
+                "contrainte": []
+            },
+            {
+                "nom": "niveaumath",
+                "valeur": 25,
+                "contrainte": []
+            },
+            {
+                "nom": "penibilite",
+                "valeur": 25,
+                "contrainte": []
+            },
+            {
+                "nom": "handicape",
+                "valeur": 25,
+                "contrainte": []
+            }
+        ]
+    }
+]

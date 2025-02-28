@@ -1,0 +1,1 @@
+pyinstaller --onefile --windowed --hidden-import=PIL._tkinter_finder --add-data ".venv/lib/python3.12/site-packages/pillow-11.1.0.dist-info:pillow-11.1.0.dist-info" --add-data ".venv/lib/python3.12/site-packages/PIL:PIL" --add-data ".venv/lib/python3.12/site-packages/customtkinter:customtkinter" --add-data ".venv/lib/python3.12/site-packages/tkinterdnd2:tkinterdnd2" src/app.py
