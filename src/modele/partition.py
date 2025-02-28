@@ -69,8 +69,10 @@ class Partition:
             eleve = elevesRestants[i]
             groupes = groupesPossible[eleve]
             if len(groupes) == 1:
-                groupes.pop().ajouter_eleve(eleve)
-                elevesRestants.remove(eleve)
+                groupe = groupes.pop()
+                if groupe.place_dispo():
+                    groupe.ajouter_eleve(eleve)
+                    elevesRestants.remove(eleve)
             else:
                 i += 1
         # Ajouter les autres élèves
