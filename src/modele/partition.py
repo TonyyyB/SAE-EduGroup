@@ -73,6 +73,8 @@ class Partition:
                 if groupe.place_dispo():
                     groupe.ajouter_eleve(eleve)
                     elevesRestants.remove(eleve)
+                else:
+                    i += 1
             else:
                 i += 1
         # Ajouter les autres élèves

@@ -99,7 +99,6 @@ class ParametresGroupe(tk.Toplevel):
         self.destroy()
         self.update()
         self.parent.afficher_groupes()
-        messagebox.showinfo("Sauvegarde", "Les critères ont été sauvegardés avec succès !")
 
 # Fenêtre principale
 root = tk.Tk()
