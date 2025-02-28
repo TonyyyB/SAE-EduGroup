@@ -14,6 +14,10 @@ class ParametresGroupe(tk.Toplevel):
         self.resizable(False,False)
         self.configure(bg="#2D62A0")
         
+        self.titre_groupe = tk.Label(self, text="Groupe " + str(self.partition.groupes.index(groupe)+1), font=("Arial", 45), bg="#4C8DAB", fg="white", width=10)
+        self.titre_groupe.place(x=325, y=5)
+        
+        print(self.partition.groupes.index(groupe))
         # Nombre d'élèves dans le groupe (Input box avec validation)
         self.label_nb_eleve = tk.Label(self, text="Nombre d'élève\ndans le groupe", font=("Arial", 14), bg="#4C8DAB", fg="white", width=18, height=3)
         self.label_nb_eleve.place(x=50, y=100)

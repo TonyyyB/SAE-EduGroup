@@ -16,7 +16,7 @@ class App(TkinterDnD.Tk):  # Changement ici pour utiliser TkinterDnD.Tk
         self.title("EduGroup")
         
         # Définir la taille initiale de la fenêtre à 1280x1080
-        self.geometry("1400x1000")
+        self.geometry("1280x1080")
         
         container = tk.Frame(self)
         container.pack(side="top", fill="both", expand=True)
