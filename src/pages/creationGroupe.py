@@ -1,3 +1,4 @@
+import json
 import tkinter as tk
 import tkinter.font as tkf
 import csv
@@ -20,6 +21,7 @@ class CreationGroupe(Page):
     def __init__(self, parent, controller):
         super().__init__(parent, controller)
         self.controller = controller
+        self.groupes = []
         self.eleves = []
         self.criteres = []
         self.text_fields = {}
@@ -133,9 +135,6 @@ class CreationGroupe(Page):
         bouton_exporter = ctk.CTkButton(self, text="Exporter les paramètres", font=GRANDE_POLICE, command=self.exporter_criteres, corner_radius=0,width=400)
         bouton_exporter.place(relx=0.7, rely=0.21, anchor='sw')
 
-    def import_params(self):
-        pass
-    
     def generer_groupes(self):
         self.loading_popup = tk.Toplevel(self)
         self.loading_popup.title("Chargement...")
@@ -225,58 +224,120 @@ class CreationGroupe(Page):
     
     def exporter_criteres(self):
         """
-        Exporte les critères et leurs valeurs actuelles des sliders dans un fichier CSV.
+        Exporte les critères, leurs valeurs et les contraintes des groupes sous forme de JSON.
         """
         fichier = filedialog.asksaveasfilename(
-            defaultextension=".csv",
-            filetypes=[("CSV files", "*.csv")],
+            defaultextension=".json",
+            filetypes=[("JSON files", "*.json")],
             title="Exporter les critères"
         )
-        
+
         if not fichier:
             return
-        
-        # Récupération des valeurs des sliders
-        data = [(critere.get_nom(), critere.get_poids()) for critere in self.criteres]
+
+        # Récupération des valeurs des sliders avec contraintes des groupes
+        data = []
+        for i, groupe in enumerate(self.partition.get_groupes(), start=1):
+            groupe_data = {
+                "groupe": i,
+                "criteres": []
+            }
+            for critere in self.criteres:
+                contrainte = groupe.get_contrainte(critere)
+                contrainte_str = ", ".join(map(str, contrainte)) if contrainte else "N/A"
+                groupe_data["criteres"].append({
+                    "nom": critere.get_nom(),
+                    "valeur": critere.get_poids(),
+                    "contrainte": contrainte_str
+                })
+            data.append(groupe_data)
 
         try:
-            with open(fichier, mode='w', newline='', encoding='utf-8') as file:
-                writer = csv.writer(file)
-                writer.writerow(["Critère", "Valeur"])
-                writer.writerows(data)
+            with open(fichier, mode='w', encoding='utf-8') as file:
+                json.dump(data, file, indent=4, ensure_ascii=False)
+
             print(f"Exportation réussie : {fichier}")
+            messagebox.showinfo("Exportation réussie", f"Les critères ont été exportés avec succès dans {fichier}.")
+
         except Exception as e:
             print(f"Erreur lors de l'exportation : {e}")
+            messagebox.showerror("Erreur d'exportation", f"Une erreur est survenue : {e}")
+
+        return data  # Retourne les données sous forme de JSON
 
     def importer_criteres(self):
+        # Dictionnaire des critères existants
         criteres = {critere.get_nom(): critere for critere in self.criteres}
-        filepath = filedialog.askopenfilename(filetypes=[("Fichiers CSV", "*.csv"), ("Tous les fichiers", "*.*")])
+        
+        # Ouvrir une boîte de dialogue pour sélectionner un fichier JSON
+        filepath = filedialog.askopenfilename(filetypes=[("Fichiers JSON", "*.json"), ("Tous les fichiers", "*.*")])
         if filepath:
-            if not filepath.endswith(".csv"):
-                messagebox.showerror("Erreur", "Veuillez sélectionner un fichier CSV.")
+            if not filepath.endswith(".json"):
+                messagebox.showerror("Erreur", "Veuillez sélectionner un fichier JSON.")
                 return
+            
             try:
+                # Lire le fichier JSON
                 with open(filepath, mode='r', encoding='utf-8') as file:
-                    reader = csv.reader(file)
-                    next(reader)  # Ignorer l'en-tête
-                    data = dict(reader)
+                    data = json.load(file)
                 print(f"Importation réussie : {filepath}")
             except Exception as e:
                 print(f"Erreur lors de l'importation : {e}")
-        if not data:
-            return messagebox.showerror("Erreur", "Aucune donnée à importer.")
-        if not all(critere in criteres for critere in data.keys()):
-            return messagebox.showerror("Erreur", "Certains critères ne sont pas reconnus.")
-        if all(critere in criteres for critere in data.keys()) and len(data.keys()) < len(criteres):
-            if not messagebox.askyesno("Confirmation", "Certains critères ne sont pas reconnus. Voulez-vous continuer l'importation ?"):
-                return messagebox.showinfo("Information", "Importation annulée.")
-        
-        for nom, critere in criteres.items():
-            if nom in data:
-                critere.set_poids(int(data[nom]))
-            else:
-                critere.set_poids(0)
-        self.afficher_criteres()    
+                return
+
+            # Vérifier si le fichier contient des données
+            if not data:
+                return messagebox.showerror("Erreur", "Aucune donnée à importer.")
+
+            # Déterminer le nombre de groupes dans le fichier JSON
+            nombre_de_groupes = len(data)
+            print(f"Nombre de groupes détectés : {nombre_de_groupes}")
+
+            # Mettre à jour le nombre de groupes dans la Partition
+            self.mettre_a_jour_nombre_de_groupes(nombre_de_groupes)
+            # Traiter chaque groupe
+            for i, groupe_data in enumerate(data):
+                groupe = self.groupes[i]  # Récupérer le groupe correspondant
+                for critere_data in groupe_data['criteres']:
+                    nom_critere = critere_data['nom']
+                    valeur = critere_data['valeur']
+                    contrainte = critere_data['contrainte']
+
+                    # Vérifier si le critère existe
+                    if nom_critere not in criteres:
+                        print(f"Critère non reconnu : {nom_critere}")
+                        continue
+
+                    # Appliquer la valeur du critère
+                    critere = criteres[nom_critere]
+                    critere.set_poids(valeur)
+
+                    # Appliquer les contraintes
+                    if contrainte != "N/A":
+                        contrainte_valeurs = set(map(int, contrainte.split(", ")))
+                        groupe.set_contrainte(critere, contrainte_valeurs)
+
+            # Afficher les critères mis à jour
+            self.nb_groupes = nombre_de_groupes
+            self.group_count_label.config(text=str(self.nb_groupes))
+            self.partition.adapter_taille()
+            self.afficher_groupes()
+            self.afficher_criteres()
+
+    def mettre_a_jour_nombre_de_groupes(self, nombre_de_groupes):
+        """
+        Met à jour le nombre de groupes dans la Partition.
+        """
+        # Supprimer les groupes existants si nécessaire
+        self.partition.groupes.clear()
+
+        # Ajouter de nouveaux groupes
+        for _ in range(nombre_de_groupes):
+            nouveau_groupe = Groupe(taille=0)  # Crée un groupe avec une taille par défaut
+            self.groupes.append(nouveau_groupe)
+            self.partition.ajouter_groupe(nouveau_groupe)
+
+        print(f"Nombre de groupes mis à jour : {nombre_de_groupes}")
 
     def afficher_groupes(self):
         """
