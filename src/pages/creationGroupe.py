@@ -213,7 +213,6 @@ class CreationGroupe(Page):
 
         df = pd.DataFrame(data)
         df.to_csv(fichier, index=False, encoding='utf-8')
-        print(f"Exportation réussie : {fichier}")
 
     def decrease_group_count(self):
         """Réduit le nombre de groupes"""
@@ -266,7 +265,6 @@ class CreationGroupe(Page):
             with open(fichier, mode='w', encoding='utf-8') as file:
                 json.dump(data, file, indent=4, ensure_ascii=False)
 
-            print(f"Exportation réussie : {fichier}")
             messagebox.showinfo("Exportation réussie", f"Les critères ont été exportés avec succès dans {fichier}.")
 
         except Exception as e:
@@ -290,7 +288,6 @@ class CreationGroupe(Page):
                 # Lire le fichier JSON
                 with open(filepath, mode='r', encoding='utf-8') as file:
                     data = json.load(file)
-                print(f"Importation réussie : {filepath}")
             except Exception as e:
                 print(f"Erreur lors de l'importation : {e}")
                 return
@@ -301,7 +298,6 @@ class CreationGroupe(Page):
 
             # Déterminer le nombre de groupes dans le fichier JSON
             nombre_de_groupes = len(data)
-            print(f"Nombre de groupes détectés : {nombre_de_groupes}")
 
             # Mettre à jour le nombre de groupes dans la Partition
             self.mettre_a_jour_nombre_de_groupes(nombre_de_groupes)
@@ -430,7 +426,7 @@ class TableauCriteres(tk.Frame):
             poids_scale.bind("<ButtonRelease-1>", lambda event, index=i: self.adjust_sliders(event.widget.get(), index))
             self.sliders.append(poids_scale)
             self.sliders_vars.append(poids_var)
-            poids_entry = tk.Entry(self.table.frame, textvariable=poids_var, width=5)
+            poids_entry = tk.Label(self.table.frame, textvariable=poids_var, width=5)
             self.table._create_table_entry(i + 1, 0, critere.get_nom())
             self.table._create_table_entry(i + 1, 1, poids_scale)
             self.table._create_table_entry(i + 1, 2, poids_entry)

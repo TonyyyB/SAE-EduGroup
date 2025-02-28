@@ -276,9 +276,6 @@ class EleveTable(Table):
 
         # Appel de la méthode de sélection d'élève dans le controller principal (TableauGroupe par ex.)
         self.controller.on_eleve_click(event)  # Passer l'événement à une méthode dans le controller
-
-        # Debug pour afficher l'élève sélectionné
-        print(f"Élève sélectionné : {eleve.get_nom()}")
         
     def sort_eleve_table(self, critere_nom, sort_order):
         """
