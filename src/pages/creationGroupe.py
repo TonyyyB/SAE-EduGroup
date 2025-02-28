@@ -198,6 +198,7 @@ class CreationGroupe(Page):
                 data.append({
                     "Nom": eleve.nom,
                     "Prénom": eleve.prenom,
+                    "Genre": eleve.genre,
                     "Groupe": f"{i}"
                 })
         
@@ -494,13 +495,13 @@ class TableauGroupe(tk.Frame):
 
         # Label titre de groupe
         title_label = tk.Label(self, text=f"Groupe {self.index + 1}", font=("Arial", 12, "bold"),
-                               bg="#3D83B1", fg="white", width=15, height=2, anchor="center")
+        bg="#3D83B1", fg="white", width=15, height=2, anchor="center")
         title_label.grid(row=0, column=0, padx=10, pady=10, sticky="w")
         title_label.bind("<Button-1>", self.on_title_label_click)
 
         # Label pour afficher le nombre d'élèves dans le groupe
         nb_eleves_label = tk.Label(self, text=f"{len(self.groupe.get_eleves())}/{self.groupe.get_taille()}", font=("Arial", 12, "bold"),
-                                   bg="#3D83B1", fg="white", width=15, height=2, anchor="center")
+        bg="#3D83B1", fg="white", width=15, height=2, anchor="center")
         nb_eleves_label.grid(row=0, column=1, padx=10, pady=10, sticky="w")
 
         # Bouton avec image pour paramètres du groupe
@@ -518,8 +519,8 @@ class TableauGroupe(tk.Frame):
                 critere, valeurs = kv
                 if(len(valeurs) == 0):
                     continue
-                contraintes_table._create_table_entry(i+1, 0, critere.get_nom(), width=21)
-                contraintes_table._create_table_entry(i+1, 1, ", ".join([str(v) for v in valeurs]), width=21)
+                contraintes_table._create_table_entry(i+1, 0, critere.get_nom(), width=21, color="lightgray")
+                contraintes_table._create_table_entry(i+1, 1, ", ".join([str(v) for v in valeurs]), width=21, color="lightgray")
         # Table des élèves : utiliser la nouvelle EleveTable avec binding des événements
         self.create_eleve_table()
 
@@ -530,7 +531,8 @@ class TableauGroupe(tk.Frame):
             if isinstance(widget, EleveTable):
                 widget.destroy()
 
-        # Recréation de la table avec les données actuelles des élèves
+        
+        # Créer la table pour chaque groupe
         table = EleveTable(parent=self, controller=self, eleves=self.groupe.get_eleves(), criteres=self.partition.get_criteres())
         table.grid(row=2, column=0, padx=10, pady=10, columnspan=3)
 

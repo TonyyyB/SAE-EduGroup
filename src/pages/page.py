@@ -95,7 +95,7 @@ class Table(tk.Frame):
     def __init__(self, parent, controller, enable_scroll_x=False, enable_scroll_y=False, height=None, width=None):
         super().__init__(parent)
 
-        self.canvas = tk.Canvas(self, height=height, width=width)
+        self.canvas = tk.Canvas(self, height=height, width=width) 
         if enable_scroll_x:
             self.scrollbar_x = tk.Scrollbar(self, orient="horizontal", command=self.canvas.xview)
             self.scrollbar_x.grid(row=1, column=0, sticky="ew")
@@ -145,10 +145,10 @@ class Table(tk.Frame):
                 b = tk.Label(self.frame, text=titre, bg="lightgray", font=("Arial", 12))
             b.grid(row=0, column=j)
 
-    def _create_table_entry(self, row, col, widget, width=15):
+    def _create_table_entry(self, row, col, widget, width=15, color=None):
         """Crée une cellule dans le tableau."""
         if isinstance(widget, str) or isinstance(widget, int):
-            widget = tk.Label(self.frame, text=widget, bg="white", font=("Arial", 12), width=width)
+            widget = tk.Label(self.frame, text=widget, bg=color, font=("Arial", 12), width=width)
         widget.grid(row=row, column=col)
 
     def _on_mousewheel_windows(self, event):
@@ -179,21 +179,22 @@ class EleveTable(Table):
         """
         criteres_tries = sorted(criteres, key=lambda c: c.get_poids(), reverse=True)
         # Définir les titres de colonnes : Prénom, Nom + critères
-        self.titre_colonnes = ['Prénom', 'Nom'] + [c.get_nom() for c in criteres_tries]
+        self.titre_colonnes = ['Prénom', 'Nom', 'Genre'] + [c.get_nom() for c in criteres_tries]
 
         # Créer les titres des colonnes
         self._create_table_headers(self.titre_colonnes)
 
         # Remplir les lignes avec les données des élèves
         for i, eleve in enumerate(eleves):
-            # Colonnes fixes : prénom, nom
+            # Colonnes fixes : prénom, nom, genre
             self._create_clickable_table_entry(i + 1, 0, eleve.prenom, eleve)  # Ajout du bind sur prénom
-            self._create_clickable_table_entry(i + 1, 1, eleve.nom, eleve)     # Ajout du bind sur nom
+            self._create_clickable_table_entry(i + 1, 1, eleve.nom, eleve)
+            self._create_clickable_table_entry(i + 1, 2, eleve.genre, eleve)# Ajout du bind sur nom
 
             # Colonnes dynamiques : notes pour chaque critère
             for j, critere in enumerate(criteres_tries):
                 note = eleve.get_critere(critere)
-                self._create_clickable_table_entry(i + 1, j + 2, note, eleve)  # Ajout du bind sur chaque note
+                self._create_clickable_table_entry(i + 1, j + 3, note, eleve)  # Ajout du bind sur chaque note
 
     def _create_clickable_table_entry(self, row, col, text, eleve):
         """
