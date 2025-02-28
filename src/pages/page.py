@@ -206,7 +206,7 @@ class EleveTable(Table):
         elif current_state == "asc":
             new_state = "desc"
         else:
-            new_state = None
+            new_state = "asc"
 
         # Mettre à jour l'état du tri pour ce critère
         self.sorting_states[critere_nom] = new_state
