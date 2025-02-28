@@ -369,7 +369,7 @@ class CreationGroupe(Page):
         posx, posy = 0, 0
 
         for i, groupe in enumerate(self.partition.get_groupes()):
-            tg = TableauGroupe(self.inner_frame, self, self.partition, i, self.img_param_tk)
+            tg = TableauGroupe(self.inner_frame, self.inner_frame, self, self.partition, i, self.img_param_tk)
             tg.grid(row=posy, column=posx)
 
             self.tables.append(tg)
@@ -389,8 +389,8 @@ class CreationGroupe(Page):
         self.scrollbar_y.pack(side="right", fill="y")
         self.canvas_frame.configure(yscrollcommand=self.scrollbar_y.set)
 
-        table_eleves_restant = TableauElevesRestants(self.inner_frame, self, self.partition.get_eleves_restant())
-        table_eleves_restant.place(relx=0.01, rely=0.6)
+        table_eleves_restant = TableauGroupe(self, self.inner_frame, self, self.partition, -1, None, elevesRestants=True)
+        table_eleves_restant.place(relx=0.05, rely=0.6)
 
         self.tables.append(table_eleves_restant)
 
@@ -473,13 +473,20 @@ class TableauCriteres(tk.Frame):
             self.criteres[i].set_poids(new_values[i])
 
 class TableauGroupe(tk.Frame):
-    def __init__(self, parent, page, partition: Partition, index, img_param_tk):
+    def __init__(self, parent, controller, page, partition: Partition, index, img_param_tk, elevesRestants=False):
         super().__init__(parent)
         self.parent = parent
-        self.groupe = partition.get_groupes()[index]
+        self.controller = controller
+        if elevesRestants:
+            restants = partition.get_eleves_restant()
+            self.groupe = Groupe(len(restants))
+            [self.groupe.ajouter_eleve(eleve) for eleve in restants]
+        else:
+            self.groupe = partition.get_groupes()[index]
         self.page = page
         self.partition = partition
         self.index = index
+        self.elevesRestants = elevesRestants
         
         # Création du tableau de base
         self.create_widgets()
@@ -495,13 +502,13 @@ class TableauGroupe(tk.Frame):
 
         # Label titre de groupe
         title_label = tk.Label(self, text=f"Groupe {self.index + 1}", font=("Arial", 12, "bold"),
-        bg="#3D83B1", fg="white", width=15, height=2, anchor="center")
+                               bg="#3D83B1", fg="white", width=15, height=2, anchor="center")
         title_label.grid(row=0, column=0, padx=10, pady=10, sticky="w")
         title_label.bind("<Button-1>", self.on_title_label_click)
 
         # Label pour afficher le nombre d'élèves dans le groupe
         nb_eleves_label = tk.Label(self, text=f"{len(self.groupe.get_eleves())}/{self.groupe.get_taille()}", font=("Arial", 12, "bold"),
-        bg="#3D83B1", fg="white", width=15, height=2, anchor="center")
+                                   bg="#3D83B1", fg="white", width=15, height=2, anchor="center")
         nb_eleves_label.grid(row=0, column=1, padx=10, pady=10, sticky="w")
 
         # Bouton avec image pour paramètres du groupe
@@ -519,8 +526,8 @@ class TableauGroupe(tk.Frame):
                 critere, valeurs = kv
                 if(len(valeurs) == 0):
                     continue
-                contraintes_table._create_table_entry(i+1, 0, critere.get_nom(), width=21, color="lightgray")
-                contraintes_table._create_table_entry(i+1, 1, ", ".join([str(v) for v in valeurs]), width=21, color="lightgray")
+                contraintes_table._create_table_entry(i+1, 0, critere.get_nom(), width=21)
+                contraintes_table._create_table_entry(i+1, 1, ", ".join([str(v) for v in valeurs]), width=21)
         # Table des élèves : utiliser la nouvelle EleveTable avec binding des événements
         self.create_eleve_table()
 
@@ -542,20 +549,20 @@ class TableauGroupe(tk.Frame):
 
     def on_title_label_click(self, event):
         """Lorsque le title_label est cliqué, on transfère l'élève sélectionné vers ce groupe."""
-        if self.parent.selected_eleve:
+        if self.controller.selected_eleve:
             try:
-                if self.parent.on_group:
-                    current_groupe = self.partition.get_groupes()[self.parent.selected_groupe]
+                if self.controller.on_group:
+                    current_groupe = self.controller.selected_groupe
                     target_groupe = self.partition.get_groupes()[self.index]
 
                 # Validation de transfert simple
                     if target_groupe and current_groupe != target_groupe:
-                        if self.parent.selected_eleve:
-                            current_groupe.transferer_simple(target_groupe, self.parent.selected_eleve)  # Transfert simple sans échange
+                        if self.controller.selected_eleve:
+                            current_groupe.transferer_simple(target_groupe, self.controller.selected_eleve)  # Transfert simple sans échange
                             #MAJ DE L'AFFICHAGE A AJOUTER
-                            self.parent.selected_eleve = None
-                            self.parent.selected_groupe = None
-                            self.parent.selected_eleve_widget = None
+                            self.controller.selected_eleve = None
+                            self.controller.selected_groupe = None
+                            self.controller.selected_eleve_widget = None
                             self.page.afficher_groupes()
                         else:
                                 messagebox.showwarning("Erreur de transfert", "Impossible de trouver l'élève pour le transfert.")
@@ -564,6 +571,7 @@ class TableauGroupe(tk.Frame):
                 else:
                     target_groupe = self.partition.get_groupes()[self.index]
                     target_groupe.get_eleves().add(self.parent.selected_eleve)
+                    self.partition.get_eleves_restant().remove(self.parent.selected_eleve)
                     self.parent.selected_eleve = None
                     self.parent.selected_groupe = None
                     self.parent.selected_eleve_widget = None
@@ -590,74 +598,16 @@ class TableauGroupe(tk.Frame):
 
         # Sélectionner l'élève actuel et mettre en évidence le widget
         try:
-            if(hasattr(self.parent,"selected_eleve_widget")):
-                if(self.parent.selected_eleve_widget is not None):
-                    self.parent.selected_eleve_widget.config(bg="white", fg="black")
+            if(hasattr(self.controller,"selected_eleve_widget")):
+                if(self.controller.selected_eleve_widget is not None):
+                    self.controller.selected_eleve_widget.config(bg="white", fg="black")
         except Exception:
             pass
-        self.parent.selected_eleve = eleve
-        self.parent.selected_groupe = self.index
-        self.parent.on_group = True
-        self.parent.selected_eleve_widget = widget
+        self.controller.selected_eleve = eleve
+        self.controller.selected_groupe = self.groupe
+        self.controller.on_group = True
+        self.controller.selected_eleve_widget = widget
         widget.config(bg="#ffcccb", fg="black")
-
-        print(f"Élève sélectionné: {eleve.get_nom()}")
-
-    def reset_color(self, widget):
-        widget.config(bg="white", fg="black")
-
-
-class TableauElevesRestants(tk.Frame):
-    def __init__(self, parent, page, eleves):
-        super().__init__(page)
-        self.parent = parent
-        self.page = page
-        self.eleves = eleves
-        self.selected_eleve_widget = None  # Stocker le widget de l'élève sélectionné (ligne cliquée)
-
-        # Création du tableau de base
-        self.create_widgets()
-
-    def create_widgets(self):
-        """Crée tous les widgets de la classe, y compris la table des élèves"""
-        # Supprimer tous les widgets existants
-        for widget in self.winfo_children():
-            widget.destroy()
-
-        # Label titre de groupe
-        title_label = tk.Label(self, text="Élèves restants", font=("Arial", 12, "bold"),
-                               bg="#3D83B1", fg="white", width=15, height=2, anchor="center")
-        title_label.grid(row=0, column=0, padx=10, pady=10, sticky="w")
-
-
-        # Table des élèves restants
-        table = EleveTable(parent=self, controller=self, eleves=self.eleves, criteres=self.page.criteres)
-        table.grid(row=1, column=0, padx=10, pady=10, columnspan=2)
-    
-    def on_eleve_click(self, event):
-        """Lorsqu'un élève est cliqué, on le sélectionne pour un transfert."""
-        widget = event.widget
-        eleve = getattr(widget, "eleve", None)  # Récupérer l'objet Eleve directement depuis le widget
-
-        if eleve is None:
-            print("Erreur : aucun élève trouvé pour ce widget.")
-            return
-
-        # Si un élève a déjà été sélectionné, on réinitialise l'apparence du widget précédent
-        if self.selected_eleve_widget:
-            self.selected_eleve_widget.config(bg="white", fg="black")
-        
-        # Sélectionner l'élève actuel et mettre en évidence le widget
-        self.parent.selected_eleve = eleve
-        self.parent.on_group = False
-        self.selected_eleve_widget = widget
-        widget.config(bg="#ffcccb", fg="black")  # Changer la couleur pour indiquer la sélection
-
-        # Debug print pour vérifier quel élève est sélectionné
-        print(f"Élève sélectionné: {eleve.get_nom()}")  # Assurez-vous que la méthode `get_nom()` existe dans Eleve
-        self.parent.selected_eleve_widget = widget
-        widget.config(bg="#ffcccb", fg="black")
-        widget.after(1000, lambda: self.reset_color(widget))  # Utilisation de lambda pour retarder l'exécution
 
         print(f"Élève sélectionné: {eleve.get_nom()}")
 

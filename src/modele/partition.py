@@ -13,47 +13,6 @@ class Partition:
     
     def is_generer(self):
         return self.is_genere
-    
-    #def generer(self) -> 'Partition':
-    #    self.clear()
-    #    self.calcul_proportion()
-    #    elevesAPlacer:set[Eleve] = set(self.eleves)
-    #    groupes = self.get_groupes()
-    #    # Initialisation
-#
-    #    # Groupes possibles
-    #    for eleve in self.eleves:
-    #        self.groupeEleve[eleve] = []
-    #        for groupe in groupes:
-    #            if groupe.respecter_contraintes(eleve):
-    #                self.groupeEleve[eleve].append(groupe)
-#
-    #    # Ajout des élèves dans le seul groupe possible 
-#
-    #    for eleve,groupe in self.groupeEleve.items():
-    #        if len(groupe) == 1:
-    #            groupe[0].ajouter_eleve(eleve)
-    #            elevesAPlacer.remove(eleve)
-    #    
-    #    # Ajout des autres élèves selon le score
-    #    eleveNonPlacer = set()
-    #    score = self.calcul_penalite()
-    #    while (len(elevesAPlacer) > 0):
-    #        eleve = elevesAPlacer.pop()
-    #        groupes = self.groupeEleve[eleve]
-    #        if len(self.groupeEleve[eleve]) == 0:
-    #            eleveNonPlacer.add(eleve)
-    #        else:
-    #            groupeAAjouter = None
-    #            for groupe in groupes:
-    #                if self.simule_ajout(eleve, groupe) <= score:
-    #                    groupeAAjouter = groupe
-    #                    score = self.simule_ajout(eleve, groupe)
-    #            if groupeAAjouter is not None:
-    #                groupeAAjouter.ajouter_eleve(eleve)
-    #            else:
-    #                eleveNonPlacer.add(eleve)
-    #    elevesAPlacer = eleveNonPlacer
 
     def generer(self) -> 'Partition':
         self.clear()
