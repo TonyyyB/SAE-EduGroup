@@ -487,6 +487,7 @@ class TableauGroupe(tk.Frame):
                             #MAJ DE L'AFFICHAGE A AJOUTER
                             self.parent.selected_eleve = None
                             self.parent.selected_groupe = None
+                            self.parent.selected_eleve_widget = None
                             self.page.afficher_groupes()
                         else:
                                 messagebox.showwarning("Erreur de transfert", "Impossible de trouver l'élève pour le transfert.")
@@ -498,6 +499,7 @@ class TableauGroupe(tk.Frame):
                     self.partition.get_eleves_restant().remove(self.parent.selected_eleve)
                     self.parent.selected_eleve = None
                     self.parent.selected_groupe = None
+                    self.parent.selected_eleve_widget = None
                     self.page.afficher_groupes()
                         
             except Exception as e:
@@ -520,12 +522,14 @@ class TableauGroupe(tk.Frame):
             return
 
         # Sélectionner l'élève actuel et mettre en évidence le widget
+        if(hasattr(self.parent,"selected_eleve_widget")):
+            if(self.parent.selected_eleve_widget is not None):
+                self.parent.selected_eleve_widget.config(bg="white", fg="black")
         self.parent.selected_eleve = eleve
         self.parent.selected_groupe = self.index
         self.parent.on_group = True
-        self.selected_eleve_widget = widget
+        self.parent.selected_eleve_widget = widget
         widget.config(bg="#ffcccb", fg="black")
-        widget.after(1000, lambda: self.reset_color(widget))  # Utilisation de lambda pour retarder l'exécution
 
         print(f"Élève sélectionné: {eleve.get_nom()}")
 

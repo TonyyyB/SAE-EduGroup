@@ -58,22 +58,25 @@ class Partition:
     def generer(self) -> 'Partition':
         self.clear()
         self.calcul_proportion()
-        print([groupe.get_contraintes() for groupe in self.groupes])
         # Calcul dico Eleve => groupes possibles
         groupesPossible:dict[Eleve, set[Groupe]] = dict()
         for eleve in self.eleves:
             groupesPossible[eleve] = set(groupe for groupe in self.groupes if groupe.respecter_contraintes(eleve))
+        elevesRestants = list(groupesPossible.keys())
         # Ajout des élèves dans le seul groupe possible
-        for eleve in list(groupesPossible.keys()):
+        i = 0
+        while i < len(elevesRestants):
+            eleve = elevesRestants[i]
             groupes = groupesPossible[eleve]
             if len(groupes) == 1:
                 groupes.pop().ajouter_eleve(eleve)
-                del groupesPossible[eleve]
-                print(f"Eleve {eleve.get_prenom()} {eleve.get_nom()} ajouté dans un groupe")
+                elevesRestants.remove(eleve)
+            else:
+                i += 1
         # Ajouter les autres élèves
-        elevesRestants = set()
-        print(len(groupesPossible))
-        for eleve in list(groupesPossible.keys()):
+        i = 0
+        while i < len(elevesRestants):
+            eleve = elevesRestants[i]
             groupes = groupesPossible[eleve]
             gmax = None
             score = self.calcul_penalite()
@@ -84,11 +87,10 @@ class Partition:
                     gmax = groupe
 
             if gmax is not None:
-                print(f"Eleve {eleve.get_prenom()} {eleve.get_nom()} ajouté dans un groupe")
                 gmax.ajouter_eleve(eleve)
-                del groupesPossible[eleve]
-            else : 
-                elevesRestants.add(eleve)
+                elevesRestants.remove(eleve)
+            else:
+                i += 1
         self.eleves_restant = elevesRestants
         self.is_genere = True
         return self
