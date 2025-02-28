@@ -216,11 +216,12 @@ class CreationGroupe(Page):
 
     def increase_group_count(self):
         """Augmente le nombre de groupes"""
-        self.nb_groupes += 1
-        self.partition.ajouter_groupe(Groupe(20, self.criteres))
-        self.partition.adapter_taille()
-        self.group_count_label.config(text=str(self.nb_groupes))
-        self.afficher_groupes()  # Regénérer les groupes avec le nouveau nombre
+        if self.nb_groupes < len(self.eleves):
+            self.nb_groupes += 1
+            self.partition.ajouter_groupe(Groupe(20, self.criteres))
+            self.partition.adapter_taille()
+            self.group_count_label.config(text=str(self.nb_groupes))
+            self.afficher_groupes()  # Regénérer les groupes avec le nouveau nombre
     
     def exporter_criteres(self):
         """
